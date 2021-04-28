@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 23.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 1024 1024" style="enable-background:new 0 0 1024 1024;" xml:space="preserve">
+<style type="text/css">
+	.st0{display:none;}
+	.st1{display:inline;fill:#141E32;}
+	.st2{fill:#DC8C00;}
+</style>
+<title>Risorsa 1@1x</title>
+<g>
+	<g id="Mask" class="st0">
+		<path class="st1" d="M225,0h574c124.3,0,225,100.7,225,225v574c0,124.3-100.7,225-225,225H225C100.7,1024,0,923.3,0,799V225
+			C0,100.7,100.7,0,225,0z"/>
+	</g>
+	<g id="Logo">
+		<path class="st2" d="M937,647.6c14-43.8,21-89.6,21-135.6H512l237,137h0.3C700.4,733.8,609.9,786,512,786
+			c-151.3,0-274-122.7-274-274s122.7-274,274-274c72.7-0.1,142.4,28.8,193.8,80.2l0,0l0.2-0.2h207.7C839.2,164,683.1,66.1,512,66
+			C265.7,66,66,265.7,66,512s199.7,446,446,446c198.5,0,366.8-129.7,424.6-309h0.4V647.6z"/>
+	</g>
+</g>
+</svg>
