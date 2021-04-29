@@ -28,7 +28,7 @@
         </div>
         <div class="md:w-1/2 md:justify-center md:flex hidden">
           <img
-            src="@/assets/illustrations/landing/link.svg"
+            src="@/assets/illustrations/landing/landing-link.svg"
             alt="Link Background"
           >
         </div>
