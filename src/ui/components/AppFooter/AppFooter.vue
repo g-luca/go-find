@@ -21,7 +21,7 @@
       </div>
 
       <div class="col-span-12 md:col-span-2 my-auto text-center py-2">
-        <a class="px-4">Docs</a>
+        <a class="px-4">Staking</a>
       </div>
     </div>
 
