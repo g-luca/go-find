@@ -1,6 +1,7 @@
+/* With purge enabled if there is a new/edited class not used before it will not be loaded */
 module.exports = {
   purge: {
-    enabled: true,
+    enabled: !(process.env.NODE_ENV === 'development'),
     content: [
       './src/**/*.html',
       './src/**/*.vue',
@@ -139,7 +140,9 @@ module.exports = {
     },
   },
   variants: {
-    extend: {},
+    extend: {
+      ringWidth: ['hover', 'active'],
+    },
   },
   plugins: [],
 }
