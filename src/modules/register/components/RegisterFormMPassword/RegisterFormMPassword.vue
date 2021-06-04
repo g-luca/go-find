@@ -2,52 +2,37 @@
   <div class="">
     <div class="mt-8 space-y-6 w-11/12 xl:w-1/2 mx-auto">
       <div class="text-gray-500 text-sm">
-        <router-link
-          to="/"
-          tag="button"
-        >
-          <i class="bi bi-arrow-left" /> Home
-        </router-link>
+        <button @click="goBack()">
+          <i class="bi bi-arrow-left" /> Change username
+        </button>
       </div>
-      <LinkBlockSample :username="inputUsername" />
 
-      <!-- Username -->
+      <!-- mPassword -->
+      <div class="pb-2">
+        <h2 class="font-bold text-2xl text-brand">
+          Wallet Password
+        </h2>
+        <p class="text-lg pt-1 dark:text-white font-semibold">
+          This password is used to provide another layer of encryption to ensure your wallet safety.
+        </p>
+        <p class="pt-1 dark:text-white">
+          In this way no one will have access to your keys, even us! <a
+            target="_blank"
+            href=""
+            class="text-blue-400"
+          >Learn more</a>
+        </p>
+      </div>
       <div>
         <label
           class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
-          for="inputUsername"
-        >Choose your <span class="text-brand">username</span></label>
-        <input
-          id="inputUsername"
-          :key="validateUsername()"
-          v-model="inputUsername"
-          :class="{'border-red-700': !isValidUsername&&isTouched,'border-green-700': isValidUsername, 'focus:border-brand dark:border-gray-700': !isTouched}"
-          type="text"
-          required="required"
-          class="relative block w-full px-3 py-2 mt-2 border border-gray-300 placeholder-gray-300 
-                text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:z-10 text-sm md:text-xl
-                dark:bg-denim-900 dark:placeholder-gray-600 dark:text-white"
-          placeholder="Username"
-        >
-        <div
-          v-if="!isValidUsername&&isTouched"
-          class="text-red-700 text-sm px-2 pt-2 font-light"
-        >
-          <p>Usernames must be 3-30 characters, can contains numbers and underscores.</p>
-        </div>
-      </div>
-
-      <!-- ePassword -->
-      <div>
-        <label
-          class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
-          for="inputEPassword"
+          for="inputMPassword"
         >Password</label>
         <input
-          id="inputEPassword"
-          :key="validatePassword()"
-          v-model="inputEPassword"
-          :class="{'border-red-700': !isValidEPassword&&isTouched,'border-green-700': isValidEPassword, 'focus:border-brand dark:border-gray-700': !isTouched}"
+          id="inputMPassword"
+          :key="validateMPassword()"
+          v-model="inputMPassword"
+          :class="{'border-red-700': !isValidMPassword&&isTouched,'border-green-700': isValidMPassword, 'focus:border-brand dark:border-gray-700': !isTouched}"
           type="password"
           required="required"
           class="relative block w-full px-3 py-2 mt-2 border border-gray-300 placeholder-gray-300 
@@ -56,10 +41,10 @@
           placeholder="Password"
         >
         <div
-          v-if="!isValidEPassword&&isTouched"
+          v-if="!isValidMPassword&&isTouched"
           class="text-red-700 text-sm px-2 pt-2 font-light"
         >
-          <p>Password must be at least 10 characters, contains a special character and an uppercase letter.</p>
+          <p>Password must be at least 10 characters, contains a special character and an uppercase letter. <span class="underline">Must be different from the other password.</span></p>
           <p>
             Why this requirements? Check it
             <a
@@ -71,17 +56,17 @@
         </div>
       </div>
 
-      <!-- ePassword Confirm -->
+      <!-- mPassword Confirm -->
       <div>
         <label
           class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
-          for="inputEPasswordConfirm"
+          for="inputMPasswordConfirm"
         >Confirm password</label>
         <input
-          id="inputEPasswordConfirm"
-          :key="validatePasswordConfirm()"
-          v-model="inputEPasswordConfirm"
-          :class="{'border-red-700': !isEPasswordEqual&&isTouched,'border-green-700': isEPasswordEqual, 'focus:border-brand dark:border-gray-700': !isTouched}"
+          id="inputMPasswordConfirm"
+          :key="validateMPasswordConfirm()"
+          v-model="inputMPasswordConfirm"
+          :class="{'border-red-700': !isMPasswordEqual&&isTouched,'border-green-700': isMPasswordEqual, 'focus:border-brand dark:border-gray-700': !isTouched}"
           type="password"
           required="required"
           class="relative block w-full px-3 py-2 mt-2 border border-gray-300 placeholder-gray-300 
@@ -90,7 +75,7 @@
           placeholder="Confirm password"
         >
         <div
-          v-if="!isEPasswordEqual&&isTouched"
+          v-if="!isMPasswordEqual&&isTouched"
           class="text-red-700 text-sm px-2 pt-2 font-light"
         >
           <p>Passwords are not equals.</p>
@@ -102,7 +87,7 @@
           type="button"
           class="relative block w-full justify-center py-2 px-4 border border-transparent text-md rounded-md font-extrabold
                text-white bg-brand opacity-90 hover:opacity-100 focus:outline-none focus:ring-2 dark:ring-offset-denim-900 focus:ring-offset-2 focus:ring-brand"
-          @click="setUserInfo()"
+          @click="setMPassword()"
         >
           Continue
           <span class="absolute right-0 inset-y-0 flex items-center pr-3">
@@ -114,4 +99,4 @@
   </div>
 </template>
         
-<script lang="tsx" src="./RegisterFormUser.ts"/>
+<script lang="tsx" src="./RegisterFormMPassword.ts"/>

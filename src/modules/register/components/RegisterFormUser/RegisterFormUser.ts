@@ -12,12 +12,12 @@ export default defineComponent({
     data() {
         return {
             isValidUsername: false,
-            isValidPassword: false,
-            isPasswordEqual: false,
+            isValidEPassword: false,
+            isEPasswordEqual: false,
             isTouched: false,
             inputUsername: "",
-            inputPassword: "",
-            inputPasswordConfirm: "",
+            inputEPassword: "",
+            inputEPasswordConfirm: "",
         };
     },
     methods: {
@@ -25,19 +25,19 @@ export default defineComponent({
             this.isValidUsername = User.USERNAME_REGEX.test(this.inputUsername);
         },
         validatePassword() {
-            this.isValidPassword = User.PASSWORD_REGEX.test(this.inputPassword);
+            this.isValidEPassword = User.PASSWORD_REGEX.test(this.inputEPassword);
         },
         validatePasswordConfirm() {
-            this.isPasswordEqual = this.isValidPassword && this.inputPassword === this.inputPasswordConfirm;
+            this.isEPasswordEqual = this.isValidEPassword && this.inputEPassword === this.inputEPasswordConfirm;
         },
         setUserInfo() {
             this.isTouched = true;
             this.validateUsername();
             this.validatePassword();
-            if (this.isValidUsername && this.isValidPassword && this.isPasswordEqual) {
+            if (this.isValidUsername && this.isValidEPassword && this.isEPasswordEqual) {
                 registerModule.setUsername(this.inputUsername);
-                registerModule.setPassword(this.inputPassword);
-                registerModule.nextState(RegisterState.StateWalletGeneration);
+                registerModule.setEPassword(this.inputEPassword);
+                registerModule.nextState(RegisterState.StateMPasswordInput);
             }
         },
     },

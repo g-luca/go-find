@@ -19,8 +19,11 @@
       <div class="pt-3 w-full">
         <div class="lg:w-4/6 mx-auto ">
           <RegisterFormUser v-if="$store.state.RegisterModule.currentState==='StateUserInput'" />
+          <RegisterFormMPassword v-if="$store.state.RegisterModule.currentState==='StateMPasswordInput'" />
           <RegisterNewWallet v-if="$store.state.RegisterModule.currentState==='StateWalletGeneration'" />
+          <RegisterImportWallet v-if="$store.state.RegisterModule.currentState==='StateWalletImport'" />
           <RegisterSuccess v-if="$store.state.RegisterModule.currentState==='StateRegistrationSuccess'" />
+          <RegisterFail v-if="$store.state.RegisterModule.currentState==='StateRegistrationFail'" />
         </div>
       </div>
     </div>

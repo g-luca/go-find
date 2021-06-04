@@ -1,4 +1,3 @@
-import store from "@/store/"
 import RegisterModule, { RegisterState } from "@/store/modules/RegisterModule";
 import { defineComponent } from "vue";
 import { getModule } from "vuex-module-decorators";
@@ -30,11 +29,14 @@ export default defineComponent({
             this.hasWroteMnemonic = true;
         },
         goBack(): void {
-            registerModule.nextState(RegisterState.StateUserInput)
+            registerModule.nextState(RegisterState.StateMPasswordInput)
         },
         completeRegistration(): void {
             registerModule.completeRegistration();
             registerModule.nextState(RegisterState.StateRegistrationSuccess);
+        },
+        goImportMnemonic() {
+            registerModule.nextState(RegisterState.StateWalletImport);
         }
     },
 });
