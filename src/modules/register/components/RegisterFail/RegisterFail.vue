@@ -9,15 +9,15 @@
     </div>
     <div class="text-center pt-10 xl:pt-20">
       <h1 class="text-4xl xl:text-6xl dark:text-white">
-        Welcome aboard @<span class="text-brand">{{ $store.state.RegisterModule.username }}</span>!
+        Error!
       </h1>
     </div>
     <div class="pt-10 w-1/2 mx-auto pb-10">
       <button class="bg-brand text-3xl rounded-2xl focus:outline-none text-white py-2 w-full">
-        Let's get started!
+        Ops, something went wrong
       </button>
     </div>
   </div>
 </template>
 
-<script lang="ts" src="./RegisterSuccess.ts"/>
+<script lang="ts" src="./RegisterFail.ts"/>
