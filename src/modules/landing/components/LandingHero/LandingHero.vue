@@ -17,13 +17,23 @@
             />
           </div>
 
-          <div class="py-4">
-            <router-link
-              to="/register"
-              class="bg-brand rounded-3xl py-4 px-8 text-3xl font-bold uppercase focus:outline-none"
-            >
-              get started
-            </router-link>
+          <div class="container">
+            <div class="py-4">
+              <router-link
+                to="/register"
+                class="bg-brand rounded-3xl py-4 px-8 text-3xl font-bold uppercase focus:outline-none text-white"
+              >
+                get started
+              </router-link>
+            </div>
+            <div class="pt-1">
+              <router-link
+                to="/login"
+                class="dark:text-white text-black text pl-2 font-bold focus:outline-none"
+              >
+                Already registered or have a Desmos profile? <span class="text-brand">Login</span>
+              </router-link>
+            </div>
           </div>
         </div>
         <div class="md:w-1/2 md:justify-center md:flex hidden">
