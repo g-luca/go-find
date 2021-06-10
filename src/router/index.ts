@@ -1,23 +1,50 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
+import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import ViewHome from "../views/ViewLanding.vue";
-import ViewLanding from "../views/ViewLanding.vue";
+import ViewLogin from "@/views/ViewLogin/ViewLogin.vue";
 import ViewRegister from "../views/ViewRegister/ViewRegister.vue";
+import ViewProfile from "../views/ViewProfile/ViewProfile.vue";
+import 'vue-router';
+import { getModule } from "vuex-module-decorators";
+import AuthModule, { AuthLevel } from "@/store/modules/AuthModule";
+const authModule = getModule(AuthModule);
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth: boolean,
+    hiddenWithAuth: boolean,
+  }
+}
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     name: "Home",
     component: ViewHome,
+    meta: { requiresAuth: false, hiddenWithAuth: false }
   },
   {
     path: "/login",
     name: "Log in",
-    component: ViewLanding,
+    component: ViewLogin,
+    meta: { requiresAuth: false, hiddenWithAuth: true }
   },
   {
     path: "/register",
     name: "Sign up",
     component: ViewRegister,
+    meta: { requiresAuth: false, hiddenWithAuth: true }
+  },
+  {
+    path: "/:username",
+    name: "Profile",
+    component: ViewProfile,
+    meta: { requiresAuth: false, hiddenWithAuth: false }
+  },
+  {
+    path: "/me",
+    name: "Profile",
+    component: ViewProfile,
+    meta: { requiresAuth: true, hiddenWithAuth: false }
   },
   /* {
     path: "/about",
@@ -31,8 +58,23 @@ const routes: Array<RouteRecordRaw> = [
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const authRequired = to.meta.requiresAuth;
+  const hiddenWithAuth = to.meta.hiddenWithAuth;
+
+  // check authentication
+  authModule.authenticate()
+  if (authRequired && authModule.authLevel === AuthLevel.None) {
+    next('/login');
+  } else if (hiddenWithAuth && authModule.authLevel > AuthLevel.None) {
+    next('/me');
+  } else {
+    next();
+  }
 });
 
 export default router;
