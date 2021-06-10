@@ -4,7 +4,12 @@ import { defineComponent } from "vue";
 const WORDS: string[] = ["instagram", "facebook", "yourlink", "twitch", "website"];
 
 export default defineComponent({
-    props: ['username'],
+    props: {
+        username: {
+            type: String,
+            default: ''
+        },
+    },
     data() {
         return {
             wordIndex: 0,
