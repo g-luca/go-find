@@ -20,5 +20,5 @@ import LandingHero from "@/modules/landing/components/LandingHero/LandingHero.vu
     LandingHero,
   },
 })
-export default class Home extends Vue {}
+export default class ViewLanding extends Vue {}
 </script>
