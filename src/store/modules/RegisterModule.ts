@@ -74,7 +74,7 @@ export default class RegisterModule extends VuexModule {
         const eKey = CryptoUtils.encryptAes(ePassword, mKey + '#ok'); // encrypt mKey with ePassword
 
         //TODO: implement response logic
-        const response = await Api.post('signup', JSON.stringify({
+        const response = await Api.post(Api.endpoint + 'signup', JSON.stringify({
             username: this.username,
             eKey,
             address: this.address,
