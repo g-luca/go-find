@@ -8,7 +8,7 @@
           <div class="md:col-start-2 md:col-span-3 col-span-12 my-auto">
             <img
               alt="avatar"
-              src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
+              :src="$store.state.UserModule.user.profilePic"
               class="mx-auto object-cover rounded-full h-36 md:h-48 pointer-events-none select-none"
             >
           </div>
@@ -21,7 +21,7 @@
               </div>
               <div class="py-1">
                 <h2 class="text-brand font-semibold text-lg">
-                  {{ $store.state.UserModule.user.username }}
+                  @{{ $store.state.UserModule.user.username }}
                 </h2>
                 <div class="flex justify-center md:justify-start px-4 md:pl-0">
                   <div class="flex-none w-4">

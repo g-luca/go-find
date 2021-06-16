@@ -1,7 +1,8 @@
+import Api from '@/core/api/Api';
 import User from '@/core/types/User';
 import store from '@/store';
 import { Module, Mutation, VuexModule } from "vuex-module-decorators";
-
+import router from '@/router';
 
 
 @Module({ store, name: 'UserModule', dynamic: true })
@@ -14,8 +15,14 @@ export default class UserModule extends VuexModule {
      * @param username username of the profile to get
      */
     @Mutation
-    loadUser(username: string): void {
+    async loadUser(username: string): Promise<void> {
         //TODO: replace with LCD request
-        this.user = new User(username, 'desmos16c60y8t8vra27zjg2arlcd58dck9cwn7p6fwtd', 'Luca G.', 'Hello there!');
+        const foundUser = await Api.get('https://lcd.go-find.me/desmos/profiles/v1beta1/profiles/' + username);
+        if (foundUser['profile']) {
+            const rawUser = foundUser['profile'];
+            this.user = new User(rawUser['dtag'], rawUser['account']['address'], rawUser['nickname'], rawUser['bio'], rawUser['pictures']['profile']);
+        } else {
+            router.push('/');
+        }
     }
 }
