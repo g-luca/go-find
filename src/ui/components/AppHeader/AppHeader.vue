@@ -30,10 +30,6 @@
               ⌘K
             </div>
           </div>
-
-          Hi,
-          {{ $store.state.AuthModule.account?.username }}
-          {{ username }}
         </div>
       </div>
     </div>
