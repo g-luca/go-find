@@ -35,16 +35,16 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: false, hiddenWithAuth: true }
   },
   {
-    path: "/:username",
-    name: "Profile",
-    component: ViewProfile,
-    meta: { requiresAuth: false, hiddenWithAuth: false }
-  },
-  {
     path: "/me",
     name: "Profile",
     component: ViewProfile,
     meta: { requiresAuth: true, hiddenWithAuth: false }
+  },
+  { // must be the last one
+    path: "/:username",
+    name: "Profile",
+    component: ViewProfile,
+    meta: { requiresAuth: false, hiddenWithAuth: false }
   },
   /* {
     path: "/about",

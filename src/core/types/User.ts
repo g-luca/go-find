@@ -12,6 +12,7 @@ export default class User {
     private _nickname: string;
     private _bio: string;
     private _address: string;
+    private _profilePic: string;
 
     private _socialIntegrations: SocialIntegration[] = [
         new SocialIntegrationFacebook('l'),
@@ -32,11 +33,12 @@ export default class User {
     static PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W\_])[a-zA-Z0-9\W\_]{10,30}$/;
 
 
-    constructor(username: string, address: string, nickname = "", bio = "") {
+    constructor(username: string, address: string, nickname = "", bio = "", profilePic = "") {
         this._username = username;
         this._address = address;
         this._nickname = nickname;
         this._bio = bio;
+        this._profilePic = profilePic;
     }
 
     /**
@@ -90,6 +92,16 @@ export default class User {
     public get postLinks(): PostLink[] {
         return this._postLinks;
     }
+
+
+    /**
+     * Getter profilePic
+     * @return {string}
+     */
+    public get profilePic(): string {
+        return this._profilePic;
+    }
+
 
 
 }
