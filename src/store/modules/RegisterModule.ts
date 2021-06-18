@@ -9,8 +9,6 @@ import Account from '@/core/types/Account';
 const authModule = getModule(AuthModule);
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const DesmosJS = require("desmosjs/dist/lib/DesmosJS.js");
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const cosmos = require('cosmos-lib');
 
 export enum RegisterState {
     StateUserInput = 'StateUserInput',
@@ -57,8 +55,8 @@ export default class RegisterModule extends VuexModule {
         if (!mnemonic) {
             mnemonic = bip39.generateMnemonic(256);
         }
-        const keys = cosmos.crypto.getKeysFromMnemonic(mnemonic, '44\'/852\'/0\'/0/0');
-        this.address = cosmos.address.getAddress(keys.publicKey, 'desmos');
+        const wallet = new DesmosJS.Wallet(mnemonic, '44\'/852\'/0\'/0/0', "desmos", "morpheus-apollo-1");
+        this.address = wallet.address;
         this.mnemonic = mnemonic.split(' ');
     }
 
