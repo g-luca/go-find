@@ -41,10 +41,13 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: true, hiddenWithAuth: false }
   },
   { // must be the last one
-    path: "/:username",
+    path: "/:username([A-Za-z0-9_]{3,45}$)",
     name: "Profile",
     component: ViewProfile,
     meta: { requiresAuth: false, hiddenWithAuth: false }
+  }, {
+    path: "/:catchAll(.*)",
+    component: ViewRegister, // TODO: change to Error 404
   },
   /* {
     path: "/about",
@@ -63,12 +66,14 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const authRequired = to.meta.requiresAuth;
+  const requiresAuth = to.meta.requiresAuth;
   const hiddenWithAuth = to.meta.hiddenWithAuth;
 
+  console.log(requiresAuth);
+  console.log(authModule.authLevel)
   // check authentication
   authModule.authenticate()
-  if (authRequired && authModule.authLevel === AuthLevel.None) {
+  if (requiresAuth && authModule.authLevel === AuthLevel.None) {
     next('/login');
   } else if (hiddenWithAuth && authModule.authLevel > AuthLevel.None) {
     next('/me');
