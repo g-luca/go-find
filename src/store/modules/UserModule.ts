@@ -3,11 +3,12 @@ import User from '@/core/types/User';
 import store from '@/store';
 import { Module, Mutation, VuexModule } from "vuex-module-decorators";
 import router from '@/router';
-
+import { LoadingStatus } from '@/core/types/LoadingStatus';
 
 @Module({ store, name: 'UserModule', dynamic: true })
 export default class UserModule extends VuexModule {
     protected user: User | false = false;
+    public userLoadingStatus: LoadingStatus = LoadingStatus.Loading;
 
 
     /**
@@ -16,12 +17,14 @@ export default class UserModule extends VuexModule {
      */
     @Mutation
     async loadUser(username: string): Promise<void> {
-        //TODO: replace with LCD request
+        this.userLoadingStatus = LoadingStatus.Loading;
         const foundUser = await Api.get('https://lcd.go-find.me/desmos/profiles/v1beta1/profiles/' + username);
         if (foundUser['profile']) {
             const rawUser = foundUser['profile'];
             this.user = new User(rawUser['dtag'], rawUser['account']['address'], rawUser['nickname'], rawUser['bio'], rawUser['pictures']['profile']);
+            this.userLoadingStatus = LoadingStatus.Loaded;
         } else {
+            this.userLoadingStatus = LoadingStatus.Error;
             router.push('/');
         }
     }
