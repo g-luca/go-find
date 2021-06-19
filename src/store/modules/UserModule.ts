@@ -2,7 +2,6 @@ import Api from '@/core/api/Api';
 import User from '@/core/types/User';
 import store from '@/store';
 import { Module, Mutation, VuexModule } from "vuex-module-decorators";
-import router from '@/router';
 import { LoadingStatus } from '@/core/types/LoadingStatus';
 
 @Module({ store, name: 'UserModule', dynamic: true })
@@ -25,7 +24,6 @@ export default class UserModule extends VuexModule {
             this.userLoadingStatus = LoadingStatus.Loaded;
         } else {
             this.userLoadingStatus = LoadingStatus.Error;
-            router.push('/');
         }
     }
 }

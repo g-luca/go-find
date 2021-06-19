@@ -1,170 +1,199 @@
 <template>
   <div>
     <AppHeader />
-    <div class="pt-3 w-full dark:bg-denim-900 bg-gray-50">
-      <!-- Profile Heading -->
-      <section>
-        <div class="grid grid-cols-12 pt-8">
-          <!-- Profile Pic -->
-          <div class="md:col-start-2 md:col-span-3 col-span-12 my-auto">
-            <span v-if="$store.state.UserModule.userLoadingStatus">
-              <img
-                v-if="$store.state.UserModule.user.profilePic"
-                alt="avatar"
-                :src="$store.state.UserModule.user.profilePic"
-                class="mx-auto object-cover rounded-full h-36 md:h-48 pointer-events-none select-none"
-              >
-              <img
-                v-else
-                alt="avatar"
-                src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
-                class="mx-auto object-cover rounded-full h-36 md:h-48 pointer-events-none select-none"
-              >
-            </span>
-            <span v-else>
-              <!-- Loading -->
-              <SkeletonLoader
-                shape="circle"
-                class="mx-auto object-cover rounded-full h-36 md:h-48 w-36 md:w-48 pointer-events-none select-none"
-              />
-            </span>
-          </div>
-
-          <!-- User Info -->
-          <div class="md:col-start-5 md:col-span-7 col-span-12 my-auto pt-8">
-            <div class="w-full text-center md:text-left dark:text-white">
+    <div class="md:pt-3 w-full dark:bg-denim-900 bg-gray-50">
+      <span v-if="$store.state.UserModule.userLoadingStatus>=0">
+        <!-- Profile Heading -->
+        <section>
+          <div class="grid grid-cols-12 pt-8">
+            <!-- Profile Pic -->
+            <div class="md:col-start-2 md:col-span-3 col-span-12 my-auto">
               <span v-if="$store.state.UserModule.userLoadingStatus">
-                <div class="font-bold text-4xl">
-                  <h1>
-                    {{ $store.state.UserModule.user.nickname }}
-                  </h1>
-                </div>
-                <div class="py-1">
-                  <h2 class="text-brand font-semibold text-lg">
-                    @{{ $store.state.UserModule.user.username }}
-                  </h2>
-                  <div class="flex justify-center md:justify-start px-4 md:pl-0">
-                    <div class="flex-none w-4">
-                      <img
-                        src="@/assets/brands/desmos/logo.svg"
-                        class="object-cover w-4 inline-block"
-                      >
-                    </div>
-                    <div class="flex-shrink font-mono text-sm mt-1 truncate px-2 dark:text-gray-400">
-                      {{ $store.state.UserModule.user.address }}
-                    </div>
-                    <div class="flex-none w-4">
-                      <i class="bi bi-clipboard text-blue-500 cursor-pointer" />
-                    </div>
-                  </div>
-                </div>
-                <h4 class="dark:text-gray-300">
-                  {{ $store.state.UserModule.user.bio }}
-                </h4>
+                <img
+                  v-if="$store.state.UserModule.user.profilePic"
+                  alt="avatar"
+                  :src="$store.state.UserModule.user.profilePic"
+                  class="mx-auto object-cover rounded-full h-36 md:h-48 pointer-events-none select-none"
+                >
+                <img
+                  v-else
+                  alt="avatar"
+                  src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
+                  class="mx-auto object-cover rounded-full h-36 md:h-48 pointer-events-none select-none"
+                >
               </span>
               <span v-else>
                 <!-- Loading -->
                 <SkeletonLoader
-                  shape="rectangle"
-                  class="py-1 text-left w-full md:w-1/2 h-12 px-4"
+                  shape="circle"
+                  class="mx-auto object-cover rounded-full h-36 md:h-48 w-36 md:w-48 pointer-events-none select-none"
                 />
-                <SkeletonLoader
-                  shape="rectangle"
-                  class="py-1 text-left w-full md:w-2/5 h-10 px-4"
-                />
-                <SkeletonLoader
-                  shape="rectangle"
-                  class="py-1 text-left w-full md:w-5/6 h-10 px-4"
-                />
-                <SkeletonLoader
-                  shape="rectangle"
-                  class="py-1 text-left w-full md:w-4/6 h-24 px-4"
-                />
-
               </span>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <section>
-        <div class="px-2 md:px-16 lg:mx-40 pt-16">
-          <span v-if="$store.state.UserModule.userLoadingStatus">
-            <div class="py-2 md:py-8 px-2 bg-gray-100 dark:bg-gray-700 rounded-3xl">
-              <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 text-center">
-                <div
-                  v-for="socialIntegration in $store.state.UserModule.user.socialIntegrations"
-                  :key="socialIntegration"
-                  class="m-auto cursor-pointer"
-                >
-                  <div class="bg-gray-200 dark:bg-gray-800 rounded-3xl w-16 h-16 md:w-20 md:h-20 m-auto">
-                    <img
-                      class="p-4 pointer-events-none select-none"
-                      :src="socialIntegration._logo"
-                      alt=""
-                    >
+            <!-- User Info -->
+            <div class="md:col-start-5 md:col-span-7 col-span-12 my-auto pt-8">
+              <div class="w-full text-center md:text-left dark:text-white">
+                <span v-if="$store.state.UserModule.userLoadingStatus">
+                  <div class="font-bold text-4xl">
+                    <h1>
+                      {{ $store.state.UserModule.user.nickname }}
+                    </h1>
                   </div>
-                  <h4 class="dark:text-white select-none">
-                    {{ socialIntegration._displayName }}
+                  <div class="py-1">
+                    <h2 class="text-brand font-semibold text-lg">
+                      @{{ $store.state.UserModule.user.username }}
+                    </h2>
+                    <div class="flex justify-center md:justify-start px-4 md:pl-0">
+                      <div class="flex-none w-4">
+                        <img
+                          src="@/assets/brands/desmos/logo.svg"
+                          class="object-cover w-4 inline-block"
+                        >
+                      </div>
+                      <div class="flex-shrink font-mono text-sm mt-1 truncate px-2 dark:text-gray-400">
+                        {{ $store.state.UserModule.user.address }}
+                      </div>
+                      <div class="flex-none w-4">
+                        <i class="bi bi-clipboard text-blue-500 cursor-pointer" />
+                      </div>
+                    </div>
+                  </div>
+                  <h4 class="dark:text-gray-300">
+                    {{ $store.state.UserModule.user.bio }}
                   </h4>
-                </div>
+                </span>
+                <span v-else>
+                  <!-- Loading -->
+                  <SkeletonLoader
+                    shape="rectangle"
+                    class="py-1 text-left w-full md:w-1/2 h-12 px-4"
+                  />
+                  <SkeletonLoader
+                    shape="rectangle"
+                    class="py-1 text-left w-full md:w-2/5 h-10 px-4"
+                  />
+                  <SkeletonLoader
+                    shape="rectangle"
+                    class="py-1 text-left w-full md:w-5/6 h-10 px-4"
+                  />
+                  <SkeletonLoader
+                    shape="rectangle"
+                    class="py-1 text-left w-full md:w-4/6 h-24 px-4"
+                  />
+
+                </span>
               </div>
             </div>
-          </span>
-          <span v-else>
-            <!-- Loading -->
-            <SkeletonLoader
-              shape="rectangle"
-              class="py-1 text-left w-full h-32 px-2"
-            />
+          </div>
+        </section>
 
-          </span>
-        </div>
-      </section>
-
-      <section>
-        <div class="px-2 md:px-16 lg:mx-40 pt-8">
-          <div class="py-2 md:py-8 px-2">
+        <section>
+          <div class="px-2 md:px-16 lg:mx-40 pt-16">
             <span v-if="$store.state.UserModule.userLoadingStatus">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 text-center">
-                <div
-                  v-for="postLink in $store.state.UserModule.user.postLinks"
-                  :key="postLink"
-                  class="col-span-1 bg-gray-100 dark:bg-gray-700 rounded-3xl cursor-pointer py-4 ring-brand dark:ring-offset-denim-900 ring-offset-2 hover:ring-2"
-                >
-                  <div class="flex px-4">
-                    <h4 class="flex-1 dark:text-white select-none focus:underline font-semibold text-lg">
-                      {{ postLink._displayName }}
+              <div class="py-2 md:py-8 px-2 bg-gray-100 dark:bg-gray-700 rounded-3xl">
+                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 text-center">
+                  <div
+                    v-for="socialIntegration in $store.state.UserModule.user.socialIntegrations"
+                    :key="socialIntegration"
+                    class="m-auto cursor-pointer"
+                  >
+                    <div class="bg-gray-200 dark:bg-gray-800 rounded-3xl w-16 h-16 md:w-20 md:h-20 m-auto">
+                      <img
+                        class="p-4 pointer-events-none select-none"
+                        :src="socialIntegration._logo"
+                        alt=""
+                      >
+                    </div>
+                    <h4 class="dark:text-white select-none">
+                      {{ socialIntegration._displayName }}
                     </h4>
-                    <i class="flex-none bi bi-arrow-right dark:text-white" />
                   </div>
                 </div>
               </div>
             </span>
             <span v-else>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 text-center">
-                <!-- Loading -->
-                <div
-                  v-for="loadingItem in [1,2,3,4,5]"
-                  class="col-span-1"
-                >
-                  <SkeletonLoader
-                    shape="rectangle"
-                    class="py-0 w-full h-14"
-                  >{{ loadingItem }}</SkeletonLoader>
-                </div>
-              </div>
+              <!-- Loading -->
+              <SkeletonLoader
+                shape="rectangle"
+                class="py-1 text-left w-full h-32 px-2"
+              />
 
             </span>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section>
-        <div class="pt-8" />
-      </section>
+        <section>
+          <div class="px-2 md:px-16 lg:mx-40 pt-8">
+            <div class="py-2 md:py-8 px-2">
+              <span v-if="$store.state.UserModule.userLoadingStatus">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 text-center">
+                  <div
+                    v-for="postLink in $store.state.UserModule.user.postLinks"
+                    :key="postLink"
+                    class="col-span-1 bg-gray-100 dark:bg-gray-700 rounded-3xl cursor-pointer py-4 ring-brand dark:ring-offset-denim-900 ring-offset-2 hover:ring-2"
+                  >
+                    <div class="flex px-4">
+                      <h4 class="flex-1 dark:text-white select-none focus:underline font-semibold text-lg">
+                        {{ postLink._displayName }}
+                      </h4>
+                      <i class="flex-none bi bi-arrow-right dark:text-white" />
+                    </div>
+                  </div>
+                </div>
+              </span>
+              <span v-else>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 text-center">
+                  <!-- Loading -->
+                  <div
+                    v-for="loadingItem in [1,2,3,4,5]"
+                    class="col-span-1"
+                  >
+                    <SkeletonLoader
+                      shape="rectangle"
+                      class="py-0 w-full h-14"
+                    >{{ loadingItem }}</SkeletonLoader>
+                  </div>
+                </div>
+
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div class="pt-8" />
+        </section>
+      </span>
+      <span v-else>
+        <div class="min-w-screen flex items-center md:p-20 overflow-hidden relative">
+          <div class="flex-1 min-h-full min-w-full md:rounded-3xl bg-gray-50 dark:bg-gray-900 shadow-2xl p-0 md:pl-20 text-gray-800 relative md:flex items-center text-center md:text-left">
+            <div class="w-full md:w-1/2 pt-20 md:pt-0">
+              <div class=" text-gray-600 font-light p-1 md:p-0">
+                <h1 class="font-extrabold uppercase text-6xl lg:text-8xl text-brand md:mb-5">don't panic</h1>
+                <h2 class="text-2xl lg:text-4xl dark:text-white font-bold ">The user is not here</h2>
+              </div>
+              <div class="mb-20 pt-10 md:mb-0">
+                <router-link
+                  to="/"
+                  class="text-lg font-light outline-none focus:outline-none transform transition-all hover:scale-150 text-brand hover:text-yellow-600"
+                >
+                  <i class="bi bi-arrow-left" /> Back to Earth
+                </router-link>
+              </div>
+            </div>
+            <div class="w-full text-center">
+              <img
+                class="text-center mx-auto my-auto align-middle rounded-r-3xl"
+                src="@/assets/illustrations/user/user-not-found.svg"
+                alt=""
+              >
+            </div>
+          </div>
+        </div>
+      </span>
+      <AppFooter />
     </div>
-    <AppFooter />
   </div>
 </template>
 
