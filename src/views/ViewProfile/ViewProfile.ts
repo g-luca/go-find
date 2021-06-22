@@ -16,6 +16,9 @@ export default defineComponent({
         AppFooter,
         SkeletonLoader,
         /* LoginFormUser, */
+    }, beforeRouteUpdate(to, from, next) {
+        userModule.loadUser(to.params['username'].toLocaleString());
+        next()
     },
     data() {
         return {
@@ -24,6 +27,5 @@ export default defineComponent({
     mounted() {
         const username = this.$route.params['username'].toLocaleString();
         userModule.loadUser(username);
-    }, methods: {
-    },
+    }
 });
