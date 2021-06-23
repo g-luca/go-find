@@ -33,7 +33,6 @@ export default defineComponent({
         },
         completeRegistration(): void {
             registerModule.completeRegistration();
-            registerModule.nextState(RegisterState.StateRegistrationSuccess);
         },
         goImportMnemonic() {
             registerModule.nextState(RegisterState.StateWalletImport);

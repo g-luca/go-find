@@ -24,6 +24,7 @@
           <RegisterImportWallet v-if="$store.state.RegisterModule.currentState==='StateWalletImport'" />
           <RegisterSuccess v-if="$store.state.RegisterModule.currentState==='StateRegistrationSuccess'" />
           <RegisterFail v-if="$store.state.RegisterModule.currentState==='StateRegistrationFail'" />
+          <RegisterResponseLoading v-if="$store.state.RegisterModule.currentState==='StateRegistering'" />
         </div>
       </div>
     </div>

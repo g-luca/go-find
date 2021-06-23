@@ -11,12 +11,13 @@ const authModule = getModule(AuthModule);
 
 
 export enum RegisterState {
-    StateUserInput = 'StateUserInput',
-    StateMPasswordInput = 'StateMPasswordInput',
-    StateWalletGeneration = 'StateWalletGeneration',
-    StateWalletImport = 'StateWalletImport',
-    StateRegistrationSuccess = 'StateRegistrationSuccess',
-    StateRegistrationFail = 'StateRegistrationFail',
+    StateUserInput = 'StateUserInput', // user details input
+    StateMPasswordInput = 'StateMPasswordInput', // mPassword input
+    StateWalletGeneration = 'StateWalletGeneration', // wallet mnemonic generation & confirm
+    StateWalletImport = 'StateWalletImport', // wallet mnemonic input & confirm
+    StateRegistering = 'StateRegistering', // loading register backend response 
+    StateRegistrationSuccess = 'StateRegistrationSuccess', // complete registration success
+    StateRegistrationFail = 'StateRegistrationFail', // complete registration error
 }
 
 
@@ -60,6 +61,10 @@ export default class RegisterModule extends VuexModule {
         this.mnemonic = mnemonic.split(' ');
     }
 
+
+    /**
+     * Complete the registration finalizing all the data and sending it to the backend
+     */
     @Mutation
     async completeRegistration(): Promise<void> {
         const wallet = new Wallet(this.mnemonic.join(' ')); // generate the wallet from the given mnemonic
@@ -71,7 +76,8 @@ export default class RegisterModule extends VuexModule {
         const ePassword = CryptoUtils.sha256(this.ePassword); // hgenerate the hashed ePassword
         const eKey = CryptoUtils.encryptAes(ePassword, mKey + '#ok'); // encrypt mKey with ePassword
 
-        //TODO: implement response logic
+
+        this.currentState = RegisterState.StateRegistering; // loading state
         const response = await Api.post(Api.endpoint + 'signup', JSON.stringify({
             username: this.username,
             eKey,
@@ -81,6 +87,7 @@ export default class RegisterModule extends VuexModule {
         if (response && response.success) {
             authModule.saveMKey({ mKey, mPassword }); // store mKey on localStorage
             authModule.saveAccount({ account: new Account(this.username, this.address) });
+            this.currentState = RegisterState.StateRegistrationSuccess;
         } else {
             this.currentState = RegisterState.StateRegistrationFail;
         }
@@ -90,5 +97,19 @@ export default class RegisterModule extends VuexModule {
     @Mutation
     nextState(newState: RegisterState): void {
         this.currentState = newState;
+    }
+
+
+    /**+
+     * Reset all the state and goes back to the first RegisterState
+     */
+    @Mutation
+    reset(): void {
+        this.currentState = RegisterState.StateUserInput;
+        this.username = "";
+        this.mPassword = "";
+        this.ePassword = "";
+        this.address = "";
+        this.mnemonic = [];
     }
 }
