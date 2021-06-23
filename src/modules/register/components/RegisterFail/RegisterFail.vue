@@ -3,18 +3,21 @@
     <div class="flex justify-center">
       <img
         class="max-h-44 xl:max-h-64"
-        src="@/assets/illustrations/register/register-success.svg"
+        src="@/assets/illustrations/register/loading_blockchain.svg"
         alt="Success"
       >
     </div>
     <div class="text-center pt-10 xl:pt-20">
-      <h1 class="text-4xl xl:text-6xl dark:text-white">
-        Error!
+      <h1 class="text-4xl xl:text-5xl text-red-700">
+        Ops, something went wrong!
       </h1>
     </div>
     <div class="pt-10 w-1/2 mx-auto pb-10">
-      <button class="bg-brand text-3xl rounded-2xl focus:outline-none text-white py-2 w-full">
-        Ops, something went wrong
+      <button
+        class="bg-brand text-3xl rounded-2xl focus:outline-none text-white p-2 text-center w-full"
+        @click="reset()"
+      >
+        Try again
       </button>
     </div>
   </div>

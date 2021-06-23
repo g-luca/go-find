@@ -9,6 +9,7 @@ import RegisterSuccess from "@/modules/register/components/RegisterSuccess/Regis
 import RegisterImportWallet from "@/modules/register/components/RegisterImportWallet/RegisterImportWallet.vue";
 import RegisterFormMPassword from "@/modules/register/components/RegisterFormMPassword/RegisterFormMPassword.vue";
 import RegisterFail from "@/modules/register/components/RegisterFail/RegisterFail.vue";
+import RegisterResponseLoading from "@/modules/register/components/RegisterResponseLoading/RegisterResponseLoading.vue";
 
 export default defineComponent({
     components: {
@@ -20,6 +21,7 @@ export default defineComponent({
         RegisterSuccess,
         RegisterFail,
         RegisterImportWallet,
+        RegisterResponseLoading
     },
     data() {
         return {

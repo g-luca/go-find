@@ -17,7 +17,6 @@ export default defineComponent({
         },
         completeRegistration(): void {
             registerModule.completeRegistration();
-            registerModule.nextState(RegisterState.StateRegistrationSuccess);
         },
         validateInputMnemonic(): void {
             this.inputMnemonic.forEach((word, i) => {

@@ -10,5 +10,8 @@ export default defineComponent({
         }
     },
     methods: {
+        reset(): void {
+            registerModule.reset();
+        }
     },
 });
