@@ -1,6 +1,5 @@
 import router from "@/router";
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const DesmosJS = require("desmosjs/dist/lib/DesmosJS.js");
+import { DesmosJS } from "desmosjs";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -22,7 +21,7 @@ export default defineComponent({
     }, methods: {
         search() {
             const username = this.searchUsername;
-            if (DesmosJS.DesmosJS.usernameRegex.test(username) || DesmosJS.DesmosJS.addressRegex.test(username)) {
+            if (DesmosJS.usernameRegex.test(username) || DesmosJS.addressRegex.test(username)) {
                 router.push(`/${username}`);
             }
         }

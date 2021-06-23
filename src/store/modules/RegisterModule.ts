@@ -6,9 +6,9 @@ import CryptoUtils from '@/utils/CryptoUtils';
 import AuthModule from '@/store/modules/AuthModule';
 import Api from '@/core/api/Api';
 import Account from '@/core/types/Account';
+import { Wallet } from 'desmosjs';
 const authModule = getModule(AuthModule);
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const DesmosJS = require("desmosjs/dist/lib/DesmosJS.js");
+
 
 export enum RegisterState {
     StateUserInput = 'StateUserInput',
@@ -55,14 +55,14 @@ export default class RegisterModule extends VuexModule {
         if (!mnemonic) {
             mnemonic = bip39.generateMnemonic(256);
         }
-        const wallet = new DesmosJS.Wallet(mnemonic, '44\'/852\'/0\'/0/0', "desmos", "morpheus-apollo-1");
+        const wallet = new Wallet(mnemonic, '44\'/852\'/0\'/0/0', "desmos", "morpheus-apollo-1");
         this.address = wallet.address;
         this.mnemonic = mnemonic.split(' ');
     }
 
     @Mutation
     async completeRegistration(): Promise<void> {
-        const wallet = new DesmosJS.Wallet(this.mnemonic.join(' ')); // generate the wallet from the given mnemonic
+        const wallet = new Wallet(this.mnemonic.join(' ')); // generate the wallet from the given mnemonic
         const privateKeyHex = Buffer.from(wallet.privateKey).toString('hex'); // convert the wallet private key to hex
 
         const mPassword = CryptoUtils.sha256(this.mPassword); // generate the hashed mPassword
