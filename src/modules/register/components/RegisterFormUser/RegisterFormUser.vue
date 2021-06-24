@@ -35,7 +35,7 @@
           >
           <div
             v-if="isValidUsername"
-            class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
+            class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none z-10"
           >
             <div v-if="isVerifyingUsernameAvailability">
               <svg
