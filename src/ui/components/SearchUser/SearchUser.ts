@@ -1,12 +1,18 @@
+import Api from "@/core/api/Api";
+import User from "@/core/types/User";
 import router from "@/router";
+import SearchModule from "@/store/modules/SearchModule";
 import { DesmosJS } from "desmosjs";
 import { defineComponent } from "vue";
+import { getModule } from "vuex-module-decorators";
+const searchUser = getModule(SearchModule);
 
 export default defineComponent({
     components: {},
     data() {
         return {
-            searchUsername: ""
+            searchUsername: "",
+            showSearchResults: false,
         }
     },
     mounted() {
@@ -20,10 +26,23 @@ export default defineComponent({
         });
     }, methods: {
         search() {
+            const username = this.searchUsername.toString();
+            const isUsernameValid = DesmosJS.usernameRegex.test(username) || DesmosJS.addressRegex.test(username);
+            this.showSearchResults = isUsernameValid;
+            if (isUsernameValid) {
+                searchUser.search(username);
+            }
+        },
+        directSearch() {
             const username = this.searchUsername;
-            if (DesmosJS.usernameRegex.test(username) || DesmosJS.addressRegex.test(username)) {
+            const isUsernameValid = DesmosJS.usernameRegex.test(username) || DesmosJS.addressRegex.test(username);
+            if (isUsernameValid) {
                 router.push(`/${username}`);
             }
+        },
+        openProfile(username: string) {
+            this.showSearchResults = false;
+            router.push(`/${username}`);
         }
     }
 });
