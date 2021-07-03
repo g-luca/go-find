@@ -6,7 +6,7 @@ import CryptoUtils from '@/utils/CryptoUtils';
 import AuthModule from '@/store/modules/AuthModule';
 import Api from '@/core/api/Api';
 import Account from '@/core/types/Account';
-import { Wallet } from 'desmosjs';
+import { Secp256k1, Wallet } from 'desmosjs';
 const authModule = getModule(AuthModule);
 
 
@@ -29,12 +29,18 @@ export default class RegisterModule extends VuexModule {
     public currentState: RegisterState = RegisterState.StateUserInput;
     public mnemonic: string[] = [];
     public address = '';
+    public hasDesmosProfile = false;
 
     @Mutation
     setUsername(username: string): void {
         if (User.USERNAME_REGEX.test(username)) {
             this.username = username;
         }
+    }
+
+    @Mutation
+    setHasDesmosProfile(has: boolean): void {
+        this.hasDesmosProfile = has;
     }
 
     @Mutation
@@ -78,13 +84,18 @@ export default class RegisterModule extends VuexModule {
 
 
         this.currentState = RegisterState.StateRegistering; // loading state
-        const response = await Api.post(Api.endpoint + 'signup', JSON.stringify({
-            username: this.username,
-            eKey,
-            address: this.address,
-        }));
 
-        if (response && response.success) {
+        let success = false
+
+        if (!this.hasDesmosProfile) {
+            // register a completelly new user
+            success = await RegisterModule.completeNewUserRegistration(this.username, eKey, this.address);
+        } else {
+            // register a new user with already a Desmos Profile
+            success = await RegisterModule.completeDesmosUserRegistration(this.username, eKey, wallet);
+        }
+
+        if (success) {
             authModule.saveMKey({ mKey, mPassword }); // store mKey on localStorage
             authModule.saveAccount({ account: new Account(this.username, this.address) });
             this.currentState = RegisterState.StateRegistrationSuccess;
@@ -111,5 +122,48 @@ export default class RegisterModule extends VuexModule {
         this.ePassword = "";
         this.address = "";
         this.mnemonic = [];
+    }
+
+
+    /**
+     * Complete the registration of a user with already a Desmos Profile by calling the rest endpoint
+     * @param username username string
+     * @param eKey eKey string
+     * @param address user wallet address string
+     * @returns true if the operation succeed
+     */
+    private static async completeDesmosUserRegistration(username: string, eKey: string, wallet: Wallet): Promise<boolean> {
+        const hash: Buffer = CryptoUtils.sha256Buffer(Buffer.from(JSON.stringify({
+            username,
+            eKey
+        })));
+        const signature = (Secp256k1.sign(hash, wallet.privateKey) as Buffer).toString('hex');
+
+        const response = await Api.post(Api.endpoint + 'recover', JSON.stringify({
+            username,
+            eKey,
+            signature: signature,
+        }));
+        return response && response.success;
+    }
+
+
+
+
+
+    /**
+     * Complete the registration of a completelly new user by calling the rest endpoint
+     * @param username username string
+     * @param eKey eKey string
+     * @param address user wallet address string
+     * @returns true if the operation succeed
+     */
+    private static async completeNewUserRegistration(username: string, eKey: string, address: string): Promise<boolean> {
+        const response = await Api.post(Api.endpoint + 'signup', JSON.stringify({
+            username,
+            eKey,
+            address,
+        }));
+        return response && response.success;
     }
 }

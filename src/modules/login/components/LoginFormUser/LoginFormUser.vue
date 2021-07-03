@@ -53,9 +53,6 @@
             <i class="bi bi-arrow-right" />
           </span>
         </button>
-        <h5 class="text-center text-gray-500 dark:text-gray-300 pt-2">
-          Have a Desmos profile or password lost? <span class="text-brand">Sign in with Mnemonic</span>
-        </h5>
       </div>
     </div>
   </div>

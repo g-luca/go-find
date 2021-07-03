@@ -11,12 +11,33 @@
       </div>
       <LinkBlockSample :username="inputUsername" />
 
+      <div class="pb-4 w-full text-center font-semibold">
+        <h6
+          class="dark:text-white cursor-pointer select-none"
+          @click="setSignupWithDesmosProfile(!$store.state.RegisterModule.hasDesmosProfile)"
+        >
+          <span v-if="!$store.state.RegisterModule.hasDesmosProfile">
+            Already have a <span class="text-brand">Desmos Profile</span>?
+          </span>
+          <span v-else>
+            Don't have a <span class="text-brand">Desmos Profile</span>?
+          </span>
+        </h6>
+      </div>
+
       <!-- Username -->
       <div>
         <label
           class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
           for="inputUsername"
-        >Choose your <span class="text-brand">username</span></label>
+        > <span v-if="!$store.state.RegisterModule.hasDesmosProfile">
+            Choose your
+          </span>
+          <span v-else>
+            Your Desmos profile
+          </span>
+          <span class="text-brand">username</span>
+        </label>
 
         <div class="mt-1 relative rounded-md shadow-sm">
           <input
