@@ -11,6 +11,17 @@ export default class CryptoUtils {
         return createHash('sha256').update(string).digest('hex');
     }
 
+
+    /**
+     * Hash a string with SHA256
+     * @param string message or string to hash
+     * @returns Base64 hash result
+     */
+    public static sha256Buffer(buffer: Buffer): Buffer {
+        return createHash('sha256').update(buffer).digest();
+    }
+
+
     public static randomString(n: number): string {
         return randomBytes(n).toString('hex');
     }

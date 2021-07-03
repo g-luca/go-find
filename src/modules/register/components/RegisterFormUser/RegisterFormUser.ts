@@ -25,7 +25,6 @@ export default defineComponent({
     },
     methods: {
         validateUsername() {
-            console.log('called')
             this.isValidUsername = User.USERNAME_REGEX.test(this.inputUsername);
             if (this.isValidUsername) {
                 this.isVerifyingUsernameAvailability = true;
@@ -35,9 +34,10 @@ export default defineComponent({
                         Api.get('https://lcd.go-find.me/desmos/profiles/v1beta1/profiles/' + this.inputUsername).then((response) => {
                             if (this.inputUsername === username && response['profile']) {
                                 //username already taken
-                                this.isUsernameAvailable = false;
+                                // the availability value depends if is recovering the account
+                                this.isUsernameAvailable = registerModule.hasDesmosProfile;
                             } else {
-                                this.isUsernameAvailable = true;
+                                this.isUsernameAvailable = !registerModule.hasDesmosProfile;;
                             }
                             this.isVerifyingUsernameAvailability = false;
                         })
@@ -64,5 +64,9 @@ export default defineComponent({
                 registerModule.nextState(RegisterState.StateMPasswordInput);
             }
         },
+        setSignupWithDesmosProfile(has: boolean) {
+            registerModule.setHasDesmosProfile(has);
+            this.validateUsername();
+        }
     },
 });

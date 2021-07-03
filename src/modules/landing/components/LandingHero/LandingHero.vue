@@ -31,7 +31,7 @@
                 to="/login"
                 class="dark:text-white text-black text pl-2 font-bold focus:outline-none"
               >
-                Already registered or have a Desmos profile? <span class="text-brand">Login</span>
+                Already registered? <span class="text-brand">Login</span>
               </router-link>
             </div>
           </div>

@@ -1,9 +1,10 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import 'vue-router';
 import ViewHome from "../views/ViewLanding.vue";
 import ViewLogin from "@/views/ViewLogin/ViewLogin.vue";
 import ViewRegister from "../views/ViewRegister/ViewRegister.vue";
 import ViewProfile from "../views/ViewProfile/ViewProfile.vue";
-import 'vue-router';
+import ViewError404 from "../views/errors/ViewError404/ViewError404.vue";
 import { getModule } from "vuex-module-decorators";
 import AuthModule, { AuthLevel } from "@/store/modules/AuthModule";
 const authModule = getModule(AuthModule);
@@ -47,7 +48,7 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: false, hiddenWithAuth: false }
   }, {
     path: "/:catchAll(.*)",
-    component: ViewRegister, // TODO: change to Error 404
+    component: ViewError404, // TODO: change to Error 404
   },
   /* {
     path: "/about",
@@ -69,8 +70,7 @@ router.beforeEach((to, from, next) => {
   const requiresAuth = to.meta.requiresAuth;
   const hiddenWithAuth = to.meta.hiddenWithAuth;
 
-  console.log(requiresAuth);
-  console.log(authModule.authLevel)
+  console.log(`Auth level: ${authModule.authLevel}`)
   // check authentication
   authModule.authenticate()
   if (requiresAuth && authModule.authLevel === AuthLevel.None) {

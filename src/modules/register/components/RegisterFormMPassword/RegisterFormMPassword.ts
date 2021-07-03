@@ -33,7 +33,11 @@ export default defineComponent({
             this.validateMPassword();
             if (this.isValidMPassword && this.isMPasswordEqual) {
                 registerModule.setMPassword(this.inputMPassword);
-                registerModule.nextState(RegisterState.StateWalletGeneration);
+                if (registerModule.hasDesmosProfile) {
+                    registerModule.nextState(RegisterState.StateWalletImport);
+                } else {
+                    registerModule.nextState(RegisterState.StateWalletGeneration);
+                }
             }
         },
     },
