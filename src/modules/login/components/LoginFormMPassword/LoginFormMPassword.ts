@@ -31,13 +31,18 @@ export default defineComponent({
             if (this.isValidMPassword) {
                 const mPassword = CryptoUtils.sha256(this.inputMPassword); // generate hashed mPassword
                 try {
-                    const mKey = CryptoUtils.decryptAes(loginModule.ePassword, loginModule.eKey).split('#ok')[0]; // decrypt mKey
+                    //ePaassword is already hashed
+                    const mKeyRaw = CryptoUtils.decryptAes(loginModule.ePassword, loginModule.eKey); // decrypt mKey
+                    const mKey = mKeyRaw.split('#ok')[0];
                     CryptoUtils.decryptAes(mPassword, mKey); // try to decrypt privKey
                     this.hasLoginError = false
                     authModule.saveMKey({ mKey, mPassword });
+
+                    //TODO: FIXME: RESOLVE ADDRESS SAVING
                     authModule.saveAccount({ account: new Account(loginModule.username, '') });
                     router.push({ path: '/me' });
                 } catch (e) {
+                    console.log(e)
                     this.hasLoginError = true;
                 }
             } else {

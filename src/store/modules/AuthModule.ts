@@ -1,8 +1,8 @@
 import store from '@/store';
 import CryptoUtils from '@/utils/CryptoUtils';
-import { Action, Module, Mutation, VuexModule } from "vuex-module-decorators";
+import { Module, Mutation, VuexModule } from "vuex-module-decorators";
 import Account from '@/core/types/Account';
-
+import { Network, Transaction, CosmosTypes, DesmosTypes } from 'desmosjs';
 export enum AuthLevel {
     None,
     Account,
@@ -21,9 +21,7 @@ export default class AuthModule extends VuexModule {
     public authenticate(): void {
         if (localStorage.getItem('mKey') && localStorage.getItem('account')) {
             this._authLevel = AuthLevel.Account;
-            const account = AuthModule.getAccount();
-            this._account = account;
-            console.log(account);
+            this._account = AuthModule.getAccount();
             if (this.mPassword) {
                 const mKey = AuthModule.getMKey(this.mPassword);
                 if (mKey) {
@@ -36,9 +34,48 @@ export default class AuthModule extends VuexModule {
     }
 
     private static cleanAuthStorage() {
-        console.log("cleaning auth")
         localStorage.removeItem("mKey");
         localStorage.removeItem("account");
+    }
+
+    static async signTx(tx: CosmosTypes.TxBody, address: string, mPasswordClear: string): Promise<Transaction | string> {
+        const mPassword = CryptoUtils.sha256(mPasswordClear);
+        const mKey = AuthModule.getMKey(mPassword);
+        if (mKey) {
+            try {
+                const privKey = CryptoUtils.decryptAes(mPassword, mKey);
+                const desmosNet = new Network("https://lcd.go-find.me/");
+                const account = await desmosNet.getAccount(address);
+                if (account) {
+                    try {
+                        const signerInfo: CosmosTypes.SignerInfo = {
+                            /* publicKey: account, */
+                            modeInfo: { single: { mode: CosmosTypes.SignMode.SIGN_MODE_DIRECT } },
+                            sequence: account.sequence
+                        };
+
+                        const feeValue: CosmosTypes.Fee = {
+                            amount: [{ denom: "udaric", amount: "200" }],
+                            gasLimit: 200000,
+                            payer: "",
+                            granter: ""
+                        };
+
+                        const authInfo: CosmosTypes.AuthInfo = { signerInfos: [signerInfo], fee: feeValue };
+
+                        const signedTx = Transaction.sign(tx, authInfo, account.accountNumber, Buffer.from(privKey, 'hex'));
+                        return signedTx;
+                    } catch (e) {
+                        return "Error signing the transaction";
+                    }
+                } else {
+                    return "Blockchain connection error";
+                }
+            } catch (e) {
+                return "Wrong Wallet Password";
+            }
+        }
+        return "Wrong Wallet Password";
     }
 
 
@@ -81,9 +118,9 @@ export default class AuthModule extends VuexModule {
         const accountJSON = localStorage.getItem('account');
         if (accountJSON) {
             try {
-                const account: Account = JSON.parse(accountJSON);
-                if (account) {
-                    return account;
+                const accountRaw = JSON.parse(accountJSON);
+                if (accountRaw) {
+                    return new Account(accountRaw['_username'], accountRaw['_address']);
                 }
             } catch (e) {
                 return null;

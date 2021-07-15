@@ -4,7 +4,10 @@ import ViewHome from "../views/ViewLanding.vue";
 import ViewLogin from "@/views/ViewLogin/ViewLogin.vue";
 import ViewRegister from "../views/ViewRegister/ViewRegister.vue";
 import ViewProfile from "../views/ViewProfile/ViewProfile.vue";
+import ViewAccount from "../views/ViewAccount/ViewAccount.vue";
+
 import ViewError404 from "../views/errors/ViewError404/ViewError404.vue";
+
 import { getModule } from "vuex-module-decorators";
 import AuthModule, { AuthLevel } from "@/store/modules/AuthModule";
 const authModule = getModule(AuthModule);
@@ -37,16 +40,16 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/me",
-    name: "Profile",
-    component: ViewProfile,
+    name: "My Profile",
+    component: ViewAccount,
     meta: { requiresAuth: true, hiddenWithAuth: false }
-  },
-  { // must be the last one
-    path: "/:username([A-Za-z0-9_]{3,45}$)",
+  }, { // must be the last one path: "/@/:username([A-Za-z0-9_]{3,45}$)",
+    path: "/:username",
     name: "Profile",
     component: ViewProfile,
     meta: { requiresAuth: false, hiddenWithAuth: false }
-  }, {
+  },
+  {
     path: "/:catchAll(.*)",
     component: ViewError404, // TODO: change to Error 404
   },
@@ -70,9 +73,9 @@ router.beforeEach((to, from, next) => {
   const requiresAuth = to.meta.requiresAuth;
   const hiddenWithAuth = to.meta.hiddenWithAuth;
 
-  console.log(`Auth level: ${authModule.authLevel}`)
   // check authentication
   authModule.authenticate()
+  console.log(`Auth level: ${authModule.authLevel}`)
   if (requiresAuth && authModule.authLevel === AuthLevel.None) {
     next('/login');
   } else if (hiddenWithAuth && authModule.authLevel > AuthLevel.None) {
