@@ -13,6 +13,7 @@ export default class Account {
      * @return {string}
      */
     public get username(): string {
+        console.log(this._username)
         return this._username;
     }
 

@@ -4,9 +4,9 @@ import store from '@/store';
 import { Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { LoadingStatus } from '@/core/types/LoadingStatus';
 
-@Module({ store, name: 'UserModule', dynamic: true })
-export default class UserModule extends VuexModule {
-    protected user: User | false = false;
+@Module({ store, name: 'AccountModule', dynamic: true })
+export default class AccountModule extends VuexModule {
+    private _user: User | false = false;
     public userLoadingStatus: LoadingStatus = LoadingStatus.Loading;
 
 
@@ -15,11 +15,11 @@ export default class UserModule extends VuexModule {
      * @param username username of the profile to get
      */
     @Mutation
-    async loadUser(username: string): Promise<void> {
+    async loadAccount(username: string): Promise<void> {
         this.userLoadingStatus = LoadingStatus.Loading;
-        const foundUser = await UserModule.getDesmosProfile(username);
-        if (foundUser) {
-            this.user = foundUser;
+        const foundUser = await AccountModule.getDesmosProfile(username);
+        if (foundUser !== false) {
+            this._user = foundUser;
             this.userLoadingStatus = LoadingStatus.Loaded;
         } else {
             this.userLoadingStatus = LoadingStatus.Error;
@@ -36,4 +36,14 @@ export default class UserModule extends VuexModule {
             return false
         }
     }
+
+
+    /**
+     * Getter user
+     * @return {User }
+     */
+    public get user(): User | false {
+        return this._user;
+    }
+
 }
