@@ -13,20 +13,20 @@
                   v-if="$store.state.UserModule.user.profilePic"
                   alt="avatar"
                   :src="$store.state.UserModule.user.profilePic"
-                  class="mx-auto object-cover rounded-full h-36 md:h-48 pointer-events-none select-none"
+                  class="mx-auto object-cover rounded-full h-44 w-44 md:h-56 md:w-56 pointer-events-none select-none"
                 >
                 <img
                   v-else
                   alt="avatar"
                   src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
-                  class="mx-auto object-cover rounded-full h-36 md:h-48 pointer-events-none select-none"
+                  class="mx-auto object-cover rounded-full h-44 w-44 md:h-56 md:w-56 pointer-events-none select-none"
                 >
               </span>
               <span v-else>
                 <!-- Loading -->
                 <SkeletonLoader
                   shape="circle"
-                  class="mx-auto object-cover rounded-full h-36 md:h-48 w-36 md:w-48 pointer-events-none select-none"
+                  class="mx-auto object-cover rounded-full h-44 w-44 md:h-56 md:w-56 pointer-events-none select-none"
                 />
               </span>
             </div>
@@ -35,13 +35,13 @@
             <div class="md:col-start-5 md:col-span-7 col-span-12 my-auto pt-8">
               <div class="w-full text-center md:text-left dark:text-white">
                 <span v-if="$store.state.UserModule.userLoadingStatus">
-                  <div class="font-bold text-4xl">
+                  <div class="font-bold text-5xl">
                     <h1>
                       {{ $store.state.UserModule.user.nickname }}
                     </h1>
                   </div>
                   <div class="py-1">
-                    <h2 class="text-brand font-semibold text-lg">
+                    <h2 class="text-brand font-semibold text-2xl">
                       @{{ $store.state.UserModule.user.username }}
                     </h2>
                     <div class="flex justify-center md:justify-start px-4 md:pl-0">
