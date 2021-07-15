@@ -9,7 +9,7 @@ enum Theme {
 
 @Module({ store, name: 'ThemeModule', dynamic: true })
 export default class ThemeModule extends VuexModule {
-    public activeTheme: Theme = Theme.Dark;
+    public activeTheme: Theme = Theme.Light; // default theme
 
 
     /**
@@ -29,7 +29,7 @@ export default class ThemeModule extends VuexModule {
     public loadThemeConfiguration(): void {
         let savedTheme: Theme = localStorage.theme;
         if (savedTheme !== Theme.Dark && savedTheme !== Theme.Light) {
-            savedTheme = Theme.Dark;
+            savedTheme = this.activeTheme;
         }
         ThemeModule.setActiveTheme(savedTheme);
         this.activeTheme = savedTheme;
