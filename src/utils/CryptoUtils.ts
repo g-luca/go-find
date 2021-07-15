@@ -52,8 +52,8 @@ export default class CryptoUtils {
         const key = password.slice(0, 32);
         const iv = password.slice(32, 48);
         const decipher = createDecipheriv('aes-256-cbc', key, iv);
-        const decrypted = decipher.update(encrypted, 'hex') + decipher.final('hex');
-        return Buffer.from(decrypted, 'hex').toString('utf-8');
+        const decrypted = decipher.update(encrypted, 'hex', 'utf8') + decipher.final('utf8');
+        return decrypted;
     }
 }
 
