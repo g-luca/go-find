@@ -18,6 +18,14 @@ export default class AuthModule extends VuexModule {
 
 
     @Mutation
+    public logout(): void {
+        AuthModule.cleanAuthStorage();
+        this._account = null;
+        this.mPassword = null;
+        this._authLevel = AuthLevel.None;
+    }
+
+    @Mutation
     public authenticate(): void {
         if (localStorage.getItem('mKey') && localStorage.getItem('account')) {
             this._authLevel = AuthLevel.Account;

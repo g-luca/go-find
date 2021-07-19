@@ -16,10 +16,68 @@
         </div>
 
         <div class="container relative z-50 flex h-full justify-end">
-          <ToggleTheme class="ml-4 my-auto" />
+          <!-- <ToggleTheme class="ml-4 my-auto" /> -->
 
           <!-- Search bar -->
           <SearchUser class="" />
+
+          <span v-if="$store.state.AuthModule._authLevel>0&&$store.state.AccountModule._user._profilePic">
+            <Menu
+              as="div"
+              class="block relative pl-2 pt-1 inline-block text-left"
+            >
+              <div>
+                <MenuButton class="">
+                  <img
+                    :src="$store.state.AccountModule._user._profilePic"
+                    class="mx-auto object-cover h-10 w-10 rounded-full"
+                  >
+                </MenuButton>
+              </div>
+
+              <transition
+                enter-active-class="transition ease-out duration-100"
+                enter-from-class="transform opacity-0 scale-95"
+                enter-to-class="transform opacity-100 scale-100"
+                leave-active-class="transition ease-in duration-75"
+                leave-from-class="transform opacity-100 scale-100"
+                leave-to-class="transform opacity-0 scale-95"
+              >
+                <MenuItems class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-900  ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <div class="py-1">
+
+                    <MenuItem
+                      v-slot="{ active }"
+                      class="mx-2 my-1 rounded-xl"
+                    >
+                    <router-link
+                      to="/me"
+                      :class="[active ? 'bg-gray-100 dark:bg-denim-900 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-100', 'block px-4 py-2 text-md']"
+                    >
+                      <i class="bi bi-person-circle" /> Your Profile
+                    </router-link>
+                    </MenuItem>
+
+                    <MenuItem v-slot="{ active }">
+                    <ToggleTheme :active="active" />
+                    </MenuItem>
+
+                    <MenuItem
+                      v-slot="{ active }"
+                      class="mx-2 my-1 rounded-xl"
+                    >
+                    <a
+                      href="#"
+                      :class="[active ? 'bg-gray-100 dark:bg-denim-900 text-red-500' : 'text-gray-700 dark:text-gray-100', 'block px-4 py-2 text-md']"
+                      @click="logout()"
+                    ><i class="bi bi-arrow-bar-right" /> Logout</a>
+                    </MenuItem>
+
+                  </div>
+                </MenuItems>
+              </transition>
+            </Menu>
+          </span>
         </div>
       </div>
     </div>
