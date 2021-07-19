@@ -23,9 +23,9 @@ export default class User {
         new SocialIntegrationGithub('g-luca'),
     ];
     private _postLinks: PostLink[] = [
-        new PostLink(0, 'Join the club', 'addasdad'),
-        new PostLink(0, 'Discord group', 'addasdad'),
-        new PostLink(0, 'Out merch', 'addasdad'),
+        new PostLink(0, 'Link 1', 'addasdad'),
+        new PostLink(0, 'Link 2', 'addasdad'),
+        new PostLink(0, 'Link 3', 'addasdad'),
     ]
 
 
