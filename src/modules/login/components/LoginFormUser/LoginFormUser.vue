@@ -43,7 +43,7 @@
       <div>
         <button
           v-if="inputEPassword.length>3&&inputUsername.length>3"
-          :disabled="isLoading===1"
+          :disabled="isLoading===0"
           type="button"
           class="relative block w-full justify-center py-2 px-4 border border-transparent text-md rounded-md font-extrabold
                text-white bg-brand opacity-90 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:ring-offset-denim-900 focus:ring-brand"
@@ -65,7 +65,6 @@
             <i class="bi bi-exclamation-circle-fill text-red-500" /> Wrong username or password.
           </p>
         </span>
-
       </div>
     </div>
   </div>
