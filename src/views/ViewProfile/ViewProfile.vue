@@ -7,7 +7,7 @@
         <section>
           <div class="grid grid-cols-12 pt-8">
             <!-- Profile Pic -->
-            <div class="md:col-start-2 md:col-span-3 col-span-12 my-auto">
+            <div class="md:col-start-1 md:col-span-4 col-span-12 my-auto">
               <span v-if="$store.state.UserModule.userLoadingStatus">
                 <img
                   v-if="$store.state.UserModule.user.profilePic"

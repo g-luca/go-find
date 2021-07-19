@@ -119,7 +119,7 @@ export default defineComponent({
             }
         },
         validateInputProfilePic(): void {
-            this.isInputProfilePicValid = /(http)?s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg)$)/.test(this.inputProfilePic);
+            this.isInputProfilePicValid = this.inputProfilePic.length === 0 || /(http)?s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg)$)/.test(this.inputProfilePic);
             if (accountModule.user) {
                 this.isInputProfilePicEdited = this.inputProfilePic !== accountModule.user.profilePic;
             }

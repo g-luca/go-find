@@ -21,7 +21,7 @@
           <!-- Search bar -->
           <SearchUser class="" />
 
-          <span v-if="$store.state.AuthModule._authLevel>0&&$store.state.AccountModule._user._profilePic">
+          <span v-if="$store.state.AuthModule._authLevel>0">
             <Menu
               as="div"
               class="block relative pl-2 pt-1 inline-block text-left"
@@ -29,7 +29,7 @@
               <div>
                 <MenuButton class="">
                   <img
-                    :src="$store.state.AccountModule._user._profilePic"
+                    :src="$store.state.AccountModule._user._profilePic || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
                     class="mx-auto object-cover h-10 w-10 rounded-full"
                   >
                 </MenuButton>
@@ -43,8 +43,8 @@
                 leave-from-class="transform opacity-100 scale-100"
                 leave-to-class="transform opacity-0 scale-95"
               >
-                <MenuItems class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-900  ring-1 ring-black ring-opacity-5 focus:outline-none">
-                  <div class="py-1">
+                <MenuItems class="origin-top-right absolute right-0 mt-2 w-56 rounded-xl shadow-lg bg-white dark:bg-gray-900  ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <div class="py-1 text-lg font-medium">
 
                     <MenuItem
                       v-slot="{ active }"
@@ -54,7 +54,7 @@
                       to="/me"
                       :class="[active ? 'bg-gray-100 dark:bg-denim-900 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-100', 'block px-4 py-2 text-md']"
                     >
-                      <i class="bi bi-person-circle" /> Your Profile
+                      <i class="bi bi-person-circle mr-2" /> Your Profile
                     </router-link>
                     </MenuItem>
 
@@ -70,7 +70,7 @@
                       href="#"
                       :class="[active ? 'bg-gray-100 dark:bg-denim-900 text-red-500' : 'text-gray-700 dark:text-gray-100', 'block px-4 py-2 text-md']"
                       @click="logout()"
-                    ><i class="bi bi-arrow-bar-right" /> Logout</a>
+                    ><i class="bi bi-arrow-left-circle-fill mr-2" /> Logout</a>
                     </MenuItem>
 
                   </div>

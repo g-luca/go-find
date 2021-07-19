@@ -9,19 +9,19 @@
       class=" px-4 py-2 w-full text-left"
       @click="toggleTheme()"
     >
-      <span class="h-auto align-middle justify-items-center">
+      <span class="h-auto align-middle justify-items-center font-medium">
         <span
           v-if="$store.state.ThemeModule.activeTheme === 'light'"
           :class="[active ? 'text-denim-700':'']"
         >
-          <i class="bi bi-moon-fill" />
+          <i class="bi bi-moon-fill mr-2" />
           Dark Theme
         </span>
         <span
           v-else
           :class="[active ? 'text-yellow-300':'']"
         >
-          <i class="bi bi-sun-fill" />
+          <i class="bi bi-sun-fill mr-2" />
           Light Theme
         </span>
       </span>

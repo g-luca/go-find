@@ -7,18 +7,11 @@
         <section>
           <div class="grid grid-cols-12 pt-8">
             <!-- Profile Pic -->
-            <div class="md:col-start-2 md:col-span-3 col-span-12 my-auto">
+            <div class="md:col-start-1 md:col-span-4 col-span-12 my-auto">
               <span v-if="$store.state.AccountModule.userLoadingStatus">
                 <img
-                  v-if="$store.state.AccountModule._user.profilePic"
                   alt="avatar"
-                  :src="$store.state.AccountModule._user.profilePic"
-                  class="mx-auto object-cover rounded-full h-44 w-44 md:h-56 md:w-56 pointer-events-none select-none"
-                >
-                <img
-                  v-else
-                  alt="avatar"
-                  src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
+                  :src="$store.state.AccountModule._user.profilePic || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
                   class="mx-auto object-cover rounded-full h-44 w-44 md:h-56 md:w-56 pointer-events-none select-none"
                 >
               </span>
