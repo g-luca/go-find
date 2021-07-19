@@ -17,7 +17,10 @@
             />
           </div>
 
-          <div class="container">
+          <div
+            v-if="$store.state.AuthModule._authLevel==0"
+            class="container"
+          >
             <div class="py-4">
               <router-link
                 to="/register"

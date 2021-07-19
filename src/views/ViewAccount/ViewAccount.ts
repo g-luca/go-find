@@ -44,8 +44,7 @@ export default defineComponent({
     async mounted() {
         const account = authModule.account;
         if (account) {
-            const username = account.username;
-            await accountModule.loadAccount(username);
+            await accountModule.loadAccount();
 
 
             //register the watcher of the accountModule user account profile
