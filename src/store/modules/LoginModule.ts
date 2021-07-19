@@ -16,11 +16,12 @@ export default class LoginModule extends VuexModule {
     public username = "";
     public eKey = "";
     public ePassword = "";
+    public address = "";
 
 
 
-    @MutationAction({ mutate: ['eKey', 'ePassword', 'username'] })
-    async login(payload: { username: string, ePassword: string }): Promise<{ eKey: string, ePassword: string, username: string }> {
+    @MutationAction({ mutate: ['eKey', 'ePassword', 'username', 'address'] })
+    async login(payload: { username: string, ePassword: string }): Promise<{ eKey: string, ePassword: string, username: string, address: string }> {
         if (payload.username && payload.ePassword) {
             const response = await Api.post(Api.endpoint + 'signin', JSON.stringify({
                 username: payload.username,
@@ -30,13 +31,14 @@ export default class LoginModule extends VuexModule {
                 const ePassword: string = payload.ePassword;
                 const username: string = payload.username;
                 const eKey: string = response.eKey;
-                return { eKey, ePassword, username };
+                const address: string = response.address;
+                return { eKey, ePassword, username, address };
             } else {
-                return { eKey: '', ePassword: '', username: '' };
+                return { eKey: '', ePassword: '', username: '', address: '' };
             }
         }
         // update the store variables
-        return { eKey: '', ePassword: '', username: '' };
+        return { eKey: '', ePassword: '', username: '', address: '' };
     }
 
 
