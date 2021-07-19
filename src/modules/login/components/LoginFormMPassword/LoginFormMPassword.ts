@@ -38,8 +38,7 @@ export default defineComponent({
                     this.hasLoginError = false
                     authModule.saveMKey({ mKey, mPassword });
 
-                    //TODO: FIXME: RESOLVE ADDRESS SAVING
-                    authModule.saveAccount({ account: new Account(loginModule.username, '') });
+                    authModule.saveAccount({ account: new Account(loginModule.username, loginModule.address) });
                     router.push({ path: '/me' });
                 } catch (e) {
                     console.log(e)
