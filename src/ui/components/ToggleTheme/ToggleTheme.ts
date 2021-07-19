@@ -1,19 +1,21 @@
 import ThemeModule from "@/store/modules/ThemeModule";
-import { Vue } from "vue-class-component";
+import { defineComponent } from "vue";
 import { getModule } from "vuex-module-decorators";
 const themeModule = getModule(ThemeModule)
 
 
-export default class ToggleTheme extends Vue {
+
+export default defineComponent({
+    props: {
+        active: Boolean
+    },
     mounted(): void {
         themeModule.loadThemeConfiguration();
+    }, methods: {
+        toggleTheme(): void {
+            console.log('toggle theme')
+            themeModule.toggleTheme();
+        }
+
     }
-
-    public toggleTheme(): void {
-        themeModule.toggleTheme();
-    }
-
-
-
-
-};
+});
