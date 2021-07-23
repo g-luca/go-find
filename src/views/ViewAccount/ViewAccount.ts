@@ -26,14 +26,17 @@ export default defineComponent({
         return {
             inputNickname: '',
             inputProfilePic: '',
+            inputProfileCover: '',
             inputBio: '',
 
             isInputNicknameValid: false,
             isInputProfilePicValid: false,
+            isInputProfileCoverValid: false,
             isInputBioValid: false,
 
             isInputNicknameEdited: false,
             isInputProfilePicEdited: false,
+            isInputProfileCoverEdited: false,
             isInputBioEdited: false,
 
             isExecutingTransaction: false,
@@ -53,6 +56,7 @@ export default defineComponent({
                 if (accountModule.user) {
                     this.inputNickname = accountModule.user.nickname;
                     this.inputProfilePic = accountModule.user.profilePic;
+                    this.inputProfileCover = accountModule.user.profileCover;
                     this.inputBio = accountModule.user.bio;
                 }
             })
@@ -68,7 +72,7 @@ export default defineComponent({
                     nickname: (this.isInputNicknameEdited && this.isInputNicknameValid) ? this.inputNickname : doNotModify,
                     bio: (this.isInputBioEdited && this.isInputBioValid) ? this.inputBio : doNotModify,
                     profilePicture: (this.isInputProfilePicEdited && this.isInputProfilePicValid) ? this.inputProfilePic : doNotModify,
-                    coverPicture: doNotModify,
+                    coverPicture: (this.isInputProfileCoverEdited && this.isInputProfileCoverValid) ? this.inputProfileCover : doNotModify,
                     creator: accountModule.user.address,
                 }
                 const txBody: CosmosTypes.TxBody = {
@@ -90,10 +94,12 @@ export default defineComponent({
         cancelEdit(): void {
             this.inputNickname = (accountModule.user) ? accountModule.user.nickname : '';
             this.inputProfilePic = (accountModule.user) ? accountModule.user.profilePic : '';
+            this.inputProfileCover = (accountModule.user) ? accountModule.user.profileCover : '';
             this.inputBio = (accountModule.user) ? accountModule.user.bio : '';
 
             this.isInputNicknameEdited = false;
             this.isInputProfilePicEdited = false;
+            this.isInputProfileCoverEdited = false;
             this.isInputBioEdited = false;
         },
         handleTxResponse(success: boolean): void {
@@ -122,6 +128,12 @@ export default defineComponent({
             this.isInputProfilePicValid = this.inputProfilePic.length === 0 || /(http)?s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg)$)/.test(this.inputProfilePic);
             if (accountModule.user) {
                 this.isInputProfilePicEdited = this.inputProfilePic !== accountModule.user.profilePic;
+            }
+        },
+        validateInputProfileCover(): void {
+            this.isInputProfileCoverValid = this.inputProfileCover.length === 0 || /(http)?s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg)$)/.test(this.inputProfileCover);
+            if (accountModule.user) {
+                this.isInputProfileCoverEdited = this.inputProfileCover !== accountModule.user.profileCover;
             }
         }
     }

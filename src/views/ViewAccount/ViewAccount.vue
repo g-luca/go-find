@@ -7,12 +7,17 @@
         <section>
           <div class="grid grid-cols-12 pt-8">
             <!-- Profile Pic -->
-            <div class="md:col-start-1 md:col-span-4 col-span-12 my-auto">
+            <div class="md:col-start-1 md:col-span-4 col-span-12 my-auto md:pl-8">
               <span v-if="$store.state.AccountModule.userLoadingStatus">
+                <img
+                  alt="cover"
+                  :src="$store.state.AccountModule._user.profileCover || 'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=='"
+                  class="mx-auto object-cover w-full max-h-80 md:rounded-t-2xl pointer-events-none select-none"
+                >
                 <img
                   alt="avatar"
                   :src="$store.state.AccountModule._user.profilePic || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
-                  class="mx-auto object-cover rounded-full h-44 w-44 md:h-56 md:w-56 pointer-events-none select-none"
+                  class="mx-auto object-cover rounded-full h-44 w-44 md:h-56 md:w-56 pointer-events-none select-none -mt-32"
                 >
               </span>
 
@@ -25,7 +30,7 @@
             </div>
 
             <!-- edit account -->
-            <div class="md:col-start-5 md:col-span-7 col-span-12 my-auto pt-8">
+            <div class="md:col-start-5 md:col-span-7 col-span-12 my-auto pt-8 md:pl-8">
               <div class="w-full text-center md:text-left dark:text-white">
                 <span v-if="$store.state.AccountModule.userLoadingStatus">
                   <div class="py-1">
@@ -80,6 +85,27 @@
                       </div>
                       <div class="py-2">
                         <label
+                          for="profileCover"
+                          class="text-gray-700 dark:text-white"
+                        >
+                          Cover
+                        </label>
+                        <input
+                          id="profileCover"
+                          v-model="inputProfileCover"
+                          type="text"
+                          :disabled="isExecutingTransaction"
+                          :class="{'border-red-700 dark:border-red-700': !isInputProfileCoverValid&&isInputProfileCoverEdited,
+                                   'border-green-700 dark:border-green-700': isInputProfileCoverValid&&isInputProfileCoverEdited, 
+                                   'focus:border-brand dark:border-gray-700': !isInputProfileCoverEdited}"
+                          class=" rounded-lg border-transparent flex-1 appearance-none border border-gray-300 dark:border-gray-900 w-full py-2 px-4 my-1 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+                          name="profileCover"
+                          placeholder="https://profile-cover.com/image.png"
+                          @input="validateInputProfileCover()"
+                        >
+                      </div>
+                      <div class="py-2">
+                        <label
                           for="bio"
                           class="text-gray-700 dark:text-white"
                         >
@@ -100,7 +126,7 @@
                       </div>
 
                       <div
-                        v-if="!isExecutingTransaction&&((isInputNicknameEdited&&isInputNicknameValid)||(isInputProfilePicEdited&&isInputProfilePicValid)||(isInputBioEdited&&isInputBioValid))"
+                        v-if="!isExecutingTransaction&&((isInputNicknameEdited&&isInputNicknameValid)||(isInputProfilePicEdited&&isInputProfilePicValid)||(isInputProfileCoverEdited&&isInputProfileCoverValid)||(isInputBioEdited&&isInputBioValid))"
                         class="flex items-center justify-between gap-4 mt-6"
                       >
                         <button
@@ -132,6 +158,10 @@
                   <SkeletonLoader
                     shape="rectangle"
                     class="py-1 text-left w-full md:w-2/5 h-10 px-4"
+                  />
+                  <SkeletonLoader
+                    shape="rectangle"
+                    class="py-1 text-left w-full md:w-5/6 h-10 px-4"
                   />
                   <SkeletonLoader
                     shape="rectangle"

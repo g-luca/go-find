@@ -31,7 +31,7 @@ export default class UserModule extends VuexModule {
         const foundUser = await Api.get('https://lcd.go-find.me/desmos/profiles/v1beta1/profiles/' + username);
         if (foundUser['profile']) {
             const rawUser = foundUser['profile'];
-            return new User(rawUser['dtag'], rawUser['account']['address'], rawUser['nickname'], rawUser['bio'], rawUser['pictures']['profile']);
+            return new User(rawUser['dtag'], rawUser['account']['address'], rawUser['nickname'], rawUser['bio'], rawUser['pictures']['profile'], rawUser['pictures']['cover']);
         } else {
             return false
         }

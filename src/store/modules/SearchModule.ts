@@ -29,7 +29,7 @@ export default class SearchModule extends VuexModule {
                     const foundUser = await Api.get('https://lcd.go-find.me/desmos/profiles/v1beta1/profiles/' + username);
                     if (foundUser['profile']) {
                         const rawUser = foundUser['profile'];
-                        const user = new User(rawUser['dtag'], '', rawUser['nickname'], '', rawUser['pictures']['profile']);
+                        const user = new User(rawUser['dtag'], '', rawUser['nickname'], '', rawUser['pictures']['profile'], rawUser['pictures']['cover']);
                         this.cachedUsers.set(username, user);
                         this.user = user;
                         this.userSearchStatus = LoadingStatus.Loaded;
