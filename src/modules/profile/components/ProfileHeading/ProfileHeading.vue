@@ -8,7 +8,7 @@
             <img
               alt="cpver"
               :src="$store.state.UserModule.user.profileCover || 'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=='"
-              class="mx-auto object-cover h-72 lg:h-96 w-full pointer-events-none select-none"
+              class="mx-auto object-cover h-64 lg:h-96 w-full pointer-events-none select-none"
             >
           </span>
           <span v-else>
@@ -25,7 +25,7 @@
     <!-- Profile Pic -->
     <div class=" -mt-36">
       <div class="grid grid-cols-12">
-        <div class="md:col-start-3 md:col-span-3 col-span-12 my-auto mt-8">
+        <div class="md:col-start-2 lg:col-start-3 md:col-span-3 col-span-12 my-auto mt-8">
           <span v-if="$store.state.UserModule.userLoadingStatus">
             <img
               alt="avatar"
@@ -43,8 +43,8 @@
         </div>
 
         <!-- User Info -->
-        <div class="md:col-start-6 md:col-span-4 col-span-12 my-auto pt-4 md:pt-8">
-          <div class="md:w-full text-center md:text-left dark:text-gray-100 bg-gray-50 md:bg-white dark:bg-denim-900 md:bg-gray-50 md:dark:bg-gray-900 md:bg-opacity-95 backdrop-grayscale md:shadow-xl rounded-2xl md:pl-7 py-6">
+        <div class="md:col-start-6 md:col-span-5 lg:col-span-4 col-span-12 my-auto pt-4 md:pt-8">
+          <div class="md:w-full text-center md:text-left dark:text-gray-100 bg-gray-50 md:bg-white dark:bg-denim-900 md:bg-gray-50 md:dark:bg-gray-900 md:bg-opacity-95 backdrop-grayscale md:shadow-xl rounded-2xl md:pl-7 py-2 md:py-6">
             <span v-if="$store.state.UserModule.userLoadingStatus">
               <div class="font-bold text-5xl">
                 <h1>
