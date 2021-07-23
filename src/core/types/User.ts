@@ -1,11 +1,12 @@
 import PostLink from "./PostLink";
-import SocialIntegration from "./SociaIntegration";
-import SocialIntegrationFacebook from "./SocialIntegrations/SocialIntegrationFacebook";
-import SocialIntegrationGithub from "./SocialIntegrations/SocialIntegrationGithub";
-import SocialIntegrationInstagram from "./SocialIntegrations/SocialIntegrationInstagram";
-import SocialIntegrationTiktok from "./SocialIntegrations/SocialIntegrationTiktok";
-import SocialIntegrationTwitch from "./SocialIntegrations/SocialIntegrationTwitch";
-import SocialIntegrationTwitter from "./SocialIntegrations/SocialIntegrationTwitter";
+import ApplicationLink from "./ApplicationLink";
+import ApplicationLinkFacebook from "./ApplicationLinks/ApplicationLinkFacebook";
+import ApplicationLinkGithub from "./ApplicationLinks/ApplicationLinkGithub";
+import ApplicationLinkInstagram from "./ApplicationLinks/ApplicationLinkInstagram";
+import ApplicationLinkTiktok from "./ApplicationLinks/ApplicationLinkTiktok";
+import ApplicationLinkTwitch from "./ApplicationLinks/ApplicationLinkTwitch";
+import ApplicationLinkTwitter from "./ApplicationLinks/ApplicationLinkTwitter";
+import ApplicationLinkDiscord from "./ApplicationLinks/AppplicationLinkDiscord";
 
 export default class User {
     private _username: string;
@@ -15,13 +16,14 @@ export default class User {
     private _profilePic: string;
     private _profileCover: string;
 
-    private _socialIntegrations: SocialIntegration[] = [
-        new SocialIntegrationFacebook('l'),
-        new SocialIntegrationTwitch('s'),
-        new SocialIntegrationTwitter('f'),
-        new SocialIntegrationInstagram('a'),
-        new SocialIntegrationTiktok('s'),
-        new SocialIntegrationGithub('g-luca'),
+    private _socialIntegrations: ApplicationLink[] = [
+        new ApplicationLinkDiscord('l'),
+        new ApplicationLinkFacebook('l'),
+        new ApplicationLinkTwitch('s'),
+        new ApplicationLinkTwitter('f'),
+        new ApplicationLinkInstagram('a'),
+        new ApplicationLinkTiktok('s'),
+        new ApplicationLinkGithub('g-luca'),
     ];
     private _postLinks: PostLink[] = [
         new PostLink(0, 'Link 1', 'addasdad'),
@@ -79,10 +81,10 @@ export default class User {
 
 
     /**
-     * Getter socialIntegrations
-     * @return {SocialIntegration[] }
+     * Getter applicationLinks
+     * @return {ApplicationLink[] }
      */
-    public get socialIntegrations(): SocialIntegration[] {
+    public get applicationLinks(): ApplicationLink[] {
         return this._socialIntegrations;
     }
 
