@@ -1,5 +1,5 @@
 <template>
-  <footer class="dark:bg-gray-900 py-8 px-5 dark:text-white">
+  <footer class="bg-white dark:bg-gray-900 py-8 px-5 dark:text-white">
     <div class="grid grid-cols-12">
       <div class="col-span-4 md:col-span-2 my-auto text-center py-2">
         <a class="px-4">Support</a>
