@@ -2,11 +2,13 @@ import User from '@/core/types/User';
 import store from '@/store';
 import { Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { LoadingStatus } from '@/core/types/LoadingStatus';
-import { provideApolloClient, useLazyQuery, useQuery } from '@vue/apollo-composable';
+import { provideApolloClient, useLazyQuery } from '@vue/apollo-composable';
 import { apolloClient } from '@/gql/Apollo';
 import { ProfileQuery } from '@/gql/ProfileQuery';
 import ApplicationLinkDiscord from '@/core/types/ApplicationLinks/ApplicationLinkDiscord';
 import ApplicationLink from '@/core/types/ApplicationLink';
+import ApplicationLinkGithub from '@/core/types/ApplicationLinks/ApplicationLinkGithub';
+import ApplicationLinkTwitter from '@/core/types/ApplicationLinks/ApplicationLinkTwitter';
 
 
 provideApolloClient(apolloClient)
@@ -39,6 +41,12 @@ export default class UserModule extends VuexModule {
                         switch (applicationLinkRaw.application) {
                             case "discord":
                                 applicationLinks.push(new ApplicationLinkDiscord(applicationLinkRaw.username));
+                                break;
+                            case "github":
+                                applicationLinks.push(new ApplicationLinkGithub(applicationLinkRaw.username));
+                                break;
+                            case "twitter":
+                                applicationLinks.push(new ApplicationLinkTwitter(applicationLinkRaw.username));
                                 break;
                         }
                     })
