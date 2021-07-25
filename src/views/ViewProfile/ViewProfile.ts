@@ -1,5 +1,6 @@
 import { defineComponent } from "vue";
 
+import ApolloQuery from "vue-apollo"
 import AppFooter from "@/ui/components/AppFooter/AppFooter.vue";
 import AppHeader from "@/ui/components/AppHeader/AppHeader.vue";
 import ProfileHeading from "@/modules/profile/components/ProfileHeading/ProfileHeading.vue";
@@ -9,8 +10,6 @@ import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import UserModule from '@/store/modules/UserModule';
 import { getModule } from 'vuex-module-decorators';
 const userModule = getModule(UserModule);
-/* import LoginFormUser from "@/modules/login/components/LoginFormUser/LoginFormUser.vue"; */
-
 
 export default defineComponent({
 
@@ -21,16 +20,12 @@ export default defineComponent({
         Error404,
         ProfileHeading,
         ProfileAppLinks,
+        ApolloQuery,
     }, beforeRouteUpdate(to, from, next) {
         userModule.loadUser(to.params['username'].toLocaleString());
         next()
     },
-    data() {
-        return {
-        }
-    },
     mounted() {
-        const username = this.$route.params['username'].toLocaleString();
-        userModule.loadUser(username);
-    }
+        userModule.loadUser(this.$route.params['username'].toLocaleString());
+    },
 });
