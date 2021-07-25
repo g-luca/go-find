@@ -3,12 +3,13 @@ import User from '@/core/types/User';
 import store from '@/store';
 import { Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { LoadingStatus } from '@/core/types/LoadingStatus';
+import { useLazyQuery } from '@vue/apollo-composable';
+import { ProfileSearchQuery } from '@/gql/ProfileSearchQuery';
 
 @Module({ store, name: 'SearchModule', dynamic: true })
 export default class SearchModule extends VuexModule {
-    public user: User | false = false;
+    public users: Array<User> = [];
     public userSearchStatus: LoadingStatus = LoadingStatus.Loading;
-    private cachedUsers: Map<string, User | false> = new Map([]); // cache the searched users
     private searchingUsername = ""; // stores the newest username input value, used to avoid the search at every character
 
     /**
@@ -21,24 +22,28 @@ export default class SearchModule extends VuexModule {
         setTimeout(async () => {
             if (this.searchingUsername === username) {
                 this.userSearchStatus = LoadingStatus.Loading;
-                const cachedUser = this.cachedUsers.get(username);
-                if (cachedUser || cachedUser == false) {
-                    this.user = cachedUser;
-                    this.userSearchStatus = LoadingStatus.Loaded;
-                } else {
-                    const foundUser = await Api.get('https://lcd.go-find.me/desmos/profiles/v1beta1/profiles/' + username);
-                    if (foundUser['profile']) {
-                        const rawUser = foundUser['profile'];
-                        const user = new User(rawUser['dtag'], '', rawUser['nickname'], '', rawUser['pictures']['profile'], rawUser['pictures']['cover']);
-                        this.cachedUsers.set(username, user);
-                        this.user = user;
+                const getProfileQuery = useLazyQuery(
+                    ProfileSearchQuery, {
+                    query: `${username}%`
+                });
+                getProfileQuery.onResult((result) => {
+                    if (result.loading) {
+                        this.userSearchStatus = LoadingStatus.Loading;
+                    }
+                    if (result.data && result.data.profile.length > 0 && !result.loading) {
+                        this.users = [];
+                        const profilesRaw = result.data.profile;
+                        profilesRaw.forEach((profileRaw: any) => {
+                            const user = new User(profileRaw.dtag, profileRaw.address, profileRaw.nickname, profileRaw.bio, profileRaw.profile_pic, profileRaw.cover_pic);
+                            this.users.push(user);
+                        });
                         this.userSearchStatus = LoadingStatus.Loaded;
-                    } else {
-                        this.user = false;
-                        this.cachedUsers.set(username, false);
+                    } else if (!result.loading) {
+                        this.users = [];
                         this.userSearchStatus = LoadingStatus.Error;
                     }
-                }
+                })
+                getProfileQuery.load();
             }
         }, 250);
     }

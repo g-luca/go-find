@@ -30,44 +30,51 @@
           aria-orientation="vertical"
           aria-labelledby="options-menu"
         >
-          <div
-            class="block mx-2 px-2 py-2 text-md rounded-md cursor-pointer text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-100 dark:hover:text-white dark:hover:bg-gray-600"
-            role="menuitem"
-          >
+          <span v-if="$store.state.SearchModule.userSearchStatus && $store.state.SearchModule.users.length>0">
+
             <div
-              v-if="$store.state.SearchModule.userSearchStatus && $store.state.SearchModule.user"
-              class="flex-row gap-4 flex"
-              @click="openProfile($store.state.SearchModule.user.username)"
+              v-for="user of $store.state.SearchModule.users"
+              class="block mx-3 my-1 px-2 py-2 text-md rounded-md cursor-pointer text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-100 dark:hover:text-white dark:hover:bg-gray-600"
+              role="menuitem"
             >
-              <div class="flex-shrink-0">
-                <a
-                  href="#"
-                  class="block relative"
-                >
-                  <span v-if="$store.state.SearchModule.user.profilePic">
+              <div
+                class="flex-row gap-4 flex"
+                @click="openProfile(user.username)"
+              >
+                <div class="flex-shrink-0">
+                  <a
+                    href="#"
+                    class="block relative"
+                  >
                     <img
                       alt="profile pricture"
-                      :src="$store.state.SearchModule.user.profilePic"
+                      :src="user.profilePic || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
                       class="text-left object-cover rounded-full h-10 w-10 "
                     >
+                  </a>
+                </div>
+                <div class=" flex flex-col">
+                  <span class="text-gray-600 dark:text-white text-lg font-medium">
+                    {{ user.nickname }}
                   </span>
-                </a>
-              </div>
-              <div class=" flex flex-col">
-                <span class="text-gray-600 dark:text-white text-lg font-medium">
-                  {{ $store.state.SearchModule.user.nickname }}
-                </span>
-                <span class="text-gray-400 text-xs">
-                  @{{ $store.state.SearchModule.user.username }}
-                </span>
+                  <span class="text-gray-400 text-xs">
+                    @{{ user.username }}
+                  </span>
+                </div>
               </div>
             </div>
-            <div v-else-if="$store.state.SearchModule.userSearchStatus===0">
-              Searching...
-            </div>
-            <div v-else>
-              Nothing found
-            </div>
+          </span>
+          <div
+            v-else-if="$store.state.SearchModule.userSearchStatus===0"
+            class="dark:text-white py-2 pl-4 select-none"
+          >
+            Searching...
+          </div>
+          <div
+            v-else
+            class="dark:text-white py-2 pl-4 select-none"
+          >
+            Nothing found
           </div>
         </div>
       </div>
