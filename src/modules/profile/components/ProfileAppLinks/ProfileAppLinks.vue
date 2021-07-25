@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section v-if="$store.state.UserModule.userLoadingStatus==0||($store.state.UserModule.userLoadingStatus&&$store.state.UserModule.user.applicationLinks.length>0)">
     <div class="px-2 md:px-16 lg:mx-40 pt-8 md:pt-16">
       <span v-if="$store.state.UserModule.userLoadingStatus">
         <div class="py-2 md:py-8 px-2 bg-gray-100 dark:bg-gray-700 rounded-3xl">
@@ -8,15 +8,16 @@
               v-for="applicationLink in $store.state.UserModule.user.applicationLinks"
               :key="applicationLink"
               class="m-auto cursor-pointer"
+              @click="openApplicationLink(applicationLink)"
             >
-              <div class="bg-gray-200 dark:bg-gray-800 rounded-3xl w-16 h-16 md:w-20 md:h-20 m-auto">
+              <div class="bg-gray-200 dark:bg-gray-800 rounded-3xl w-16 h-16 md:w-20 md:h-20 m-auto hover:bg-gray-300 dark:hover:bg-gray-900">
                 <img
                   class="p-4 pointer-events-none select-none"
                   :src="applicationLink.logo"
                   alt=""
                 >
               </div>
-              <h4 class="dark:text-white select-none pt-1  text-xl">
+              <h4 class="dark:text-white select-none pt-1 text-xl">
                 {{ applicationLink.displayName }}
               </h4>
             </div>
