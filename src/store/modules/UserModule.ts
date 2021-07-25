@@ -5,6 +5,8 @@ import { LoadingStatus } from '@/core/types/LoadingStatus';
 import { provideApolloClient, useLazyQuery, useQuery } from '@vue/apollo-composable';
 import { apolloClient } from '@/gql/Apollo';
 import { ProfileQuery } from '@/gql/ProfileQuery';
+import ApplicationLinkDiscord from '@/core/types/ApplicationLinks/ApplicationLinkDiscord';
+import ApplicationLink from '@/core/types/ApplicationLink';
 
 
 provideApolloClient(apolloClient)
@@ -31,7 +33,17 @@ export default class UserModule extends VuexModule {
             }
             if (result.data && result.data.profile[0] && !result.loading) {
                 const profileRaw = result.data.profile[0];
-                this.user = new User(profileRaw.dtag, profileRaw.address, profileRaw.nickname, profileRaw.bio, profileRaw.profile_pic, profileRaw.cover_pic);
+                const applicationLinks: ApplicationLink[] = [];
+                if (profileRaw.application_links && profileRaw.application_links.length > 0) {
+                    profileRaw.application_links.forEach((applicationLinkRaw: any) => {
+                        switch (applicationLinkRaw.application) {
+                            case "discord":
+                                applicationLinks.push(new ApplicationLinkDiscord(applicationLinkRaw.username));
+                                break;
+                        }
+                    })
+                }
+                this.user = new User(profileRaw.dtag, profileRaw.address, profileRaw.nickname, profileRaw.bio, profileRaw.profile_pic, profileRaw.cover_pic, applicationLinks);
                 this.userLoadingStatus = LoadingStatus.Loaded;
             } else if (!result.loading) {
                 this.user = false;

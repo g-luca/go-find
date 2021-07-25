@@ -1,12 +1,5 @@
 import PostLink from "./PostLink";
 import ApplicationLink from "./ApplicationLink";
-import ApplicationLinkFacebook from "./ApplicationLinks/ApplicationLinkFacebook";
-import ApplicationLinkGithub from "./ApplicationLinks/ApplicationLinkGithub";
-import ApplicationLinkInstagram from "./ApplicationLinks/ApplicationLinkInstagram";
-import ApplicationLinkTiktok from "./ApplicationLinks/ApplicationLinkTiktok";
-import ApplicationLinkTwitch from "./ApplicationLinks/ApplicationLinkTwitch";
-import ApplicationLinkTwitter from "./ApplicationLinks/ApplicationLinkTwitter";
-import ApplicationLinkDiscord from "./ApplicationLinks/AppplicationLinkDiscord";
 
 export default class User {
     private _username: string;
@@ -16,15 +9,8 @@ export default class User {
     private _profilePic: string;
     private _profileCover: string;
 
-    private _socialIntegrations: ApplicationLink[] = [
-        new ApplicationLinkDiscord('l'),
-        new ApplicationLinkFacebook('l'),
-        new ApplicationLinkTwitch('s'),
-        new ApplicationLinkTwitter('f'),
-        new ApplicationLinkInstagram('a'),
-        new ApplicationLinkTiktok('s'),
-        new ApplicationLinkGithub('g-luca'),
-    ];
+    private _applicationLinks: ApplicationLink[] = [];
+
     private _postLinks: PostLink[] = [
         new PostLink(0, 'Link 1', 'addasdad'),
         new PostLink(0, 'Link 2', 'addasdad'),
@@ -36,13 +22,14 @@ export default class User {
     static PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W\_])[a-zA-Z0-9\W\_]{10,30}$/;
 
 
-    constructor(username: string, address: string, nickname = "", bio = "", profilePic = "", profileCover = "") {
+    constructor(username: string, address: string, nickname = "", bio = "", profilePic = "", profileCover = "", applicationLinks: ApplicationLink[] = []) {
         this._username = username;
         this._address = address;
         this._nickname = nickname;
         this._bio = bio;
         this._profilePic = profilePic;
         this._profileCover = profileCover;
+        this._applicationLinks = applicationLinks;
     }
 
     /**
@@ -85,7 +72,7 @@ export default class User {
      * @return {ApplicationLink[] }
      */
     public get applicationLinks(): ApplicationLink[] {
-        return this._socialIntegrations;
+        return this._applicationLinks;
     }
 
 
