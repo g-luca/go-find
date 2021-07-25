@@ -2,11 +2,15 @@
   <footer class="bg-white dark:bg-gray-900 py-8 px-5 dark:text-white">
     <div class="grid grid-cols-12">
       <div class="col-span-4 md:col-span-2 my-auto text-center py-2">
-        <a class="px-4">Support</a>
+        <a
+          class="px-4 font-medium hover:underline hover:cursor-pointer text-lg"
+          href="https://github.com/g-luca/go-find/issues/new"
+          target="_blank"
+        >Support</a>
       </div>
 
       <div class="col-span-4 md:col-span-2 my-auto text-center py-2">
-        <a class="px-4">F.A.Q.</a>
+        <a class="px-4 font-medium hover:underline hover:cursor-pointer text-lg">F.A.Q.</a>
       </div>
 
       <div class="col-span-12 md:col-span-4 text-center my-auto hidden md:inline">
@@ -17,11 +21,19 @@
       </div>
 
       <div class="col-span-4 md:col-span-2 my-auto text-center py-2">
-        <a class="px-4">Contribute</a>
+        <a
+          class="px-4 font-medium hover:underline hover:cursor-pointer text-lg"
+          href="https://github.com/g-luca/go-find"
+          target="_blank"
+        >Contribute</a>
       </div>
 
       <div class="col-span-12 md:col-span-2 my-auto text-center py-2">
-        <a class="px-4">Staking</a>
+        <a
+          class="px-4 font-medium hover:underline hover:cursor-pointer text-lg"
+          href="https://morpheus.desmos.network/validators/desmosvaloper16c60y8t8vra27zjg2arlcd58dck9cwn7lhp6pl"
+          target="_blank"
+        >Staking</a>
       </div>
     </div>
 
