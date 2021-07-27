@@ -23,78 +23,84 @@
           >Learn more</a>
         </p>
       </div>
-      <div>
-        <label
-          class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
-          for="inputMPassword"
-        >Password</label>
-        <input
-          id="inputMPassword"
-          :key="validateMPassword()"
-          v-model="inputMPassword"
-          :class="{'border-red-700': !isValidMPassword&&isTouched,'border-green-700': isValidMPassword, 'focus:border-brand dark:border-gray-700': !isTouched}"
-          type="password"
-          required="required"
-          class="relative block w-full px-3 py-2 mt-2 border border-gray-300 placeholder-gray-300 
-                text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:z-10 text-sm md:text-xl
-                dark:bg-denim-900 dark:placeholder-gray-600 dark:text-white"
-          placeholder="Password"
-        >
-        <div
-          v-if="!isValidMPassword&&isTouched"
-          class="text-red-700 text-sm px-2 pt-2 font-light"
-        >
-          <p>Password must be at least 10 characters, contains a special character and an uppercase letter. <span class="underline">Must be different from the other password.</span></p>
-          <p>
-            Why this requirements? Check it
-            <a
-              href="https://howsecureismypassword.net/"
-              target="_blank"
-              class="text-denim-500"
-            >here.</a>
-          </p>
-        </div>
-      </div>
 
-      <!-- mPassword Confirm -->
-      <div>
-        <label
-          class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
-          for="inputMPasswordConfirm"
-        >Confirm password</label>
-        <input
-          id="inputMPasswordConfirm"
-          :key="validateMPasswordConfirm()"
-          v-model="inputMPasswordConfirm"
-          :class="{'border-red-700': !isMPasswordEqual&&isTouched,'border-green-700': isMPasswordEqual, 'focus:border-brand dark:border-gray-700': !isTouched}"
-          type="password"
-          required="required"
-          class="relative block w-full px-3 py-2 mt-2 border border-gray-300 placeholder-gray-300 
-                text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:z-10 text-sm md:text-xl
-                dark:bg-denim-900 dark:placeholder-gray-600 dark:text-white"
-          placeholder="Confirm password"
-        >
-        <div
-          v-if="!isMPasswordEqual&&isTouched"
-          class="text-red-700 text-sm px-2 pt-2 font-light"
-        >
-          <p>Passwords are not equals.</p>
+      <Form
+        v-slot="{ errors, meta }"
+        :validation-schema="formSchema"
+      >
+        <div class="py-3">
+          <label
+            class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
+            for="mPassword"
+          >Password</label>
+          <Field
+            id="mPassword"
+            v-model="inputMPassword"
+            name="mPassword"
+            :class="{'border-red-700 dark:border-red-700': meta.dirty && (errors.mPassword||!isValidMPassword),
+                     'focus:border-brand dark:border-gray-700 ': !errors.mPassword}"
+            type="password"
+            class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+            placeholder="Wallet Password"
+            @input="validateMPassword()"
+          />
+          <div
+            v-if="errors.mPassword||!isValidMPassword"
+            class="text-red-700 text-sm px-2 pt-2 font-light"
+          >
+            <p>Password must be at least 10 characters, contains a special character and an uppercase letter. <span class="underline">Must be different from the other password.</span></p>
+            <p>
+              Why this requirements? Check it
+              <a
+                href="https://howsecureismypassword.net/"
+                target="_blank"
+                class="text-denim-500"
+              >here.</a>
+            </p>
+          </div>
         </div>
-      </div>
 
-      <div>
-        <button
-          type="button"
-          class="relative block w-full justify-center py-2 px-4 border border-transparent text-md rounded-md font-extrabold
+        <!-- mPassword Confirm -->
+        <div class="py-3">
+          <label
+            class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
+            for="mPasswordConfirm"
+          >Confirm password</label>
+          <Field
+            id="mPasswordConfirm"
+            v-model="inputMPasswordConfirm"
+            name="mPasswordConfirm"
+            :class="{'border-red-700 dark:border-red-700': meta.dirty && errors.mPasswordConfirm,
+                     'focus:border-brand dark:border-gray-700 ': !errors.mPasswordConfirm}"
+            type="password"
+            class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+            placeholder="Confirm password"
+          />
+          <div
+            v-if="errors.mPasswordConfirm"
+            class="text-red-700 text-sm px-2 pt-2 font-light"
+          >
+            <p>Passwords are not equals.</p>
+          </div>
+        </div>
+
+        <div
+          v-if="meta.valid&&isValidMPassword"
+          class="py-3"
+        >
+          <button
+            type="button"
+            class="relative block w-full justify-center py-2 px-4 border border-transparent text-md rounded-md font-extrabold
                text-white bg-brand opacity-90 hover:opacity-100 focus:outline-none focus:ring-2 dark:ring-offset-denim-900 focus:ring-offset-2 focus:ring-brand"
-          @click="setMPassword()"
-        >
-          Continue
-          <span class="absolute right-0 inset-y-0 flex items-center pr-3">
-            <i class="bi bi-arrow-right" />
-          </span>
-        </button>
-      </div>
+            @click="setMPassword()"
+          >
+            Continue
+            <span class="absolute right-0 inset-y-0 flex items-center pr-3">
+              <i class="bi bi-arrow-right" />
+            </span>
+          </button>
+        </div>
+      </Form>
     </div>
   </div>
 </template>
