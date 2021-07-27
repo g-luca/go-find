@@ -3,28 +3,36 @@ import RegisterModule, { RegisterState } from "@/store/modules/RegisterModule";
 import LinkBlockSample from "@/modules/landing/components/LinkBlockSample/LinkBlockSample.vue"
 import { defineComponent } from "vue";
 import { getModule } from "vuex-module-decorators";
+import { Form, Field } from "vee-validate";
 import Api from "@/core/api/Api";
 const registerModule = getModule(RegisterModule)
 
 export default defineComponent({
     components: {
-        LinkBlockSample
+        LinkBlockSample,
+        Form,
+        Field,
     },
     data() {
+        const formSchema = {
+            username: { required: true, regex: User.USERNAME_REGEX },
+            ePassword: { required: true, regex: User.PASSWORD_REGEX },
+            ePasswordConfirm: { required: true, regex: User.PASSWORD_REGEX, confirmed: "@ePassword" },
+        };
         return {
+            formSchema,
             isValidUsername: false,
             isUsernameAvailable: false,
             isVerifyingUsernameAvailability: false,
-            isValidEPassword: false,
             isEPasswordEqual: false,
-            isTouched: false,
             inputUsername: "",
             inputEPassword: "",
-            inputEPasswordConfirm: "",
+            inputEPasswordConfirm: ""
         };
     },
     methods: {
         validateUsername() {
+            this.isUsernameAvailable = false;
             this.isValidUsername = User.USERNAME_REGEX.test(this.inputUsername);
             if (this.isValidUsername) {
                 this.isVerifyingUsernameAvailability = true;
@@ -47,22 +55,12 @@ export default defineComponent({
                     }
                 }, 200);
             }
-        },
-        validatePassword() {
-            this.isValidEPassword = User.PASSWORD_REGEX.test(this.inputEPassword);
-        },
-        validatePasswordConfirm() {
-            this.isEPasswordEqual = this.isValidEPassword && this.inputEPassword === this.inputEPasswordConfirm;
+            return this.isValidUsername;
         },
         setUserInfo() {
-            this.isTouched = true;
-            //this.validateUsername();
-            this.validatePassword();
-            if (this.isValidUsername && this.isUsernameAvailable && !this.isVerifyingUsernameAvailability && this.isValidEPassword && this.isEPasswordEqual) {
-                registerModule.setUsername(this.inputUsername);
-                registerModule.setEPassword(this.inputEPassword);
-                registerModule.nextState(RegisterState.StateMPasswordInput);
-            }
+            registerModule.setUsername(this.inputUsername);
+            registerModule.setEPassword(this.inputEPassword);
+            registerModule.nextState(RegisterState.StateMPasswordInput);
         },
         setSignupWithDesmosProfile(has: boolean) {
             registerModule.setHasDesmosProfile(has);

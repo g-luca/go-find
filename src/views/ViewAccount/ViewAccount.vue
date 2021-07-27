@@ -3,10 +3,9 @@
     <AppHeader />
     <div class="md:pt-3 w-full dark:bg-denim-900 bg-gray-50">
       <span v-if="$store.state.AccountModule.userLoadingStatus>=0">
-        <!-- Profile Heading -->
         <section>
+          <!-- Profile Heading -->
           <div class="grid grid-cols-12 pt-8">
-            <!-- Profile Pic -->
             <div class="md:col-start-1 md:col-span-4 col-span-12 my-auto md:pl-8">
               <span v-if="$store.state.AccountModule.userLoadingStatus">
                 <img
@@ -30,7 +29,11 @@
             </div>
 
             <!-- edit account -->
-            <div class="md:col-start-5 md:col-span-7 col-span-12 my-auto pt-8 md:pl-8">
+            <Form
+              v-slot="{ errors, meta }"
+              class="md:col-start-5 md:col-span-7 col-span-12 my-auto pt-8 md:pl-8"
+              :validation-schema="formSchema"
+            >
               <div class="w-full text-center md:text-left dark:text-white">
                 <span v-if="$store.state.AccountModule.userLoadingStatus">
                   <div class="py-1">
@@ -39,115 +42,123 @@
                     </h2>
                   </div>
 
-                  <form id="edit">
-                    <div class="font-bold text-xl px-4 md:px-0">
-                      <div class="py-2">
-                        <label
-                          for="nickname"
-                          class="text-gray-700 dark:text-white py-9"
-                        >
-                          Nickname
-                        </label>
-                        <input
-                          id="nickname"
-                          v-model="inputNickname"
-                          type="text"
-                          :disabled="isExecutingTransaction"
-                          :class="{'border-red-700 dark:border-red-700': !isInputNicknameValid&&isInputNicknameEdited,
-                                   'border-green-700 dark:border-green-700': isInputNicknameValid&&isInputNicknameEdited, 
-                                   'focus:border-brand dark:border-gray-700': !isInputNicknameEdited}"
-                          class=" rounded-lg border-transparent flex-1 appearance-none border border-gray-300 dark:border-gray-900 w-full py-2 px-4 my-1 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
-                          name="nickname"
-                          placeholder="Nickname"
-                          @input="validateInputNickname()"
-                        >
-                      </div>
-                      <div class="py-2">
-                        <label
-                          for="profilePic"
-                          class="text-gray-700 dark:text-white"
-                        >
-                          Profile picture
-                        </label>
-                        <input
-                          id="profilePic"
-                          v-model="inputProfilePic"
-                          type="text"
-                          :disabled="isExecutingTransaction"
-                          :class="{'border-red-700 dark:border-red-700': !isInputProfilePicValid&&isInputProfilePicEdited,
-                                   'border-green-700 dark:border-green-700': isInputProfilePicValid&&isInputProfilePicEdited, 
-                                   'focus:border-brand dark:border-gray-700': !isInputProfilePicEdited}"
-                          class=" rounded-lg border-transparent flex-1 appearance-none border border-gray-300 dark:border-gray-900 w-full py-2 px-4 my-1 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
-                          name="profilePic"
-                          placeholder="https://profile-picture.com/image.png"
-                          @input="validateInputProfilePic()"
-                        >
-                      </div>
-                      <div class="py-2">
-                        <label
-                          for="profileCover"
-                          class="text-gray-700 dark:text-white"
-                        >
-                          Cover
-                        </label>
-                        <input
-                          id="profileCover"
-                          v-model="inputProfileCover"
-                          type="text"
-                          :disabled="isExecutingTransaction"
-                          :class="{'border-red-700 dark:border-red-700': !isInputProfileCoverValid&&isInputProfileCoverEdited,
-                                   'border-green-700 dark:border-green-700': isInputProfileCoverValid&&isInputProfileCoverEdited, 
-                                   'focus:border-brand dark:border-gray-700': !isInputProfileCoverEdited}"
-                          class=" rounded-lg border-transparent flex-1 appearance-none border border-gray-300 dark:border-gray-900 w-full py-2 px-4 my-1 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
-                          name="profileCover"
-                          placeholder="https://profile-cover.com/image.png"
-                          @input="validateInputProfileCover()"
-                        >
-                      </div>
-                      <div class="py-2">
-                        <label
-                          for="bio"
-                          class="text-gray-700 dark:text-white"
-                        >
-                          Bio
-                        </label>
-                        <textarea
-                          id="bio"
-                          v-model="inputBio"
-                          :disabled="isExecutingTransaction"
-                          class="flex-1 appearance-none border border-gray-300 dark:border-gray-900 w-full py-2 px-4 my-1 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
-                          placeholder="Your incredible bio"
-                          name="bio"
-                          rows="3"
-                          cols="40"
-                          @input="validateInputBio()"
-                        />
-
-                      </div>
-
-                      <div
-                        v-if="!isExecutingTransaction&&((isInputNicknameEdited&&isInputNicknameValid)||(isInputProfilePicEdited&&isInputProfilePicValid)||(isInputProfileCoverEdited&&isInputProfileCoverValid)||(isInputBioEdited&&isInputBioValid))"
-                        class="flex items-center justify-between gap-4 mt-6"
+                  <div class="font-bold text-xl px-4 md:px-0">
+                    <div class="py-2">
+                      <label
+                        for="nickname"
+                        class="text-gray-700 dark:text-white py-9"
                       >
-                        <button
-                          type="button"
-                          :disabled="isExecutingTransaction"
-                          class="py-2 px-4 w-9/12 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
-                          @click="submitEdit()"
-                        >
-                          Save changes
-                        </button>
-                        <button
-                          type="button"
-                          class="py-2 px-4 w-3/12 bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
-                          @click="cancelEdit()"
-                        >
-                          Cancel
-                        </button>
-                      </div>
+                        Nickname
+                      </label>
+                      <Field
+                        id="nickname"
+                        v-model="inputNickname"
+                        type="text"
+                        :disabled="isExecutingTransaction"
+                        class=" rounded-lg flex-1 appearance-none border w-full py-2 px-4 my-1 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+                        :class="{'border-red-700 dark:border-red-700': errors.nickname,
+                                 'focus:border-brand dark:focus:border-brand border-gray-300 dark:border-gray-900': !errors.nickname }"
+                        name="nickname"
+                        placeholder="Nickname"
+                      />
+                      <span
+                        v-if="errors.nickname"
+                        class="text-red-700 text-sm"
+                      >Invalid Nickname</span>
+                    </div>
+                    <div class="py-2">
+                      <label
+                        for="profilePic"
+                        class="text-gray-700 dark:text-white"
+                      >
+                        Profile picture
+                      </label>
+                      <Field
+                        id="profilePic"
+                        v-model="inputProfilePic"
+                        type="text"
+                        :disabled="isExecutingTransaction"
+                        class=" rounded-lg flex-1 appearance-none border w-full py-2 px-4 my-1 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+                        :class="{'border-red-700 dark:border-red-700': errors.profilePic,
+                                 'focus:border-brand dark:focus:border-brand border-gray-300 dark:border-gray-900': !errors.profilePic }"
+                        name="profilePic"
+                        placeholder="https://profile-picture.com/image.png"
+                      />
+                      <span
+                        v-if="errors.profilePic"
+                        class="text-red-700 text-sm"
+                      >Invalid image Url</span>
+                    </div>
+                    <div class="py-2">
+                      <label
+                        for="profileCover"
+                        class="text-gray-700 dark:text-white"
+                      >
+                        Cover
+                      </label>
+                      <Field
+                        id="profileCover"
+                        v-model="inputProfileCover"
+                        type="text"
+                        :disabled="isExecutingTransaction"
+                        class=" rounded-lg flex-1 appearance-none border w-full py-2 px-4 my-1 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+                        :class="{'border-red-700 dark:border-red-700': errors.profileCover,
+                                 'focus:border-brand dark:focus:border-brand border-gray-300 dark:border-gray-900': !errors.profileCover }"
+                        name="profileCover"
+                        placeholder="https://profile-cover.com/image.png"
+                      />
+                      <span
+                        v-if="errors.profileCover"
+                        class="text-red-700 text-sm"
+                      >Invalid image Url</span>
+                    </div>
+                    <div class="py-2">
+                      <label
+                        for="bio"
+                        class="text-gray-700 dark:text-white"
+                      >
+                        Bio
+                      </label>
+                      <Field
+                        id="bio"
+                        v-model="inputBio"
+                        :disabled="isExecutingTransaction"
+                        class=" rounded-lg flex-1 appearance-none border w-full py-2 px-4 my-1 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+                        :class="{'border-red-700 dark:border-red-700': errors.bio,
+                                 'focus:border-brand dark:focus:border-brand border-gray-300 dark:border-gray-900': !errors.bio }"
+                        placeholder="Your incredible bio"
+                        as="textarea"
+                        name="bio"
+                        rows="3"
+                        cols="40"
+                      />
+                      <span
+                        v-if="errors.bio"
+                        class="text-red-700 text-sm"
+                      >Invalid Bio</span>
 
                     </div>
-                  </form>
+                    <div
+                      v-if="!isExecutingTransaction&&(meta.valid&&meta.touched&&meta.dirty)"
+                      class="flex items-center justify-between gap-4 mt-6"
+                    >
+                      <button
+                        type="button"
+                        :disabled="isExecutingTransaction"
+                        class="py-2 px-4 w-9/12 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                        @click="submitEdit()"
+                      >
+                        Save changes
+                      </button>
+                      <button
+                        type="reset"
+                        class="py-2 px-4 w-3/12 bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                      >
+                        Cancel
+                      </button>
+                    </div>
+
+                  </div>
                 </span>
                 <span v-else>
                   <!-- Loading -->
@@ -174,7 +185,7 @@
 
                 </span>
               </div>
-            </div>
+            </Form>
           </div>
         </section>
 
