@@ -13,17 +13,25 @@ export const AccountQuery = gql`
                 application
                 username
             }
+            chain_links {
+                external_address
+                chain_link_chain_config {
+                    name
+                }
+            }
         }account(where:{address:{_eq: $address}}){
             account_balances{
                 coins
             }
-            delegation_rewards{
+            delegations{
+                amount
+            }
+            unbonding_delegations{
                 amount
             }
             redelegations{
                 amount
             }
-            
         }
     }
 `;

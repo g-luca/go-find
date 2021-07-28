@@ -1,5 +1,6 @@
 import PostLink from "./PostLink";
 import ApplicationLink from "./ApplicationLink";
+import ChainLink from "./ChainLink";
 
 export default class User {
     private _username: string;
@@ -10,6 +11,7 @@ export default class User {
     private _profileCover: string;
 
     private _applicationLinks: ApplicationLink[] = [];
+    private _chainLinks: ChainLink[] = []
 
     private _postLinks: PostLink[] = [
         new PostLink(0, 'Link 1', 'addasdad'),
@@ -22,7 +24,7 @@ export default class User {
     static PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W\_])[a-zA-Z0-9\W\_]{10,30}$/;
 
 
-    constructor(username: string, address: string, nickname = "", bio = "", profilePic = "", profileCover = "", applicationLinks: ApplicationLink[] = []) {
+    constructor(username: string, address: string, nickname = "", bio = "", profilePic = "", profileCover = "", applicationLinks: ApplicationLink[] = [], chainLinks: ChainLink[] = []) {
         this._username = username;
         this._address = address;
         this._nickname = nickname;
@@ -30,6 +32,7 @@ export default class User {
         this._profilePic = profilePic;
         this._profileCover = profileCover;
         this._applicationLinks = applicationLinks;
+        this._chainLinks = chainLinks;
     }
 
     /**
@@ -73,6 +76,15 @@ export default class User {
      */
     public get applicationLinks(): ApplicationLink[] {
         return this._applicationLinks;
+    }
+
+
+    /**
+     * Getter chainLinks
+     * @return {ChainLink[] }
+     */
+    public get chainLinks(): ChainLink[] {
+        return this._chainLinks;
     }
 
 
