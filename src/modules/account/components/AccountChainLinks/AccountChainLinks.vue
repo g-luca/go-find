@@ -1,0 +1,204 @@
+<template>
+  <div>
+    <section v-if="$store.state.AccountModule.userLoadingStatus==0||$store.state.AccountModule.userLoadingStatus">
+      <span v-if="$store.state.AccountModule.userLoadingStatus">
+        <div class="pt-2 pb-3 md:pt-6 px-2 bg-white dark:bg-gray-900 rounded-3xl shadow-xl hover:shadow-2xl">
+          <h1 class="pb-8 pl-4 text-5xl text-purple-600 dark:text-purple-700 font-extrabold">
+            Blockchains
+          </h1>
+          <span v-if="$store.state.AccountModule._user.chainLinks.length>0">
+            <div class="grid grid-cols-2 gap-3 text-center">
+              <div
+                v-for="chainLink in $store.state.AccountModule._user.chainLinks"
+                :key="chainLink"
+                class="m-auto col-span-2 w-full px-2"
+              >
+                <div class="w-full grid grid-cols-12 bg-indigo-50 dark:bg-denim-900 rounded-3xl">
+                  <div class="w-20 m-auto col-span-2">
+                    <img
+                      class="p-4 pointer-events-none select-none"
+                      :src="require('@/assets/brands/'+chainLink.chain+'/logo.svg')"
+                      alt=""
+                    >
+                  </div>
+                  <div class="col-span-8 my-auto text-left">
+                    <h1 class="dark:text-white text-3xl font-bold capitalize">
+                      {{ chainLink.chain }}
+                    </h1>
+                    <h4 class="dark:text-white text-lg font-mono">
+                      {{ chainLink.address }}
+                    </h4>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </span>
+          <span v-else>
+            <div class="px-2 w-full ">
+              <h4 class="text-3xl text-center dark:text-white">
+                Wow, such empty
+              </h4>
+              <h5 class="text-lg text-gray-700 dark:text-gray-300 text-center">
+                You don't have any Blockchain connected to your profile
+              </h5>
+            </div>
+          </span>
+          <div class="w-full pt-5 px-2">
+            <button
+              class="bg-indigo-800 hover:bg-indigo-900 w-full rounded-xl py-3 text-xl font-bold text-white"
+              @click="toggleChainLinkEditor()"
+            >Connect a Blockchain</button>
+          </div>
+        </div>
+      </span>
+      <span v-else>
+        <!-- Loading -->
+        <SkeletonLoader
+          shape="rectangle"
+          class="py-1 text-left w-full h-32 px-2"
+        />
+
+      </span>
+    </section>
+
+    <!-- Editor -->
+    <Dialog
+      :open="isChainLinkEditorOpen"
+      @close="toggleChainLinkEditor()"
+    >
+      <div class="fixed inset-0 z-10 overflow-y-auto bg-opacity-50 bg-gray-500">
+        <div class="min-h-screen px-4 text-center">
+          <span class="inline-block h-screen align-middle"> &#8203; </span>
+
+          <div class="inline-block w-full max-w-6xl p-6 pb-1 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-900 shadow-xl rounded-2xl">
+            <DialogTitle class="text-3xl font-bold leading-6 text-gray-900 dark:text-white">
+              <span class="flex">
+                <div class="flex dark:text-purple-700 text-purple-600 text-4xl">Connect a Blockchain</div>
+                <div class="flex-auto text-right">
+                  <button>
+                    <i
+                      class="bi bi-x h-12 w-12"
+                      @click="toggleChainLinkEditor()"
+                    />
+                  </button>
+                </div>
+              </span>
+            </DialogTitle>
+
+            <section class="p-4">
+              <li class="flex -mx-4">
+                <div class="px-4">
+                  <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 text-blue-600">
+                    1
+                  </span>
+                </div>
+                <div class="px-4 w-full pb-4">
+                  <h3 class="mt-4 text-2xl font-bold dark:text-white">
+                    Select the Blockchain
+                  </h3>
+                  <div class="grid grid-cols-12">
+                    <div
+                      v-for="chain of supportedChains"
+                      class="col-span-12 md:col-span-6 xl:col-span-4 m-2 rounded-3xl bg-gray-100 dark:bg-denim-900 dark:hover:bg-purple-800 hover:bg-purple-200 cursor-pointer"
+                      @click="selectChain(chain)"
+                    >
+                      <div class="grid grid-cols-12">
+                        <div class="col-span-3">
+                          <img
+                            class="p-4 pointer-events-none select-none w-20 h-20"
+                            :src="require('@/assets/brands/'+chain+'/logo.svg')"
+                            alt=""
+                          >
+                        </div>
+                        <div class="col-span-6 my-auto">
+                          <h5 class="dark:text-white text-2xl capitalize">
+                            {{ chain }}
+                          </h5>
+                        </div>
+                        <div class="col-span-3 text-right my-auto pr-4">
+                          <i
+                            v-if="chain===selectedChain"
+                            class="bi bi-check2-circle text-3xl dark:text-white"
+                          />
+                          <i
+                            v-else
+                            class="bi bi-circle text-2xl dark:text-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </li>
+              <li class="flex -mx-4">
+                <div class="px-4">
+                  <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 text-blue-600">
+                    2
+                  </span>
+                </div>
+                <div class="px-4 w-full">
+                  <h3 class="mt-4 text-2xl font-bold dark:text-white">
+                    Enter the <span class="capitalize font-bolder text-brand">{{ selectedChain }}</span> mnemonic
+                  </h3>
+                  <h4 class="dark:text-white">
+                    <span class="text-yellow-400">Keep calm</span>: your mnemonic <strong><u>never</u></strong> leaves this form
+                  </h4>
+                  <div class="grid grid-cols-8 gap-x-8 gap-y-4 pt-2 pb-8">
+                    <div
+                      v-for="(word,index) in inputMnemonic"
+                      class="col-span-4 lg:col-span-2 border-b-2 border-gray-300 dark:border-gray-500 bg-gray-50 dark:bg-gray-900 rounded"
+                    >
+                      <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <span class="text-gray-500 text-sm">
+                            {{ index+1 }}
+                          </span>
+                        </div>
+                        <input
+                          :key="index"
+                          v-model="inputMnemonic[index]"
+                          class="block w-full pl-8 dark:bg-gray-900 bg-gray-50 text-xl lowercase dark:text-white"
+                          @input="validateInputMnemonic()"
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </li>
+              <li
+                v-if="isValidMnemonic"
+                class="flex -mx-4 w-full"
+              >
+                <div class="px-4">
+                  <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 text-blue-600">
+                    3
+                  </span>
+                </div>
+                <div class="px-4 w-full">
+                  <h3 class="my-4 text-2xl font-bold dark:text-white">
+                    Confirm the operation
+                  </h3>
+                  <button
+                    type="button"
+                    :disabled="isExecutingTransaction||!isValidMnemonic"
+                    class="py-2 px-4 w-6/12 bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                    @click="submitChainLink()"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </li>
+            </section>
+          </div>
+        </div>
+      </div>
+    </Dialog>
+    <ModalTransaction
+      :is-open="isExecutingTransaction"
+      :tx="tx"
+      @tx-response="handleTxResponse"
+    />
+  </div>
+</template>
+
+<script lang="ts" src="./AccountChainLinks.ts"/>

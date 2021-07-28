@@ -9,6 +9,7 @@ import AuthModule from "@/store/modules/AuthModule";
 import Error404 from "@/ui/components/errors/Error404.vue";
 import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
 import AccountBalance from "@/modules/account/components/AccountBalance/AccountBalance.vue";
+import AccountChainLinks from "@/modules/account/components/AccountChainLinks/AccountChainLinks.vue";
 import AccountModule from "@/store/modules/AccountModule";
 import { CosmosTypes, DesmosTypes } from "desmosjs";
 const authModule = getModule(AuthModule);
@@ -24,6 +25,7 @@ export default defineComponent({
         Form,
         Field,
         AccountBalance,
+        AccountChainLinks,
     },
     data() {
         const formSchema = {

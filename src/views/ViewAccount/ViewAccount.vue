@@ -202,63 +202,7 @@
             <AccountBalance />
 
             <!-- Chain Links -->
-            <section v-if="$store.state.AccountModule.userLoadingStatus==0||$store.state.AccountModule.userLoadingStatus">
-              <span v-if="$store.state.AccountModule.userLoadingStatus">
-                <div class="pt-2 pb-3 md:pt-6 px-2 bg-white dark:bg-gray-900 rounded-3xl shadow-xl hover:shadow-2xl">
-                  <h1 class="pb-8 pl-4 text-5xl text-purple-600 dark:text-purple-700 font-extrabold">
-                    Blockchains
-                  </h1>
-                  <span v-if="$store.state.AccountModule._user.chainLinks.length>0">
-                    <div class="grid grid-cols-2 gap-3 text-center">
-                      <div
-                        v-for="chainLink in $store.state.AccountModule._user.chainLinks"
-                        :key="chainLink"
-                        class="m-auto col-span-2 w-full px-2"
-                      >
-                        <div class="w-full grid grid-cols-12 bg-indigo-50 dark:bg-denim-900 rounded-3xl">
-                          <div class="w-20 m-auto col-span-2">
-                            <img
-                              class="p-4 pointer-events-none select-none"
-                              :src="require('@/assets/brands/'+chainLink.chain+'/logo.svg')"
-                              alt=""
-                            >
-                          </div>
-                          <div class="col-span-8 my-auto text-left">
-                            <h1 class="dark:text-white text-3xl font-bold capitalize">
-                              {{ chainLink.chain }}
-                            </h1>
-                            <h4 class="dark:text-white text-lg font-mono">
-                              {{ chainLink.address }}
-                            </h4>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </span>
-                  <span v-else>
-                    <div class="px-2 w-full ">
-                      <h4 class="text-3xl text-center dark:text-white">
-                        Wow, such empty
-                      </h4>
-                      <h5 class="text-lg text-gray-700 dark:text-gray-300 text-center">
-                        You don't have any Blockchain connected to your profile
-                      </h5>
-                    </div>
-                  </span>
-                  <div class="w-full pt-5 px-2">
-                    <button class="bg-indigo-800 hover:bg-indigo-900 w-full rounded-xl py-3 text-xl font-bold text-white">Connect a Blockchain</button>
-                  </div>
-                </div>
-              </span>
-              <span v-else>
-                <!-- Loading -->
-                <SkeletonLoader
-                  shape="rectangle"
-                  class="py-1 text-left w-full h-32 px-2"
-                />
-
-              </span>
-            </section>
+            <AccountChainLinks />
           </div>
         </div>
 
