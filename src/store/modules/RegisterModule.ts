@@ -5,7 +5,7 @@ import * as bip39 from "bip39";
 import CryptoUtils from '@/utils/CryptoUtils';
 import AuthModule from '@/store/modules/AuthModule';
 import Api from '@/core/api/Api';
-import Account from '@/core/types/Account';
+import AuthAccount from '@/core/types/AuthAccount';
 import { Secp256k1, Wallet } from 'desmosjs';
 const authModule = getModule(AuthModule);
 
@@ -97,7 +97,7 @@ export default class RegisterModule extends VuexModule {
 
         if (success) {
             authModule.saveMKey({ mKey, mPassword }); // store mKey on localStorage
-            authModule.saveAccount({ account: new Account(this.username, this.address) });
+            authModule.saveAuthAccount({ account: new AuthAccount(this.username, this.address) });
             this.currentState = RegisterState.StateRegistrationSuccess;
         } else {
             this.currentState = RegisterState.StateRegistrationFail;

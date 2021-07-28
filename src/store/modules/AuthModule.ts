@@ -1,11 +1,11 @@
 import store from '@/store';
 import CryptoUtils from '@/utils/CryptoUtils';
 import { Module, Mutation, VuexModule } from "vuex-module-decorators";
-import Account from '@/core/types/Account';
+import AuthAccount from '@/core/types/AuthAccount';
 import { Network, Transaction, CosmosTypes, DesmosTypes } from 'desmosjs';
 export enum AuthLevel {
     None,
-    Account,
+    AuthAccount,
     Wallet
 }
 
@@ -13,7 +13,7 @@ export enum AuthLevel {
 export default class AuthModule extends VuexModule {
     private static entropy = 300; // how much mKeys (including the real one) will be generated
     private mPassword: string | null = null;
-    private _account: Account | null = null;
+    private _account: AuthAccount | null = null;
     private _authLevel: AuthLevel = AuthLevel.None;
 
 
@@ -28,7 +28,7 @@ export default class AuthModule extends VuexModule {
     @Mutation
     public authenticate(): void {
         if (localStorage.getItem('mKey') && localStorage.getItem('account')) {
-            this._authLevel = AuthLevel.Account;
+            this._authLevel = AuthLevel.AuthAccount;
             this._account = AuthModule.getAccount();
             if (this.mPassword) {
                 const mKey = AuthModule.getMKey(this.mPassword);
@@ -112,23 +112,23 @@ export default class AuthModule extends VuexModule {
      * @param account account to store
      */
     @Mutation
-    public saveAccount(payload: { account: Account }): void {
+    public saveAuthAccount(payload: { account: AuthAccount }): void {
         localStorage.setItem('account', JSON.stringify(payload.account)); // store on localStorage
         this._account = payload.account; // save account on memory
     }
 
 
     /**
-     * Retrieve the Account from the localStorage
-     * @returns Account object
+     * Retrieve the AuthAccount from the localStorage
+     * @returns AuthAccount object
      */
-    private static getAccount(): Account | null {
+    private static getAccount(): AuthAccount | null {
         const accountJSON = localStorage.getItem('account');
         if (accountJSON) {
             try {
                 const accountRaw = JSON.parse(accountJSON);
                 if (accountRaw) {
-                    return new Account(accountRaw['_username'], accountRaw['_address']);
+                    return new AuthAccount(accountRaw['_username'], accountRaw['_address']);
                 }
             } catch (e) {
                 return null;
@@ -175,9 +175,9 @@ export default class AuthModule extends VuexModule {
 
     /**
      * Getter account
-     * @return {Account | null }
+     * @return {AuthAccount | null }
      */
-    public get account(): Account | null {
+    public get account(): AuthAccount | null {
         return this._account;
     }
 

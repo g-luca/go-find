@@ -1,7 +1,6 @@
 import store from '@/store'
-import { Action, Module, Mutation, MutationAction, VuexModule } from 'vuex-module-decorators'
+import { Module, Mutation, MutationAction, VuexModule } from 'vuex-module-decorators'
 import Api from '@/core/api/Api';
-import Account from '@/core/types/Account';
 
 
 export enum LoginState {

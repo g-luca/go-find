@@ -1,4 +1,4 @@
-import Account from "@/core/types/Account";
+import AuthAccount from "@/core/types/AuthAccount";
 import User from "@/core/types/User";
 import LinkBlockSample from "@/modules/landing/components/LinkBlockSample/LinkBlockSample.vue"
 import router from "@/router";
@@ -38,7 +38,7 @@ export default defineComponent({
                     this.hasLoginError = false
                     authModule.saveMKey({ mKey, mPassword });
 
-                    authModule.saveAccount({ account: new Account(loginModule.username, loginModule.address) });
+                    authModule.saveAuthAccount({ account: new AuthAccount(loginModule.username, loginModule.address) });
                     router.push({ path: '/me' });
                 } catch (e) {
                     console.log(e)
