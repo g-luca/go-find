@@ -13,6 +13,12 @@ export const ProfileQuery = gql`
                 application
                 username
             }
+            chain_links {
+                external_address
+                chain_link_chain_config {
+                    name
+                }
+            }
         }
     }
 `;
