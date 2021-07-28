@@ -75,7 +75,6 @@ router.beforeEach((to, from, next) => {
 
   // check authentication
   authModule.authenticate()
-  console.log(`Auth level: ${authModule.authLevel}`)
   if (requiresAuth && authModule.authLevel === AuthLevel.None) {
     next('/login');
   } else if (hiddenWithAuth && authModule.authLevel > AuthLevel.None) {
