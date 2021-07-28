@@ -3,7 +3,7 @@
     :open="isOpen"
     @close="closeModal"
   >
-    <div class="fixed inset-0 z-20 overflow-y-auto bg-opacity-50 bg-gray-500">
+    <div class="fixed inset-0 z-50 overflow-y-auto bg-opacity-50 bg-gray-500">
       <div class="min-h-screen px-4 text-center">
         <span class="inline-block h-screen align-middle"> &#8203; </span>
 
