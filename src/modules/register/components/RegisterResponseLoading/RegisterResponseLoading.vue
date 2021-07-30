@@ -7,8 +7,8 @@
         alt="Success"
       >
     </div>
-    <div class="text-center pb-10">
-      <h1 class="text-xl xl:text-2xl dark:text-white font-mono">
+    <div class="text-center pb-10 w-full">
+      <h1 class="text-xl xl:text-2xl dark:text-white font-mono text-center">
         Registering on the Blockchain . . .
       </h1>
     </div>
