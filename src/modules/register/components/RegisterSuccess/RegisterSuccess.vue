@@ -12,7 +12,7 @@
         Welcome aboard @<span class="text-brand">{{ $store.state.RegisterModule.username }}</span>!
       </h1>
     </div>
-    <div class="pt-10 w-1/2 mx-auto pb-10">
+    <div class="pt-10 w-1/2 mx-auto pb-10 text-center">
       <router-link
         to="/me"
         class="bg-brand text-3xl rounded-2xl focus:outline-none text-white p-2 text-center w-full"

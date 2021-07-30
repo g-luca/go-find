@@ -12,7 +12,7 @@
         Ops, something went wrong!
       </h1>
     </div>
-    <div class="pt-10 w-1/2 mx-auto pb-10">
+    <div class="pt-10 w-1/2 mx-auto pb-10 text-center">
       <button
         class="bg-brand text-3xl rounded-2xl focus:outline-none text-white p-2 text-center w-full"
         @click="reset()"
