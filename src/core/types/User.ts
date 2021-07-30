@@ -20,8 +20,8 @@ export default class User {
     ]
 
 
-    static USERNAME_REGEX = /[A-Za-z0-9_]{3,30}$/;
-    static PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W\_])[a-zA-Z0-9\W\_]{10,30}$/;
+    static USERNAME_REGEX = /^[A-Za-z0-9_]{3,30}$/;
+    static PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\w\W]{10,}$/;
 
 
     constructor(username: string, address: string, nickname = "", bio = "", profilePic = "", profileCover = "", applicationLinks: ApplicationLink[] = [], chainLinks: ChainLink[] = []) {
