@@ -12,23 +12,73 @@
 
       <!-- Username -->
       <div>
-        <label class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl">Your <span class="text-brand">username</span></label>
-        <input
-          v-model="inputUsername"
-          :class="{'border-red-700 dark:border-red-700 ': hasLoginError, 'focus:border-brand dark:border-gray-700': !isTouched}"
-          type="text"
-          required="required"
-          class="relative block w-full px-3 py-2 mt-2 border border-gray-300 dark:border-gray-500 placeholder-gray-300 
+        <span>
+          <label
+            class="dark:text-gray-50 text-gray-800 pb-4 font-medium text-xl"
+            for="username"
+          >Your <span class="text-brand">username</span></label>
+          <input
+            id="username"
+            v-model="inputUsername"
+            :class="{'border-red-700 dark:border-red-700 ': hasLoginError, 'focus:border-brand dark:border-gray-700': !isTouched}"
+            type="text"
+            required="required"
+            class="relative block w-full px-3 py-2 mt-2 border border-gray-300 dark:border-gray-500 placeholder-gray-300 
                 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:z-10 text-sm md:text-xl
                 dark:bg-denim-900 dark:placeholder-gray-600 dark:text-white"
-          placeholder="Username"
+            placeholder="Username"
+          >
+        </span>
+        <span v-if="isLoginWithAddress">
+          <label
+            class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl mt-10"
+            for="address"
+          >Address</label>
+          <input
+            id="address"
+            v-model="inputAddress"
+            :class="{'border-red-700 dark:border-red-700 ': hasLoginError, 'focus:border-brand dark:border-gray-700': !isTouched}"
+            type="text"
+            required="required"
+            class="relative block w-full px-3 py-2 mt-2 border border-gray-300 dark:border-gray-500 placeholder-gray-300 
+                text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:z-10 text-sm md:text-xl
+                dark:bg-denim-900 dark:placeholder-gray-600 dark:text-white"
+            placeholder="Address"
+          >
+        </span>
+
+        <p
+          v-if="!isLoginWithAddress"
+          class="dark:text-gray-200"
         >
+          If you still haven't created a Desmos Profile, <span
+            class="text-brand cursor-pointer"
+            @click="toggleAddressLogin()"
+          >
+            <u> Sign In with your address</u>
+          </span>
+        </p>
+        <p
+          v-else
+          class="dark:text-gray-200"
+        >
+          I already have created a Desmos Profile, <span
+            class="text-brand cursor-pointer"
+            @click="toggleAddressLogin()"
+          >
+            <u> Sign In with your username</u>
+          </span>
+        </p>
       </div>
 
       <!-- Password -->
       <div>
-        <label class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl">Password</label>
+        <label
+          class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
+          for="ePassword"
+        >Password</label>
         <input
+          id="ePassword"
           v-model="inputEPassword"
           :class="{'border-red-700 dark:border-red-700': hasLoginError, 'focus:border-brand dark:border-gray-700': !isTouched}"
           type="password"
@@ -42,7 +92,7 @@
 
       <div>
         <button
-          v-if="inputEPassword.length>3&&inputUsername.length>3"
+          v-if="inputEPassword.length>3&&inputUsername.length>3&&(!isLoginWithAddress||(isLoginWithAddress&&inputAddress.length>10))"
           :disabled="isLoading===0"
           type="button"
           class="relative block w-full justify-center py-2 px-4 border border-transparent text-md rounded-md font-extrabold
@@ -61,7 +111,7 @@
         </button>
 
         <span v-if="isLoading===-1">
-          <p class="font-semibold text-lg pt-2">
+          <p class="font-semibold text-lg pt-2 dark:text-white">
             <i class="bi bi-exclamation-circle-fill text-red-500" /> Wrong username or password.
           </p>
         </span>

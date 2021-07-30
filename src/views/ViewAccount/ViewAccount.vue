@@ -251,9 +251,6 @@
         </div>
 
       </span>
-      <span v-else>
-        <Error404 :message="'Ops, someething went wrong'" />
-      </span>
       <AppFooter class="mt-8" />
     </div>
     <ModalTransaction

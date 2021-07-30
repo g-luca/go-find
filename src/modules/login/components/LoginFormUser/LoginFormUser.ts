@@ -16,10 +16,13 @@ export default defineComponent({
             isLoading: LoadingStatus.Loaded,
             isValidUsername: false,
             isValidEPassword: false,
+            isValidAddress: false,
             hasLoginError: false,
             isTouched: false,
             inputUsername: "",
+            inputAddress: "",
             inputEPassword: "",
+            isLoginWithAddress: false,
         };
     },
     methods: {
@@ -29,17 +32,26 @@ export default defineComponent({
         validatePassword() {
             this.isValidEPassword = User.PASSWORD_REGEX.test(this.inputEPassword);
         },
+        validateAddress() {
+            //TODO: add better control with regex
+            this.isValidAddress = this.inputAddress.length > 10;
+        },
+        toggleAddressLogin() {
+            this.isLoginWithAddress = !this.isLoginWithAddress;
+            this.inputAddress = "";
+        },
         async signin() {
             this.isTouched = true;
             this.validateUsername();
             this.validatePassword();
+            this.validateAddress();
 
-            if (this.isValidEPassword && this.isValidUsername) {
+            if (this.isValidEPassword && this.isValidUsername && (!this.isLoginWithAddress) || (this.isLoginWithAddress && this.isValidAddress)) {
                 const ePassword = CryptoUtils.sha256(this.inputEPassword); // generate the hashed ePassword
 
                 // Call the login endpoint, if username and ePassword matches it will return eKey, empty string otherwise
                 this.isLoading = LoadingStatus.Loading;
-                await loginModule.login({ username: this.inputUsername, ePassword });
+                await loginModule.login({ username: this.inputUsername, ePassword, address: this.inputAddress });
                 const eKey = loginModule.eKey;
                 if (eKey) {
                     this.isLoading = LoadingStatus.Loaded;

@@ -20,11 +20,12 @@ export default class LoginModule extends VuexModule {
 
 
     @MutationAction({ mutate: ['eKey', 'ePassword', 'username', 'address'] })
-    async login(payload: { username: string, ePassword: string }): Promise<{ eKey: string, ePassword: string, username: string, address: string }> {
+    async login(payload: { username: string, ePassword: string, address: string }): Promise<{ eKey: string, ePassword: string, username: string, address: string }> {
         if (payload.username && payload.ePassword) {
             const response = await Api.post(Api.endpoint + 'signin', JSON.stringify({
                 username: payload.username,
                 ePassword: payload.ePassword,
+                address: payload.address,
             }));
             if (response.success) {
                 const ePassword: string = payload.ePassword;
