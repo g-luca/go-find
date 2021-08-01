@@ -21,7 +21,7 @@ export default class AccountModule extends VuexModule {
 
 
     /**
-     * Retrieve a user Desmos profile from the auth username
+     * Retrieve the account Desmos profile. If already loaded, returns the cached value if not forced
      * @param force force the reload of the profile data
      */
     @Mutation
