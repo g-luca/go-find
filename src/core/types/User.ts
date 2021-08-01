@@ -35,6 +35,7 @@ export default class User {
         this._chainLinks = chainLinks;
     }
 
+
     /**
      * Getter username
      * @return {string}
@@ -43,15 +44,13 @@ export default class User {
         return this._username;
     }
 
-
     /**
-     * Getter address
-     * @return {string}
+     * Setter username
+     * @param {string} value
      */
-    public get address(): string {
-        return this._address;
+    public set username(value: string) {
+        this._username = value;
     }
-
 
     /**
      * Getter nickname
@@ -62,6 +61,14 @@ export default class User {
     }
 
     /**
+     * Setter nickname
+     * @param {string} value
+     */
+    public set nickname(value: string) {
+        this._nickname = value;
+    }
+
+    /**
      * Getter bio
      * @return {string}
      */
@@ -69,33 +76,29 @@ export default class User {
         return this._bio;
     }
 
-
     /**
-     * Getter applicationLinks
-     * @return {ApplicationLink[] }
+     * Setter bio
+     * @param {string} value
      */
-    public get applicationLinks(): ApplicationLink[] {
-        return this._applicationLinks;
+    public set bio(value: string) {
+        this._bio = value;
     }
 
-
     /**
-     * Getter chainLinks
-     * @return {ChainLink[] }
+     * Getter address
+     * @return {string}
      */
-    public get chainLinks(): ChainLink[] {
-        return this._chainLinks;
+    public get address(): string {
+        return this._address;
     }
 
-
     /**
-     * Getter postLinks
-     * @return {PostLink[] }
+     * Setter address
+     * @param {string} value
      */
-    public get postLinks(): PostLink[] {
-        return this._postLinks;
+    public set address(value: string) {
+        this._address = value;
     }
-
 
     /**
      * Getter profilePic
@@ -105,6 +108,13 @@ export default class User {
         return this._profilePic;
     }
 
+    /**
+     * Setter profilePic
+     * @param {string} value
+     */
+    public set profilePic(value: string) {
+        this._profilePic = value;
+    }
 
     /**
      * Getter profileCover
@@ -112,6 +122,62 @@ export default class User {
      */
     public get profileCover(): string {
         return this._profileCover;
+    }
+
+    /**
+     * Setter profileCover
+     * @param {string} value
+     */
+    public set profileCover(value: string) {
+        this._profileCover = value;
+    }
+
+    /**
+     * Getter applicationLinks
+     * @return {ApplicationLink[] }
+     */
+    public get applicationLinks(): ApplicationLink[] {
+        return this._applicationLinks;
+    }
+
+    /**
+     * Setter applicationLinks
+     * @param {ApplicationLink[] } value
+     */
+    public set applicationLinks(value: ApplicationLink[]) {
+        this._applicationLinks = value;
+    }
+
+    /**
+     * Getter chainLinks
+     * @return {ChainLink[] }
+     */
+    public get chainLinks(): ChainLink[] {
+        return this._chainLinks;
+    }
+
+    /**
+     * Setter chainLinks
+     * @param {ChainLink[] } value
+     */
+    public set chainLinks(value: ChainLink[]) {
+        this._chainLinks = value;
+    }
+
+    /**
+     * Getter postLinks
+     * @return {PostLink[] }
+     */
+    public get postLinks(): PostLink[] {
+        return this._postLinks;
+    }
+
+    /**
+     * Setter postLinks
+     * @param {PostLink[] } value
+     */
+    public set postLinks(value: PostLink[]) {
+        this._postLinks = value;
     }
 
 
