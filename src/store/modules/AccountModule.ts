@@ -22,7 +22,6 @@ export default class AccountModule extends VuexModule {
 
     /**
      * Retrieve a user Desmos profile from the auth username
-     * 
      * @param force force the reload of the profile data
      */
     @Mutation
@@ -103,14 +102,32 @@ export default class AccountModule extends VuexModule {
         }
     }
 
+    /**
+     * Reset the AccountModule state
+     */
+    @Mutation
+    reset(): void {
+        this._user = false;
+        this._account = false;
+        this.userLoadingStatus = LoadingStatus.Loading;
+    }
 
 
     /**
      * Getter user
-     * @return {User }
+     * @return {User | false }
      */
     public get user(): User | false {
         return this._user;
+    }
+
+    /**
+    /**
+     * Setter user
+     * @param {User | false } value
+     */
+    public set user(value: User | false) {
+        this._user = value;
     }
 
 }

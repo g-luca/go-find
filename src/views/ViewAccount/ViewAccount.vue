@@ -10,12 +10,12 @@
               <span v-if="$store.state.AccountModule.userLoadingStatus">
                 <img
                   alt="cover"
-                  :src="$store.state.AccountModule._user.profileCover || 'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=='"
+                  :src="inputProfileCover || 'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=='"
                   class="mx-auto object-cover w-full max-h-80 pointer-events-none select-none"
                 >
                 <img
                   alt="avatar"
-                  :src="$store.state.AccountModule._user.profilePic || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
+                  :src="inputProfilePic || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
                   class="mx-auto object-cover rounded-full h-44 w-44 md:h-56 md:w-56 pointer-events-none select-none -mt-32"
                 >
               </span>
@@ -39,6 +39,7 @@
               <Form
                 v-slot="{ errors, meta }"
                 :validation-schema="formSchema"
+                @submit="submitEdit"
               >
                 <div class="w-full text-center md:text-left dark:text-white">
                   <span v-if="$store.state.AccountModule.userLoadingStatus">
@@ -60,7 +61,6 @@
                           id="nickname"
                           v-model="inputNickname"
                           type="text"
-                          :disabled="isExecutingTransaction"
                           class=" rounded-lg flex-1 appearance-none border w-full py-2 px-4 my-1 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
                           :class="{'border-red-700 dark:border-red-700': errors.nickname,
                                    'focus:border-brand dark:focus:border-brand border-gray-300 dark:border-gray-900': !errors.nickname }"
@@ -83,7 +83,6 @@
                           id="profilePic"
                           v-model="inputProfilePic"
                           type="text"
-                          :disabled="isExecutingTransaction"
                           class=" rounded-lg flex-1 appearance-none border w-full py-2 px-4 my-1 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
                           :class="{'border-red-700 dark:border-red-700': errors.profilePic,
                                    'focus:border-brand dark:focus:border-brand border-gray-300 dark:border-gray-900': !errors.profilePic }"
@@ -106,7 +105,6 @@
                           id="profileCover"
                           v-model="inputProfileCover"
                           type="text"
-                          :disabled="isExecutingTransaction"
                           class=" rounded-lg flex-1 appearance-none border w-full py-2 px-4 my-1 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
                           :class="{'border-red-700 dark:border-red-700': errors.profileCover,
                                    'focus:border-brand dark:focus:border-brand border-gray-300 dark:border-gray-900': !errors.profileCover }"
@@ -128,7 +126,6 @@
                         <Field
                           id="bio"
                           v-model="inputBio"
-                          :disabled="isExecutingTransaction"
                           class=" rounded-lg flex-1 appearance-none border w-full py-2 px-4 my-1 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
                           :class="{'border-red-700 dark:border-red-700': errors.bio,
                                    'focus:border-brand dark:focus:border-brand border-gray-300 dark:border-gray-900': !errors.bio }"
@@ -144,21 +141,21 @@
                         >Invalid Bio</span>
 
                       </div>
-                      <div
-                        v-if="!isExecutingTransaction&&(meta.valid&&meta.touched&&meta.dirty)"
-                        class="flex items-center justify-between gap-4 my-6"
-                      >
+                      <div class="grid grid-cols-12 items-center justify-between gap-4 my-6">
                         <button
-                          type="button"
-                          :disabled="isExecutingTransaction"
-                          class="py-2 px-4 w-9/12 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
-                          @click="submitEdit()"
+                          v-if="$store.state.TransactionModule.transactionStatus!==1&&(meta.valid&&meta.touched&&meta.dirty)"
+                          type="submit"
+                          :disabled="$store.state.TransactionModule.transactionStatus===1"
+                          class="py-2 px-4 col-span-9 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
                         >
                           Save changes
                         </button>
                         <button
-                          type="reset"
-                          class="py-2 px-4 w-3/12 bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                          v-if="$store.state.TransactionModule.transactionStatus!==1&&(meta.touched&&meta.dirty)"
+                          type="button"
+                          :class="{'col-start-10':!meta.valid}"
+                          class="py-2 px-4 col-span-3 bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                          @click="handleResetForm()"
                         >
                           Cancel
                         </button>
@@ -253,11 +250,7 @@
       </span>
       <AppFooter class="mt-8" />
     </div>
-    <ModalTransaction
-      :is-open="isExecutingTransaction"
-      :tx="tx"
-      @tx-response="handleTxResponse"
-    />
+    <ModalTransaction />
   </div>
 </template>
 

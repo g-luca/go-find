@@ -1,8 +1,10 @@
 import store from '@/store';
 import CryptoUtils from '@/utils/CryptoUtils';
-import { Module, Mutation, VuexModule } from "vuex-module-decorators";
+import { getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import AuthAccount from '@/core/types/AuthAccount';
-import { Network, Transaction, CosmosTypes, DesmosTypes } from 'desmosjs';
+import { Network, Transaction, CosmosTypes } from 'desmosjs';
+import AccountModule from './AccountModule';
+
 export enum AuthLevel {
     None,
     AuthAccount,
@@ -17,19 +19,28 @@ export default class AuthModule extends VuexModule {
     private _authLevel: AuthLevel = AuthLevel.None;
 
 
+    /**
+     * Account Logout
+     */
     @Mutation
     public logout(): void {
         AuthModule.cleanAuthStorage();
         this._account = null;
         this.mPassword = null;
         this._authLevel = AuthLevel.None;
+        getModule(AccountModule).reset();
     }
 
+    /**
+     * Authenticate the user verifying the localStorage keys
+     */
     @Mutation
     public authenticate(): void {
         if (localStorage.getItem('mKey') && localStorage.getItem('account')) {
             this._authLevel = AuthLevel.AuthAccount;
             this._account = AuthModule.getAccount();
+
+            // check if there is a mPassword stored in memory for Wallet authentication
             if (this.mPassword) {
                 const mKey = AuthModule.getMKey(this.mPassword);
                 if (mKey) {
@@ -41,12 +52,22 @@ export default class AuthModule extends VuexModule {
         }
     }
 
+    /**
+     * Remove all Authentication localStorage keys
+     */
     private static cleanAuthStorage() {
         localStorage.removeItem("mKey");
         localStorage.removeItem("account");
     }
 
-    static async signTx(tx: CosmosTypes.TxBody, address: string, mPasswordClear: string): Promise<Transaction | string> {
+    /**
+     * Sign a Tx object
+     * @param tx Transaction body object to sign
+     * @param address address of the signer
+     * @param mPasswordClear wallet mPassword in clear
+     * @returns A signed Traansaction object or the string error
+     */
+    static async signTx(tx: CosmosTypes.TxBody, address: string, mPasswordClear: string): Promise<Transaction | false> {
         const mPassword = CryptoUtils.sha256(mPasswordClear);
         const mKey = AuthModule.getMKey(mPassword);
         if (mKey) {
@@ -74,16 +95,17 @@ export default class AuthModule extends VuexModule {
                         const signedTx = Transaction.sign(tx, authInfo, account.accountNumber, Buffer.from(privKey, 'hex'));
                         return signedTx;
                     } catch (e) {
-                        return "Error signing the transaction";
+                        //return new Error("Error signing the transaction");
                     }
                 } else {
-                    return "Blockchain connection error";
+                    //return new Error("Blockchain connection error");
                 }
             } catch (e) {
-                return "Wrong Wallet Password";
+                //return new Error("Wrong Wallet Password");
             }
         }
-        return "Wrong Wallet Password";
+        //return new Error("Wrong Wallet Password");
+        return false;
     }
 
 
