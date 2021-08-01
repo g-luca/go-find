@@ -10,6 +10,9 @@ import { Secp256k1, Wallet } from 'desmosjs';
 const authModule = getModule(AuthModule);
 
 
+/**
+ * Represents the phases of the register process
+ */
 export enum RegisterState {
     StateUserInput = 'StateUserInput', // user details input
     StateMPasswordInput = 'StateMPasswordInput', // mPassword input
@@ -56,6 +59,10 @@ export default class RegisterModule extends VuexModule {
         }
     }
 
+    /**
+     * Generate the wallet from a given mnemonic
+     * @param mnemonic user input mnemonic
+     */
     @Mutation
     generateBip(mnemonic = ""): void {
         bip39.setDefaultWordlist('english')
@@ -105,6 +112,11 @@ export default class RegisterModule extends VuexModule {
 
     }
 
+
+    /**
+     * Change the state to the given one
+     * @param newState state to load
+     */
     @Mutation
     nextState(newState: RegisterState): void {
         this.currentState = newState;

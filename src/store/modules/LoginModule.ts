@@ -3,6 +3,9 @@ import { Module, Mutation, MutationAction, VuexModule } from 'vuex-module-decora
 import Api from '@/core/api/Api';
 
 
+/**
+ * Represents the phases of the login process
+ */
 export enum LoginState {
     StateELogin = 'StateELogin',
     StateMLogin = 'StateMLogin',
@@ -19,6 +22,11 @@ export default class LoginModule extends VuexModule {
 
 
 
+    /**
+     * Auth login backend call
+     * @param payload payload to send to the backend login endpoint
+     * @returns the auth params if succeeded, emppty otherwise
+     */
     @MutationAction({ mutate: ['eKey', 'ePassword', 'username', 'address'] })
     async login(payload: { username: string, ePassword: string, address: string }): Promise<{ eKey: string, ePassword: string, username: string, address: string }> {
         if (payload.username && payload.ePassword) {
@@ -43,8 +51,24 @@ export default class LoginModule extends VuexModule {
 
 
 
+    /**
+     * Change the state to the given one
+     * @param newState state to load
+     */
     @Mutation
     nextState(newState: LoginState): void {
         this.currentState = newState;
+    }
+
+    /**
+     * Reset the LoginModule state
+     */
+    @Mutation
+    reset(): void {
+        this.currentState = LoginState.StateELogin;
+        this.username = "";
+        this.eKey = "";
+        this.ePassword = "";
+        this.address = "";
     }
 }

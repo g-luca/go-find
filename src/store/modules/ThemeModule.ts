@@ -1,7 +1,9 @@
 import store from '@/store';
 import { Module, Mutation, VuexModule } from "vuex-module-decorators";
 
-
+/**
+ * Available themes
+ */
 enum Theme {
     Light = 'light',
     Dark = 'dark',

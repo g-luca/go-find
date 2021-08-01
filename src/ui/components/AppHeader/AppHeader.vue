@@ -50,27 +50,27 @@
                       v-slot="{ active }"
                       class="mx-2 my-1 rounded-xl"
                     >
-                    <router-link
-                      to="/me"
-                      :class="[active ? 'bg-gray-100 dark:bg-denim-900 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-100', 'block px-4 py-2 text-md']"
-                    >
-                      <i class="bi bi-person-circle mr-2" /> Your Profile
-                    </router-link>
+                      <router-link
+                        to="/me"
+                        :class="[active ? 'bg-gray-100 dark:bg-denim-900 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-100', 'block px-4 py-2 text-md']"
+                      >
+                        <i class="bi bi-person-circle mr-2" /> Your Profile
+                      </router-link>
                     </MenuItem>
 
                     <MenuItem v-slot="{ active }">
-                    <ToggleTheme :active="active" />
+                      <ToggleTheme :active="active" />
                     </MenuItem>
 
                     <MenuItem
                       v-slot="{ active }"
                       class="mx-2 my-1 rounded-xl"
                     >
-                    <a
-                      href="#"
-                      :class="[active ? 'bg-gray-100 dark:bg-denim-900 text-red-500' : 'text-gray-700 dark:text-gray-100', 'block px-4 py-2 text-md']"
-                      @click="logout()"
-                    ><i class="bi bi-arrow-left-circle-fill mr-2" /> Logout</a>
+                      <a
+                        href="#"
+                        :class="[active ? 'bg-gray-100 dark:bg-denim-900 text-red-500' : 'text-gray-700 dark:text-gray-100', 'block px-4 py-2 text-md']"
+                        @click="logout()"
+                      ><i class="bi bi-arrow-left-circle-fill mr-2" /> Logout</a>
                     </MenuItem>
 
                   </div>

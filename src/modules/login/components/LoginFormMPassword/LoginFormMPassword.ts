@@ -39,6 +39,7 @@ export default defineComponent({
                     authModule.saveMKey({ mKey, mPassword });
 
                     authModule.saveAuthAccount({ account: new AuthAccount(loginModule.username, loginModule.address) });
+                    loginModule.reset();
                     router.push({ path: '/me' });
                 } catch (e) {
                     console.log(e)
