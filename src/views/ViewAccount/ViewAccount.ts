@@ -1,5 +1,5 @@
 import { defineComponent, ref, watchEffect } from "vue";
-import { Form, Field } from 'vee-validate';
+import { Form, Field, } from 'vee-validate';
 import AppFooter from "@/ui/components/AppFooter/AppFooter.vue";
 import AppHeader from "@/ui/components/AppHeader/AppHeader.vue";
 
@@ -12,8 +12,10 @@ import AccountBalance from "@/modules/account/components/AccountBalance/AccountB
 import AccountChainLinks from "@/modules/account/components/AccountChainLinks/AccountChainLinks.vue";
 import AccountModule from "@/store/modules/AccountModule";
 import { CosmosTypes, DesmosTypes } from "desmosjs";
+import TransactionModule, { TransactionStatus } from "@/store/modules/TransactionModule";
 const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
+const transactionModule = getModule(TransactionModule);
 
 export default defineComponent({
     components: {
@@ -30,20 +32,19 @@ export default defineComponent({
     data() {
         const formSchema = {
             nickname: { max: 1000 },
-            profilePic: { regex: /(http)?s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg)$)/ },
-            profileCover: { regex: /(http)?s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg)$)/ },
+            profilePic: { regex: /^(http)s?:?(\/\/[^"']*$)/ },
+            profileCover: { regex: /^(http)s?:?(\/\/[^"']*$)/ },
             bio: { max: 1000 }
         };
         return {
             formSchema,
+            txSent: null as CosmosTypes.TxBody | null,
             inputNickname: '',
             inputProfilePic: '',
             inputProfileCover: '',
             inputBio: '',
-
-            isExecutingTransaction: false,
-            tx: null as CosmosTypes.TxBody | null,
-
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            resetForm: (_values?: unknown) => { return; }
         }
     },
     async mounted() {
@@ -63,10 +64,31 @@ export default defineComponent({
                 }
             })
 
+
+            // start listening the transactionModule to intercept the results
+            ref(transactionModule);
+            watchEffect(() => {
+                // check if is processing the right transaction and the status
+                if (accountModule.user && transactionModule.tx === this.txSent && (transactionModule.transactionStatus === TransactionStatus.Error || transactionModule.transactionStatus === TransactionStatus.Success)) {
+                    if (transactionModule.errorMessage) {
+                        // the transaction has an error message, failed
+                        console.log('update failure!')
+                    } else {
+                        // the tx went well! update the data 
+                        console.log('update success!')
+                        accountModule.user.nickname = this.inputNickname;
+                        accountModule.user.profilePic = this.inputProfilePic;
+                        accountModule.user.profileCover = this.inputProfileCover;
+                        accountModule.user.bio = this.inputBio;
+                        this.txSent = null;
+                        this.handleResetForm();
+                    }
+                }
+            })
         }
     },
     methods: {
-        submitEdit(): void {
+        submitEdit(_data: void, { resetForm }: unknown): void {
             if (accountModule.user) {
                 const doNotModify = '[do-not-modify]';
                 const msgSaveProfile: DesmosTypes.MsgSaveProfile = {
@@ -89,18 +111,34 @@ export default defineComponent({
                     nonCriticalExtensionOptions: [],
                     timeoutHeight: 0,
                 }
-                this.tx = txBody;
-                this.isExecutingTransaction = true;
+                transactionModule.start(txBody);
+                this.txSent = txBody;
+
+                // Vee Validate send as parameter the reset function, i need to save it to use for the reset after an update
+                // This may be fixed by Vee itself in future https://github.com/logaretm/vee-validate/issues/3292
+                this.resetForm = resetForm;
             }
         },
-        handleTxResponse(success: boolean): void {
-            if (success) {
-                console.log('tx gone ok, updating local account data');
-            } else {
-                console.log('tx error');
+
+        /**
+         * Reset the form and the input data
+         */
+        handleResetForm(): void {
+            if (accountModule.user) {
+                this.inputNickname = accountModule.user.nickname;
+                this.inputProfilePic = accountModule.user.profilePic;
+                this.inputProfileCover = accountModule.user.profileCover;
+                this.inputBio = accountModule.user.bio;
+                this.resetForm({
+                    values: {
+                        nickname: this.inputNickname,
+                        profilePic: this.inputProfilePic,
+                        profileCover: this.inputProfileCover,
+                        bio: this.inputBio,
+                    },
+                });
             }
-            this.isExecutingTransaction = false;
-        },
+        }
 
     }
 });
