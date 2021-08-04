@@ -9,6 +9,7 @@ import ApplicationLinkDiscord from '@/core/types/ApplicationLinks/ApplicationLin
 import ApplicationLink from '@/core/types/ApplicationLink';
 import ApplicationLinkGithub from '@/core/types/ApplicationLinks/ApplicationLinkGithub';
 import ApplicationLinkTwitter from '@/core/types/ApplicationLinks/ApplicationLinkTwitter';
+import ChainLink from '@/core/types/ChainLink';
 
 
 provideApolloClient(apolloClient)
@@ -51,7 +52,13 @@ export default class UserModule extends VuexModule {
                         }
                     })
                 }
-                this.user = new User(profileRaw.dtag, profileRaw.address, profileRaw.nickname, profileRaw.bio, profileRaw.profile_pic, profileRaw.cover_pic, applicationLinks);
+                const chainLinks: ChainLink[] = [];
+                if (profileRaw.chain_links && profileRaw.chain_links.length > 0) {
+                    profileRaw.chain_links.forEach((chainLink: any) => {
+                        chainLinks.push(new ChainLink(chainLink.external_address, chainLink.chain_link_chain_config.name));
+                    })
+                }
+                this.user = new User(profileRaw.dtag, profileRaw.address, profileRaw.nickname, profileRaw.bio, profileRaw.profile_pic, profileRaw.cover_pic, applicationLinks, chainLinks);
                 this.userLoadingStatus = LoadingStatus.Loaded;
             } else if (!result.loading) {
                 this.user = false;
