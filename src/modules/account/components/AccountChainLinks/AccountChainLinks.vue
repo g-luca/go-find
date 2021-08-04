@@ -6,7 +6,7 @@
           <h1 class="pb-8 pl-4 text-5xl text-purple-600 dark:text-purple-700 font-extrabold">
             Blockchains
           </h1>
-          <span v-if="$store.state.AccountModule._user.chainLinks.length>0">
+          <span v-if="$store.state.AccountModule._user.chainLinks&&$store.state.AccountModule._user.chainLinks.length>0">
             <div class="grid grid-cols-2 gap-3 text-center">
               <div
                 v-for="chainLink in $store.state.AccountModule._user.chainLinks"
@@ -14,18 +14,24 @@
                 class="m-auto col-span-2 w-full px-2"
               >
                 <div class="w-full grid grid-cols-12 bg-indigo-50 dark:bg-denim-900 rounded-3xl">
-                  <div class="w-20 m-auto col-span-2">
+                  <div
+                    class="col-span-1 my-auto cursor-pointer"
+                    @click="deleteChainLink(chainLink)"
+                  >
+                    <i class="bi bi-dash-lg rounded-full bg-red-600 p-2 text-white" />
+                  </div>
+                  <div class="w-14 sm:w-16 md:w-20 m-auto col-span-2">
                     <img
-                      class="p-4 pointer-events-none select-none"
+                      class="p-4 pointer-events-none select-none text-left"
                       :src="require('@/assets/brands/'+chainLink.chain+'/logo.svg')"
                       alt=""
                     >
                   </div>
-                  <div class="col-span-8 my-auto text-left">
-                    <h1 class="dark:text-white text-3xl font-bold capitalize">
+                  <div class="col-span-7 my-auto text-left">
+                    <h1 class="dark:text-white text-xl font-bold capitalize">
                       {{ chainLink.chain }}
                     </h1>
-                    <h4 class="dark:text-white text-lg font-mono">
+                    <h4 class="dark:text-white text-md md:font-mono truncate">
                       {{ chainLink.address }}
                     </h4>
                   </div>
@@ -282,15 +288,6 @@
                       Generate
                     </button>
                     <div class="pt-4">
-                      <h5 class="text-gray-700 text-sm">
-                        Result
-                      </h5>
-                      <code
-                        v-if="generatedProof"
-                        class="dark:text-white"
-                      >
-                        {{ generatedProof }}
-                      </code>
                       <span v-if="generateProofError">
                         <h6 class="text-red-700">
                           {{ generateProofError }}
@@ -330,11 +327,6 @@
         </div>
       </div>
     </Dialog>
-    <ModalTransaction
-      :is-open="isExecutingTransaction"
-      :tx="tx"
-      @tx-response="handleTxResponse"
-    />
   </div>
 </template>
 

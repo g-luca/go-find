@@ -77,6 +77,55 @@
               <h4 class="dark:text-gray-300">
                 {{ $store.state.UserModule.user.bio }}
               </h4>
+
+              <div
+                v-if="$store.state.UserModule.user.chainLinks.length>0"
+                class="pt-2"
+              >
+                <h3 class="text-xl font-bold text-indigo-700">
+                  Connected Blockchains
+                </h3>
+                <div class="grid grid-cols-12 gap-3 text-center">
+                  <div
+                    v-for="chainLink in $store.state.UserModule.user.chainLinks"
+                    class="cursor-pointer col-span-12 lg:col-span-6 bg-indigo-50 rounded-2xl mr-4 py-1"
+                  >
+                    <div class="grid grid-cols-12">
+                      <div class="col-span-2 my-auto">
+                        <div class="rounded-full w-10 h-10 md:w-10 md:h-10 m-auto">
+                          <img
+                            class="p-2 pointer-events-none select-none"
+                            :src="require('@/assets/brands/'+chainLink.chain+'/logo.svg')"
+                            alt=""
+                          >
+                        </div>
+                      </div>
+                      <div class="col-span-10">
+                        <h4 class="dark:text-white select-none text-lg font-medium capitalize text-left">
+                          {{ chainLink._chain }}
+                        </h4>
+                        <!-- 
+                        <h4 class="dark:text-white select-none text-sm font-light text-left truncate">
+                        </h4> -->
+                        <h4 class="flex dark:text-white select-none text-sm font-light text-left">
+                          <span class="flex-1 truncate">
+                            {{ chainLink._address }}
+                          </span>
+                          <span
+                            v-if="canCopy"
+                            class="flex-none mr-4 w-5"
+                            @click="copyAddress(chainLink._address)"
+                          >
+                            <i class="bi bi-clipboard text-blue-500 cursor-pointer" />
+                          </span>
+                        </h4>
+                      </div>
+
+                    </div>
+
+                  </div>
+                </div>
+              </div>
             </span>
             <span v-else>
               <!-- Loading -->

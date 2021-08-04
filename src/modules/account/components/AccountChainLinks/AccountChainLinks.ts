@@ -12,8 +12,15 @@ import {
 } from "@headlessui/vue";
 import { supportedChainLinks } from "@/core/types/SupportedChainLinks";
 import Blockchain from "@/core/types/Blockchain";
-import { Wallet, Secp256k1 } from "desmosjs";
+import { Wallet, Secp256k1, DesmosTypes } from "desmosjs";
 import CryptoUtils from "@/utils/CryptoUtils";
+import { getModule } from "vuex-module-decorators";
+import AuthModule from "@/store/modules/AuthModule";
+import TransactionModule from "@/store/modules/TransactionModule";
+import ChainLink from "@/core/types/ChainLink";
+import { TxBody } from "desmosjs/dist/types/lib/proto/cosmos/tx/v1beta1/tx";
+const authModule = getModule(AuthModule);
+const transactionModule = getModule(TransactionModule);
 
 export default defineComponent({
     components: {
@@ -38,11 +45,10 @@ export default defineComponent({
             isExecutingTransaction: false,
             tx: null as CosmosTypes.TxBody | null,
 
-            generatedProof: "",
+            generatedProof: null as DesmosTypes.Proof | null,
             generateProofError: "",
 
             inputMnemonic: new Array<string>(24),
-            //inputMnemonic: ["happy", "upset", "august", "woman", "message", "essay", "victory", "shove", "donate", "slide", "dance", ""]
         }
     }, methods: {
         toggleChainLinkEditor(): void {
@@ -51,13 +57,35 @@ export default defineComponent({
             this.selectedChain = null;
         }, toggleAdvancedOptions(): void {
             this.isAdvancedOptionsOpen = !this.isAdvancedOptionsOpen;
-        }, submitChainLink(): void {
-            this.toggleChainLinkEditor();
-            this.isExecutingTransaction = true;
+        },
+        /**
+         * Delete a connected chain link
+         * @param chainLink chainLink to delete
+         */
+        deleteChainLink(chainLink: ChainLink): void {
+            if (authModule.account) {
+                const msgUnlink: DesmosTypes.MsgUnlinkChainAccount = {
+                    chainName: chainLink.chain,
+                    owner: authModule.account?.address,
+                    target: chainLink.address,
+                }
+                const txBody: CosmosTypes.TxBody = {
+                    memo: "Chain unlink",
+                    messages: [
+                        {
+                            typeUrl: "/desmos.profiles.v1beta1.MsgUnlinkChainAccount",
+                            value: DesmosTypes.MsgUnlinkChainAccount.encode(msgUnlink).finish(),
+                        }
+                    ],
+                    extensionOptions: [],
+                    nonCriticalExtensionOptions: [],
+                    timeoutHeight: 0,
+                }
+                transactionModule.start(txBody);
+            }
         },
         handleTxResponse(success: boolean): void {
             if (success) {
-                console.log('tx gone ok, updating local account data');
                 this.inputMnemonic = new Array<string>(24);
                 this.selectedChain = null;
             } else {
@@ -72,24 +100,53 @@ export default defineComponent({
                 this.inputMnemonic[i] = word.trim();
             });
             const mnemonic = this.inputMnemonic.join(' ');
-            if (mnemonic.trimEnd().split(' ').length >= 12) {
+            if (mnemonic.trimEnd().split(' ').length >= 12 && authModule.account && this.selectedChain) {
                 try {
-                    const wallet = new Wallet(mnemonic, this.customHdpath, this.customBechPrefix);
-                    console.log(wallet.address)
-                    success = true;
-
-                    console.log(Secp256k1.sign)
-                    this.generatedProof = `{
-                        "pub_key": {
-                          "@type": "${wallet.publicKey.typeUrl}",
-                          "key": "${wallet.publicKeyB64}"
+                    const destWallet = new Wallet(mnemonic, this.customHdpath, this.customBechPrefix);
+                    const msgLinkChain: DesmosTypes.MsgLinkChainAccount = {
+                        chainAddress: {
+                            typeUrl: "/desmos.profiles.v1beta1.Bech32Address",
+                            value: DesmosTypes.Bech32Address.encode({
+                                prefix: destWallet.bech32Prefix,
+                                value: destWallet.address,
+                            }).finish()
                         },
-                        "signature": "${Buffer.from(Secp256k1.sign(Buffer.from(CryptoUtils.sha256Buffer(Buffer.from(wallet.address))), wallet.privateKey)).toString('hex')}",
-                        "plain_text": "${wallet.address}"
-                      }`
+                        proof: {
+                            pubKey: {
+                                typeUrl: destWallet.publicKey.typeUrl,
+                                value: CosmosTypes.PubKey.encode({
+                                    key: destWallet.publicKey.value
+                                }).finish()
+                            },
+                            signature: Buffer.from(Secp256k1.sign(Buffer.from(CryptoUtils.sha256Buffer(Buffer.from(destWallet.address))), destWallet.privateKey)).toString('hex'),
+                            plainText: destWallet.address,
+                        }, chainConfig: {
+                            name: this.selectedChain?.id,
+                        },
+                        signer: authModule.account?.address,
+                    }
+                    const txBody: CosmosTypes.TxBody = {
+                        memo: "Chain link",
+                        messages: [
+                            {
+                                typeUrl: "/desmos.profiles.v1beta1.MsgLinkChainAccount",
+                                value: DesmosTypes.MsgLinkChainAccount.encode(msgLinkChain).finish(),
+                            }
+                        ],
+                        extensionOptions: [],
+                        nonCriticalExtensionOptions: [],
+                        timeoutHeight: 0,
+                    }
+                    this.tx = txBody;
+                    this.isExecutingTransaction = true;
+
+                    this.toggleChainLinkEditor();
+                    transactionModule.start(this.tx);
+
+                    success = true;
                     this.generateProofError = "";
                 } catch (e) {
-                    console.log(e);
+                    console.log(e)
                     this.generateProofError = "Error generating the address";
                 }
             } else {
