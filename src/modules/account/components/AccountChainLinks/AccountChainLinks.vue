@@ -18,7 +18,7 @@
                     class="col-span-1 my-auto cursor-pointer"
                     @click="deleteChainLink(chainLink)"
                   >
-                    <i class="bi bi-dash-lg rounded-full bg-red-600 p-2 text-white" />
+                    <i class="bi bi-dash-lg rounded-full text-red-600 p-2 bg-gray-200 dark:bg-gray-900 hover:bg-red-600 dark:hover:bg-red-700 hover:text-white" />
                   </div>
                   <div class="w-14 sm:w-16 md:w-20 m-auto col-span-2">
                     <img
@@ -282,10 +282,10 @@
                   <div class="pt-4">
                     <button
                       type="button"
-                      class="py-2 px-4 w-6/12 bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                      class="py-2 px-4 w-full bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
                       @click="generateProof()"
                     >
-                      Generate
+                      Connect
                     </button>
                     <div class="pt-4">
                       <span v-if="generateProofError">

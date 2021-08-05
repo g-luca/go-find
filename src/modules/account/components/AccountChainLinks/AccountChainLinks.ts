@@ -1,4 +1,4 @@
-import { defineComponent } from "vue";
+import { defineComponent, ref, watchEffect } from "vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
 import { CosmosTypes } from "desmosjs";
@@ -16,10 +16,11 @@ import { Wallet, Secp256k1, DesmosTypes } from "desmosjs";
 import CryptoUtils from "@/utils/CryptoUtils";
 import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
-import TransactionModule from "@/store/modules/TransactionModule";
+import TransactionModule, { TransactionStatus } from "@/store/modules/TransactionModule";
 import ChainLink from "@/core/types/ChainLink";
-import { TxBody } from "desmosjs/dist/types/lib/proto/cosmos/tx/v1beta1/tx";
+import AccountModule from "@/store/modules/AccountModule";
 const authModule = getModule(AuthModule);
+const accountModule = getModule(AccountModule);
 const transactionModule = getModule(TransactionModule);
 
 export default defineComponent({
@@ -44,12 +45,47 @@ export default defineComponent({
             isAdvancedOptionsOpen: false,
             isExecutingTransaction: false,
             tx: null as CosmosTypes.TxBody | null,
+            newChainLink: null as ChainLink | null,
+            deletedChainLink: null as ChainLink | null,
 
             generatedProof: null as DesmosTypes.Proof | null,
             generateProofError: "",
 
             inputMnemonic: new Array<string>(24),
         }
+    },
+    beforeMount() {
+        ref(transactionModule);
+        watchEffect(() => {
+            // check if is processing the right transaction and the status
+            if (accountModule.user && transactionModule.tx === this.tx && (transactionModule.transactionStatus === TransactionStatus.Error || transactionModule.transactionStatus === TransactionStatus.Success)) {
+                if (transactionModule.errorMessage) {
+                    // the transaction has an error message, failed
+                    console.log('chain link failure!')
+                } else {
+                    // the tx went well! update the data 
+
+                    // handle new chain link
+                    if (this.tx?.messages[0].typeUrl === "/desmos.profiles.v1beta1.MsgLinkChainAccount" && this.newChainLink) {
+                        console.log('chain link success!')
+                        accountModule.user.chainLinks.push(new ChainLink(this.newChainLink.address, this.newChainLink.chain));
+                        this.newChainLink = null;
+                        this.deletedChainLink = null;
+                    }
+
+                    // handle chain unlink
+                    if (this.tx?.messages[0].typeUrl === "/desmos.profiles.v1beta1.MsgUnlinkChainAccount" && this.deletedChainLink) {
+                        accountModule.user.chainLinks.slice(accountModule.user.chainLinks.indexOf(new ChainLink(this.deletedChainLink.address, this.deletedChainLink.chain)), 1);
+                        accountModule.user.chainLinks = accountModule.user.chainLinks.filter((chainLink: ChainLink) => {
+                            return chainLink.address !== this.deletedChainLink?.address && chainLink.chain !== this.deletedChainLink?.chain;
+                        });
+                        this.newChainLink = null;
+                        this.deletedChainLink = null;
+                    }
+                    this.tx = null;
+                }
+            }
+        })
     }, methods: {
         toggleChainLinkEditor(): void {
             this.isChainLinkEditorOpen = !this.isChainLinkEditorOpen;
@@ -81,18 +117,11 @@ export default defineComponent({
                     nonCriticalExtensionOptions: [],
                     timeoutHeight: 0,
                 }
+                this.tx = txBody;
+                this.newChainLink = null;
+                this.deletedChainLink = chainLink;
                 transactionModule.start(txBody);
             }
-        },
-        handleTxResponse(success: boolean): void {
-            if (success) {
-                this.inputMnemonic = new Array<string>(24);
-                this.selectedChain = null;
-            } else {
-                console.log('tx error');
-                this.toggleChainLinkEditor();
-            }
-            this.isExecutingTransaction = false;
         },
         generateProof(): boolean {
             let success = false;
@@ -139,6 +168,7 @@ export default defineComponent({
                     }
                     this.tx = txBody;
                     this.isExecutingTransaction = true;
+                    this.newChainLink = new ChainLink(destWallet.address, this.selectedChain.id);
 
                     this.toggleChainLinkEditor();
                     transactionModule.start(this.tx);
@@ -148,6 +178,7 @@ export default defineComponent({
                 } catch (e) {
                     console.log(e)
                     this.generateProofError = "Error generating the address";
+                    this.newChainLink = null;
                 }
             } else {
                 this.generateProofError = "Invalid mnemonic";
