@@ -88,7 +88,7 @@
                 <div class="grid grid-cols-12 gap-3 text-center">
                   <div
                     v-for="chainLink in $store.state.UserModule.user.chainLinks"
-                    class="cursor-pointer col-span-12 lg:col-span-6 bg-indigo-50 rounded-2xl mr-4 py-1"
+                    class="col-span-12 lg:col-span-6 bg-indigo-50 dark:bg-denim-900 rounded-2xl mr-4 py-1"
                   >
                     <div class="grid grid-cols-12">
                       <div class="col-span-2 my-auto">
