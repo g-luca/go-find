@@ -15,7 +15,7 @@ export const AccountQuery = gql`
             }
             chain_links {
                 external_address
-                chain_link_chain_config {
+                chain_config {
                     name
                 }
             }

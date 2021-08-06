@@ -55,7 +55,7 @@ export default class UserModule extends VuexModule {
                 const chainLinks: ChainLink[] = [];
                 if (profileRaw.chain_links && profileRaw.chain_links.length > 0) {
                     profileRaw.chain_links.forEach((chainLink: any) => {
-                        chainLinks.push(new ChainLink(chainLink.external_address, chainLink.chain_link_chain_config.name));
+                        chainLinks.push(new ChainLink(chainLink.external_address, chainLink.chain_config.name));
                     })
                 }
                 this.user = new User(profileRaw.dtag, profileRaw.address, profileRaw.nickname, profileRaw.bio, profileRaw.profile_pic, profileRaw.cover_pic, applicationLinks, chainLinks);
