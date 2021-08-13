@@ -6,7 +6,7 @@ import CryptoUtils from '@/utils/CryptoUtils';
 import AuthModule from '@/store/modules/AuthModule';
 import Api from '@/core/api/Api';
 import AuthAccount from '@/core/types/AuthAccount';
-import { Secp256k1, Wallet } from 'desmosjs';
+import { Transaction, Wallet } from 'desmosjs';
 const authModule = getModule(AuthModule);
 
 
@@ -149,7 +149,7 @@ export default class RegisterModule extends VuexModule {
             username,
             eKey
         })));
-        const signature = (Secp256k1.sign(hash, wallet.privateKey) as Buffer).toString('hex');
+        const signature = (Transaction.signBytes(hash, wallet.privateKey) as Buffer).toString('hex');
 
         const response = await Api.post(Api.endpoint + 'recover', JSON.stringify({
             username,

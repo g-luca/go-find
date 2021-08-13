@@ -11,7 +11,7 @@ import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.
 import AccountBalance from "@/modules/account/components/AccountBalance/AccountBalance.vue";
 import AccountChainLinks from "@/modules/account/components/AccountChainLinks/AccountChainLinks.vue";
 import AccountModule from "@/store/modules/AccountModule";
-import { CosmosTypes, DesmosTypes } from "desmosjs";
+import { CosmosTxBody, DesmosMsgSaveProfile } from "desmosjs";
 import TransactionModule, { TransactionStatus } from "@/store/modules/TransactionModule";
 const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
@@ -39,7 +39,7 @@ export default defineComponent({
         return {
             initialValues: {},
             formSchema,
-            txSent: null as CosmosTypes.TxBody | null,
+            txSent: null as CosmosTxBody | null,
             inputNickname: '',
             inputProfilePic: '',
             inputProfileCover: '',
@@ -98,10 +98,9 @@ export default defineComponent({
     },
     methods: {
         submitEdit(_data: void, { resetForm }: unknown): void {
-            console.log(resetForm)
             if (accountModule.user) {
                 const doNotModify = '[do-not-modify]';
-                const msgSaveProfile: DesmosTypes.MsgSaveProfile = {
+                const msgSaveProfile: DesmosMsgSaveProfile = {
                     dtag: accountModule.user.username,
                     nickname: (accountModule.user.nickname !== this.inputNickname) ? this.inputNickname : doNotModify,
                     bio: (accountModule.user.bio !== this.inputBio) ? this.inputBio : doNotModify,
@@ -109,12 +108,12 @@ export default defineComponent({
                     coverPicture: (accountModule.user.profileCover !== this.inputProfileCover) ? this.inputProfileCover : doNotModify,
                     creator: accountModule.user.address,
                 }
-                const txBody: CosmosTypes.TxBody = {
+                const txBody: CosmosTxBody = {
                     memo: "Profile update",
                     messages: [
                         {
                             typeUrl: "/desmos.profiles.v1beta1.MsgSaveProfile",
-                            value: DesmosTypes.MsgSaveProfile.encode(msgSaveProfile).finish(),
+                            value: DesmosMsgSaveProfile.encode(msgSaveProfile).finish(),
                         }
                     ],
                     extensionOptions: [],

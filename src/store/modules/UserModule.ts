@@ -5,18 +5,15 @@ import { LoadingStatus } from '@/core/types/LoadingStatus';
 import { provideApolloClient, useLazyQuery } from '@vue/apollo-composable';
 import { apolloClient } from '@/gql/Apollo';
 import { ProfileQuery } from '@/gql/ProfileQuery';
-import ApplicationLinkDiscord from '@/core/types/ApplicationLinks/ApplicationLinkDiscord';
-import ApplicationLink from '@/core/types/ApplicationLink';
-import ApplicationLinkGithub from '@/core/types/ApplicationLinks/ApplicationLinkGithub';
-import ApplicationLinkTwitter from '@/core/types/ApplicationLinks/ApplicationLinkTwitter';
 import ChainLink from '@/core/types/ChainLink';
+import ApplicationLinkModule from './ApplicationLinkModule';
 
 
 provideApolloClient(apolloClient)
 
 @Module({ store, name: 'UserModule', dynamic: true })
 export default class UserModule extends VuexModule {
-    protected user: User | false = false;
+    public user: User | false = false;
     public userLoadingStatus: LoadingStatus = LoadingStatus.Loading;
 
 
@@ -36,22 +33,7 @@ export default class UserModule extends VuexModule {
             }
             if (result.data && result.data.profile[0] && !result.loading) {
                 const profileRaw = result.data.profile[0];
-                const applicationLinks: ApplicationLink[] = [];
-                if (profileRaw.application_links && profileRaw.application_links.length > 0) {
-                    profileRaw.application_links.forEach((applicationLinkRaw: any) => {
-                        switch (applicationLinkRaw.application) {
-                            case "discord":
-                                applicationLinks.push(new ApplicationLinkDiscord(applicationLinkRaw.username));
-                                break;
-                            case "github":
-                                applicationLinks.push(new ApplicationLinkGithub(applicationLinkRaw.username));
-                                break;
-                            case "twitter":
-                                applicationLinks.push(new ApplicationLinkTwitter(applicationLinkRaw.username));
-                                break;
-                        }
-                    })
-                }
+                const applicationLinks = ApplicationLinkModule.parseApplicationLinks(profileRaw);
                 const chainLinks: ChainLink[] = [];
                 if (profileRaw.chain_links && profileRaw.chain_links.length > 0) {
                     profileRaw.chain_links.forEach((chainLink: any) => {

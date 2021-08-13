@@ -23,7 +23,7 @@
                   <div class="w-14 sm:w-16 md:w-20 m-auto col-span-2">
                     <img
                       class="p-4 pointer-events-none select-none text-left"
-                      :src="require('@/assets/brands/'+chainLink.chain+'/logo.svg')"
+                      :src="getChainLogo(chainLink.chain)"
                       alt=""
                     >
                   </div>

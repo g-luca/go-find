@@ -1,7 +1,7 @@
 import { defineComponent, ref, watchEffect } from "vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
-import { CosmosTypes } from "desmosjs";
+import { CosmosPubKey, CosmosTxBody, DesmosBech32Address, DesmosMsgLinkChainAccount, DesmosMsgUnlinkChainAccount, DesmosProof, Transaction } from "desmosjs";
 
 import {
     TransitionRoot,
@@ -12,7 +12,7 @@ import {
 } from "@headlessui/vue";
 import { supportedChainLinks } from "@/core/types/SupportedChainLinks";
 import Blockchain from "@/core/types/Blockchain";
-import { Wallet, Secp256k1, DesmosTypes } from "desmosjs";
+import { Wallet, } from "desmosjs";
 import CryptoUtils from "@/utils/CryptoUtils";
 import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
@@ -44,11 +44,11 @@ export default defineComponent({
             isChainLinkEditorOpen: false,
             isAdvancedOptionsOpen: false,
             isExecutingTransaction: false,
-            tx: null as CosmosTypes.TxBody | null,
+            tx: null as CosmosTxBody | null,
             newChainLink: null as ChainLink | null,
             deletedChainLink: null as ChainLink | null,
 
-            generatedProof: null as DesmosTypes.Proof | null,
+            generatedProof: null as DesmosProof | null,
             generateProofError: "",
 
             inputMnemonic: new Array<string>(24),
@@ -100,17 +100,17 @@ export default defineComponent({
          */
         deleteChainLink(chainLink: ChainLink): void {
             if (authModule.account) {
-                const msgUnlink: DesmosTypes.MsgUnlinkChainAccount = {
+                const msgUnlink: DesmosMsgUnlinkChainAccount = {
                     chainName: chainLink.chain,
                     owner: authModule.account?.address,
                     target: chainLink.address,
                 }
-                const txBody: CosmosTypes.TxBody = {
+                const txBody: CosmosTxBody = {
                     memo: "Chain unlink",
                     messages: [
                         {
                             typeUrl: "/desmos.profiles.v1beta1.MsgUnlinkChainAccount",
-                            value: DesmosTypes.MsgUnlinkChainAccount.encode(msgUnlink).finish(),
+                            value: DesmosMsgUnlinkChainAccount.encode(msgUnlink).finish(),
                         }
                     ],
                     extensionOptions: [],
@@ -132,10 +132,10 @@ export default defineComponent({
             if (mnemonic.trimEnd().split(' ').length >= 12 && authModule.account && this.selectedChain) {
                 try {
                     const destWallet = new Wallet(mnemonic, this.customHdpath, this.customBechPrefix);
-                    const msgLinkChain: DesmosTypes.MsgLinkChainAccount = {
+                    const msgLinkChain: DesmosMsgLinkChainAccount = {
                         chainAddress: {
                             typeUrl: "/desmos.profiles.v1beta1.Bech32Address",
-                            value: DesmosTypes.Bech32Address.encode({
+                            value: DesmosBech32Address.encode({
                                 prefix: destWallet.bech32Prefix,
                                 value: destWallet.address,
                             }).finish()
@@ -143,23 +143,23 @@ export default defineComponent({
                         proof: {
                             pubKey: {
                                 typeUrl: destWallet.publicKey.typeUrl,
-                                value: CosmosTypes.PubKey.encode({
+                                value: CosmosPubKey.encode({
                                     key: destWallet.publicKey.value
                                 }).finish()
                             },
-                            signature: Buffer.from(Secp256k1.sign(Buffer.from(CryptoUtils.sha256Buffer(Buffer.from(destWallet.address))), destWallet.privateKey)).toString('hex'),
+                            signature: Buffer.from(Transaction.signBytes(Buffer.from(CryptoUtils.sha256Buffer(Buffer.from(destWallet.address))), destWallet.privateKey)).toString('hex'),
                             plainText: destWallet.address,
                         }, chainConfig: {
-                            name: this.selectedChain?.id,
+                            name: this.selectedChain?.id.toLowerCase(),
                         },
                         signer: authModule.account?.address,
                     }
-                    const txBody: CosmosTypes.TxBody = {
+                    const txBody: CosmosTxBody = {
                         memo: "Chain link",
                         messages: [
                             {
                                 typeUrl: "/desmos.profiles.v1beta1.MsgLinkChainAccount",
-                                value: DesmosTypes.MsgLinkChainAccount.encode(msgLinkChain).finish(),
+                                value: DesmosMsgLinkChainAccount.encode(msgLinkChain).finish(),
                             }
                         ],
                         extensionOptions: [],
@@ -195,6 +195,12 @@ export default defineComponent({
                 this.selectedChain = chain;
                 this.customHdpath = chain.hdpath;
                 this.customBechPrefix = chain.bechPrefix;
+            }
+        }, getChainLogo(name: string) {
+            try {
+                return require('@/assets/brands/' + name + '/logo.svg')
+            } catch (e) {
+                return '';
             }
         }
     },
