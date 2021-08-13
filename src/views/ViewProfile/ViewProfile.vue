@@ -9,7 +9,7 @@
         <!-- Profile App Links -->
         <ProfileAppLinks />
 
-        <section>
+        <!-- <section>
           <div class="px-2 md:px-16 lg:mx-40 pt-8">
             <div class="py-2 md:py-8 px-2">
               <span v-if="$store.state.UserModule.userLoadingStatus">
@@ -30,7 +30,6 @@
               </span>
               <span v-else>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 text-center">
-                  <!-- Loading -->
                   <div
                     v-for="loadingItem in [1,2,3,4,5]"
                     class="col-span-1"
@@ -45,7 +44,7 @@
               </span>
             </div>
           </div>
-        </section>
+        </section> -->
 
         <section>
           <div class="pt-8" />
