@@ -80,7 +80,7 @@
       <!-- Loading -->
       <SkeletonLoader
         shape="rectangle"
-        class="py-1 text-left w-full h-32 px-2"
+        class="py-4 text-left w-full h-32 px-2"
       />
 
     </span>
