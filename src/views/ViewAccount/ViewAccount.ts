@@ -11,6 +11,7 @@ import AccountBalance from "@/modules/account/components/AccountBalance/AccountB
 import AccountChainLinks from "@/modules/account/components/AccountChainLinks/AccountChainLinks.vue";
 import AccountModule from "@/store/modules/AccountModule";
 import AccountProfileEdit from "@/modules/account/components/AccountProfileEdit/AccountProfileEdit.vue";
+import AccountAppLinks from "@/modules/account/components/AccountAppLinks/AccountAppLinks.vue";
 const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
 
@@ -24,6 +25,7 @@ export default defineComponent({
         AccountBalance,
         AccountChainLinks,
         AccountProfileEdit,
+        AccountAppLinks,
     },
     async mounted() {
         const account = authModule.account;

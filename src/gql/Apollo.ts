@@ -8,11 +8,12 @@ const httpLink = createHttpLink({
     // You should use an absolute URL here
     uri: `https://${process.env.VUE_APP_GRAPH_ENDPOINT}`,
 })
-/* 
+
 const wsLink = new WebSocketLink({
     uri: `wss://${process.env.VUE_APP_GRAPH_ENDPOINT}`,
     options: {
         reconnect: true,
+        timeout: 30000,
     },
 })
 
@@ -23,16 +24,16 @@ const link = split(
         return definition.kind === 'OperationDefinition' &&
             definition.operation === 'subscription'
     },
-    httpLink,
     wsLink,
-) */
+    httpLink,
+)
 
 // Cache implementation
 const cache = new InMemoryCache()
 
 // Create the apollo client
 export const apolloClient = new ApolloClient({
-    link: httpLink,
+    link: link,
     cache,
 })
 

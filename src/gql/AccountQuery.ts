@@ -12,6 +12,7 @@ export const AccountQuery = gql`
             application_links {
                 application
                 username
+                state
             }
             chain_links {
                 external_address

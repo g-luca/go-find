@@ -20,6 +20,12 @@ export default defineComponent({
     methods: {
         copyAddress(address: string) {
             navigator.clipboard.writeText(address);
+        }, getChainLogo(name: string) {
+            try {
+                return require('@/assets/brands/' + name + '/logo.svg')
+            } catch (e) {
+                return '';
+            }
         }
     }
 });
