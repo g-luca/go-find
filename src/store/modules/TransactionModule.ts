@@ -1,5 +1,5 @@
 import store from '@/store';
-import { CosmosTypes, Network, Transaction } from 'desmosjs';
+import { CosmosBroadcastMode, CosmosTxBody, CosmosTxResponse, Network, Transaction } from 'desmosjs';
 import { getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import AuthModule from './AuthModule';
 const authModule = getModule(AuthModule);
@@ -14,7 +14,7 @@ export enum TransactionStatus {
 @Module({ store, name: 'TransactionModule', dynamic: true })
 export default class TransactionModule extends VuexModule {
     public isOpen = false;
-    public tx: CosmosTypes.TxBody | null = null;
+    public tx: CosmosTxBody | null = null;
     public transactionStatus: TransactionStatus = TransactionStatus.Idle; // default status
     public errorMessage = "";
 
@@ -34,6 +34,7 @@ export default class TransactionModule extends VuexModule {
                 const signedTx = await TransactionModule.handleSign(this.tx, payload.mPassword);
                 if (signedTx) {
                     const broadcastSuccess = await TransactionModule.handleBroadcast(signedTx);
+                    //const broadcastSuccess = true; // only for development test
                     if (broadcastSuccess) {
                         this.transactionStatus = TransactionStatus.Success;
                         this.errorMessage = "";
@@ -61,7 +62,7 @@ export default class TransactionModule extends VuexModule {
      * @param tx the transaction that is going to be signed and broadcasted
      */
     @Mutation
-    start(tx: CosmosTypes.TxBody): void {
+    start(tx: CosmosTxBody): void {
         this.tx = tx;
         this.isOpen = true;
         this.transactionStatus = TransactionStatus.Idle;
@@ -86,7 +87,7 @@ export default class TransactionModule extends VuexModule {
      * @param mPassword clear Wallet mPassword
      * @returns the signed tx if succeeded, null otherwise
      */
-    private static async handleSign(tx: CosmosTypes.TxBody, mPassword: string): Promise<Transaction | null> {
+    private static async handleSign(tx: CosmosTxBody, mPassword: string): Promise<Transaction | null> {
         if (authModule.account) {
             const signedTx = await AuthModule.signTx(tx, authModule.account.address, mPassword);
             if (signedTx) {
@@ -105,9 +106,9 @@ export default class TransactionModule extends VuexModule {
     private static async handleBroadcast(signedTx: Transaction): Promise<boolean> {
         try {
             const desmosNet = new Network('https://lcd.go-find.me');
-            const broadcastRawResult = await desmosNet.broadcast(signedTx, CosmosTypes.BroadcastMode.BROADCAST_MODE_SYNC);
-            const broadcastResult = CosmosTypes.TxResponse.fromJSON(broadcastRawResult.tx_response);
-
+            const broadcastRawResult = await desmosNet.broadcast(signedTx, CosmosBroadcastMode.BROADCAST_MODE_SYNC);
+            const broadcastResult = CosmosTxResponse.fromJSON(broadcastRawResult.tx_response);
+            console.log(`tx hash: ${broadcastResult.txhash}`);
             //TODO: is this check enough?
             if (broadcastResult.txhash && broadcastResult.code === 0) {
                 return true;
