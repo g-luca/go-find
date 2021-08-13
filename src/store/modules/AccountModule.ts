@@ -3,14 +3,13 @@ import store from '@/store';
 import { getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { LoadingStatus } from '@/core/types/LoadingStatus';
 import AuthModule, { AuthLevel } from './AuthModule';
-import ApplicationLink from '@/core/types/ApplicationLink';
-import ApplicationLinkDiscord from '@/core/types/ApplicationLinks/ApplicationLinkDiscord';
-import ApplicationLinkGithub from '@/core/types/ApplicationLinks/ApplicationLinkGithub';
-import ApplicationLinkTwitter from '@/core/types/ApplicationLinks/ApplicationLinkTwitter';
 import { useLazyQuery } from '@vue/apollo-composable';
 import { AccountQuery } from '@/gql/AccountQuery';
 import Account from '@/core/types/Account';
 import ChainLink from '@/core/types/ChainLink';
+import { apolloClient } from '@/gql/Apollo';
+import { ApplicationLinkSubscription } from '@/gql/ApplicationLinkSubscription';
+import ApplicationLinkModule from './ApplicationLinkModule';
 const authModule = getModule(AuthModule);
 
 @Module({ store, name: 'AccountModule', dynamic: true })
@@ -34,6 +33,20 @@ export default class AccountModule extends VuexModule {
                     dtag: authModule.account?.username,
                     address: authModule.account?.address,
                 });
+
+                const applicationLinkObserver = apolloClient.subscribe({
+                    query: ApplicationLinkSubscription,
+                    variables: {
+                        dtag: authModule.account?.username,
+                    },
+                })
+                applicationLinkObserver.subscribe((response) => {
+                    const newApplicationLinks = ApplicationLinkModule.parseApplicationLinks(response['data']['profile'][0]);
+                    if (this._user) {
+                        this._user.applicationLinks = newApplicationLinks;
+                    }
+                })
+
                 getAccountQuery.onResult((result) => {
                     if (result.loading) {
                         this.userLoadingStatus = LoadingStatus.Loading;
@@ -43,23 +56,7 @@ export default class AccountModule extends VuexModule {
                         if (result.data.profile[0]) {
                             // The profile exists
                             const profileRaw = result.data.profile[0];
-                            const applicationLinks: ApplicationLink[] = [];
-                            if (profileRaw.application_links && profileRaw.application_links.length > 0) {
-                                profileRaw.application_links.forEach((applicationLinkRaw: any) => {
-                                    //TODO: this has to be managed in a different place
-                                    switch (applicationLinkRaw.application) {
-                                        case "discord":
-                                            applicationLinks.push(new ApplicationLinkDiscord(applicationLinkRaw.username));
-                                            break;
-                                        case "github":
-                                            applicationLinks.push(new ApplicationLinkGithub(applicationLinkRaw.username));
-                                            break;
-                                        case "twitter":
-                                            applicationLinks.push(new ApplicationLinkTwitter(applicationLinkRaw.username));
-                                            break;
-                                    }
-                                })
-                            }
+                            const applicationLinks = ApplicationLinkModule.parseApplicationLinks(profileRaw);
                             const chainLinks: ChainLink[] = [];
                             if (profileRaw.chain_links && profileRaw.chain_links.length > 0) {
                                 profileRaw.chain_links.forEach((chainLink: any) => {

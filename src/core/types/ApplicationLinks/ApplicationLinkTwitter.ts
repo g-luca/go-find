@@ -1,23 +1,15 @@
+import { DesmosApplicationLinkState } from "desmosjs";
 import ApplicationLink from "../ApplicationLink";
 
-export default class ApplicationLinkTwitter implements ApplicationLink {
+export default class ApplicationLinkTwitter extends ApplicationLink {
     readonly name: string = 'twitter';
     readonly displayName: string = 'Twitter';
     readonly logo: string = require('@/assets/brands/twitter/logo.svg');
     readonly url: string = "https://www.twitter.com/";
 
-    private _username: string;
 
-
-    constructor(username: string) {
-        this._username = username;
+    constructor(username: string, state = DesmosApplicationLinkState.APPLICATION_LINK_STATE_INITIALIZED_UNSPECIFIED) {
+        super(username, state);
     }
 
-    /**
-     * Getter username
-     * @return {string}
-     */
-    public get username(): string {
-        return this._username;
-    }
 }

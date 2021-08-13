@@ -88,14 +88,14 @@
                 <div class="grid grid-cols-12 gap-3 text-center">
                   <div
                     v-for="chainLink in $store.state.UserModule.user.chainLinks"
-                    class="col-span-12 lg:col-span-6 bg-indigo-50 dark:bg-denim-900 rounded-2xl mr-4 py-1"
+                    class="col-span-12 lg:col-span-6 bg-indigo-50 dark:bg-indigo-900 rounded-2xl mx-4 md:mx-0 md:mr-4 py-1"
                   >
                     <div class="grid grid-cols-12">
                       <div class="col-span-2 my-auto">
                         <div class="rounded-full w-10 h-10 md:w-10 md:h-10 m-auto">
                           <img
                             class="p-2 pointer-events-none select-none"
-                            :src="require('@/assets/brands/'+chainLink.chain+'/logo.svg')"
+                            :src="getChainLogo(chainLink.chain)"
                             alt=""
                           >
                         </div>

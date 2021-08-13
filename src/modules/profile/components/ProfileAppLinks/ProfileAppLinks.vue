@@ -5,7 +5,7 @@
         <div class="py-2 md:py-8 px-2 bg-gray-100 dark:bg-gray-700 rounded-3xl shadow-xl">
           <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 text-center">
             <div
-              v-for="applicationLink in $store.state.UserModule.user.applicationLinks"
+              v-for="applicationLink in validApplicationLinks"
               :key="applicationLink"
               class="m-auto cursor-pointer"
               @click="openApplicationLink(applicationLink)"
