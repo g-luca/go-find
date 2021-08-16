@@ -1,5 +1,6 @@
 <template>
   <div>
+    <Clipboard />
     <AppHeader />
     <div class="w-full dark:bg-denim-900 bg-gray-50">
       <span v-if="$store.state.ProfileModule.profileLoadingStatus>=0">

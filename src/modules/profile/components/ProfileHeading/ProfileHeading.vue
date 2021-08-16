@@ -66,7 +66,6 @@
                     {{ $store.state.ProfileModule.profile.address }}
                   </div>
                   <div
-                    v-if="canCopy"
                     class="flex-none w-5"
                     @click="copyAddress($store.state.ProfileModule.profile.address)"
                   >
@@ -112,7 +111,6 @@
                             {{ chainLink._address }}
                           </span>
                           <span
-                            v-if="canCopy"
                             class="flex-none mr-4 w-5"
                             @click="copyAddress(chainLink._address)"
                           >
