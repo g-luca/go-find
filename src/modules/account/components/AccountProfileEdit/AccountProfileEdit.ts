@@ -53,23 +53,23 @@ export default defineComponent({
         if (account) {
             await accountModule.loadAccount();
             // set the default values form the accountModule
-            if (accountModule.user) {
+            if (accountModule.profile) {
                 this.initialValues = {
-                    nickname: accountModule.user.nickname,
-                    profilePic: accountModule.user.profilePic,
-                    profileCover: accountModule.user.profileCover,
-                    bio: accountModule.user.bio,
+                    nickname: accountModule.profile.nickname,
+                    profilePic: accountModule.profile.profilePic,
+                    profileCover: accountModule.profile.profileCover,
+                    bio: accountModule.profile.bio,
                 }
             }
 
             //register the watcher of the accountModule user account profile
-            ref(accountModule.user);
+            ref(accountModule.profile);
             watchEffect(() => {
-                if (accountModule.user) {
-                    this.inputNickname = accountModule.user.nickname;
-                    this.inputProfilePic = accountModule.user.profilePic;
-                    this.inputProfileCover = accountModule.user.profileCover;
-                    this.inputBio = accountModule.user.bio;
+                if (accountModule.profile) {
+                    this.inputNickname = accountModule.profile.nickname;
+                    this.inputProfilePic = accountModule.profile.profilePic;
+                    this.inputProfileCover = accountModule.profile.profileCover;
+                    this.inputBio = accountModule.profile.bio;
                 }
             })
 
@@ -78,17 +78,17 @@ export default defineComponent({
             ref(transactionModule);
             watchEffect(() => {
                 // check if is processing the right transaction and the status
-                if (accountModule.user && transactionModule.tx === this.txSent && (transactionModule.transactionStatus === TransactionStatus.Error || transactionModule.transactionStatus === TransactionStatus.Success)) {
+                if (accountModule.profile && transactionModule.tx === this.txSent && (transactionModule.transactionStatus === TransactionStatus.Error || transactionModule.transactionStatus === TransactionStatus.Success)) {
                     if (transactionModule.errorMessage) {
                         // the transaction has an error message, failed
                         console.log('update failure!')
                     } else {
                         // the tx went well! update the data 
                         console.log('update success!')
-                        accountModule.user.nickname = this.inputNickname;
-                        accountModule.user.profilePic = this.inputProfilePic;
-                        accountModule.user.profileCover = this.inputProfileCover;
-                        accountModule.user.bio = this.inputBio;
+                        accountModule.profile.nickname = this.inputNickname;
+                        accountModule.profile.profilePic = this.inputProfilePic;
+                        accountModule.profile.profileCover = this.inputProfileCover;
+                        accountModule.profile.bio = this.inputBio;
                         this.txSent = null;
                         this.handleResetForm();
                     }
@@ -98,15 +98,15 @@ export default defineComponent({
     },
     methods: {
         submitEdit(_data: void, { resetForm }: unknown): void {
-            if (accountModule.user) {
+            if (accountModule.profile) {
                 const doNotModify = '[do-not-modify]';
                 const msgSaveProfile: DesmosMsgSaveProfile = {
-                    dtag: accountModule.user.username,
-                    nickname: (accountModule.user.nickname !== this.inputNickname) ? this.inputNickname : doNotModify,
-                    bio: (accountModule.user.bio !== this.inputBio) ? this.inputBio : doNotModify,
-                    profilePicture: (accountModule.user.profilePic !== this.inputProfilePic) ? this.inputProfilePic : doNotModify,
-                    coverPicture: (accountModule.user.profileCover !== this.inputProfileCover) ? this.inputProfileCover : doNotModify,
-                    creator: accountModule.user.address,
+                    dtag: accountModule.profile.dtag,
+                    nickname: (accountModule.profile.nickname !== this.inputNickname) ? this.inputNickname : doNotModify,
+                    bio: (accountModule.profile.bio !== this.inputBio) ? this.inputBio : doNotModify,
+                    profilePicture: (accountModule.profile.profilePic !== this.inputProfilePic) ? this.inputProfilePic : doNotModify,
+                    coverPicture: (accountModule.profile.profileCover !== this.inputProfileCover) ? this.inputProfileCover : doNotModify,
+                    creator: accountModule.profile.address,
                 }
                 const txBody: CosmosTxBody = {
                     memo: "Profile update",
@@ -133,11 +133,11 @@ export default defineComponent({
          * Reset the form and the input data
          */
         handleResetForm(): void {
-            if (accountModule.user) {
-                this.inputNickname = accountModule.user.nickname;
-                this.inputProfilePic = accountModule.user.profilePic;
-                this.inputProfileCover = accountModule.user.profileCover;
-                this.inputBio = accountModule.user.bio;
+            if (accountModule.profile) {
+                this.inputNickname = accountModule.profile.nickname;
+                this.inputProfilePic = accountModule.profile.profilePic;
+                this.inputProfileCover = accountModule.profile.profileCover;
+                this.inputBio = accountModule.profile.bio;
                 this.resetForm({
                     values: {
                         nickname: this.inputNickname,

@@ -1,6 +1,6 @@
 <template>
   <section>
-    <span v-if="$store.state.AccountModule.userLoadingStatus">
+    <span v-if="$store.state.AccountModule.profileLoadingStatus">
       <div class="bg-white dark:bg-gray-900 overflow-hidden shadow-xl hover:shadow-2xl rounded-3xl relative mb-8 mt-8 lg:mt-0">
         <img
           src="@/assets/brands/desmos/logo.svg"
@@ -13,15 +13,15 @@
               Balance
             </dt>
             <div class="font-mono text-md truncate py-2 dark:text-gray-400 text-gray-700">
-              {{ $store.state.AccountModule._account._address }}
+              {{ $store.state.AccountModule.account._address }}
             </div>
 
             <!-- Balance value -->
             <div>
               <span class="text-brand font-bold pt-1 text-6xl">
-                {{ splitNumberLeft($store.state.AccountModule._account._balance,".") }}
+                {{ splitNumberLeft($store.state.AccountModule.account._balance,".") }}
                 <span class="text-sm">
-                  .{{ splitNumberRight($store.state.AccountModule._account._balance,".") }}
+                  .{{ splitNumberRight($store.state.AccountModule.account._balance,".") }}
                 </span>
                 <span class="text-black dark:text-white pl-4 text-4xl">
                   DARIC
@@ -29,7 +29,7 @@
               </span>
             </div>
 
-            <span v-if="$store.state.AccountModule._account._delegations>0">
+            <span v-if="$store.state.AccountModule.account._delegations>0">
               <div class="grid grid-cols-2 pt-4">
                 <!-- Delegations -->
                 <div class="col-span-1">
@@ -38,9 +38,9 @@
                       Delegated
                     </p>
                     <span class="text-indigo-600 font-bold py-1 text-2xl">
-                      {{ splitNumberLeft($store.state.AccountModule._account._delegations,".") }}
+                      {{ splitNumberLeft($store.state.AccountModule.account._delegations,".") }}
                       <span class="text-sm">
-                        .{{ splitNumberRight($store.state.AccountModule._account._delegations,".") }}
+                        .{{ splitNumberRight($store.state.AccountModule.account._delegations,".") }}
                       </span>
                       <span class="text-gray-700 dark:text-gray-300 pl-2 text-lg">
                         DARIC
@@ -56,9 +56,9 @@
                       Total
                     </p>
                     <span class="text-pink-600 font-bold py-1 text-2xl">
-                      {{ splitNumberLeft($store.state.AccountModule._account._delegations + $store.state.AccountModule._account._balance,".") }}
+                      {{ splitNumberLeft($store.state.AccountModule.account._delegations + $store.state.AccountModule.account._balance,".") }}
                       <span class="text-sm">
-                        .{{ splitNumberRight($store.state.AccountModule._account._delegations+ $store.state.AccountModule._account._balance,".") }}
+                        .{{ splitNumberRight($store.state.AccountModule.account._delegations+ $store.state.AccountModule.account._balance,".") }}
                       </span>
                       <span class="text-gray-700 dark:text-gray-300 pl-2 text-lg">
                         DARIC

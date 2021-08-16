@@ -1,4 +1,4 @@
-import User from '@/core/types/User';
+import { Profile } from '@/core/types/Profile';
 import store from '@/store';
 import { getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { LoadingStatus } from '@/core/types/LoadingStatus';
@@ -14,9 +14,9 @@ const authModule = getModule(AuthModule);
 
 @Module({ store, name: 'AccountModule', dynamic: true })
 export default class AccountModule extends VuexModule {
-    private _user: User | false = false;
-    private _account: Account | false = false;
-    public userLoadingStatus: LoadingStatus = LoadingStatus.Loading;
+    public profile: Profile | false = false;
+    public account: Account | false = false;
+    public profileLoadingStatus: LoadingStatus = LoadingStatus.Loading;
 
 
     /**
@@ -25,31 +25,31 @@ export default class AccountModule extends VuexModule {
      */
     @Mutation
     async loadAccount(force = false): Promise<void> {
-        if (this._user === false || force) {
-            this.userLoadingStatus = LoadingStatus.Loading;
+        if (this.profile === false || force) {
+            this.profileLoadingStatus = LoadingStatus.Loading;
             if (authModule.authLevel > AuthLevel.None && authModule.account) {
                 const getAccountQuery = useLazyQuery(
                     AccountQuery, {
-                    dtag: authModule.account?.username,
+                    dtag: authModule.account?.dtag,
                     address: authModule.account?.address,
                 });
 
                 const applicationLinkObserver = apolloClient.subscribe({
                     query: ApplicationLinkSubscription,
                     variables: {
-                        dtag: authModule.account?.username,
+                        dtag: authModule.account?.dtag,
                     },
                 })
                 applicationLinkObserver.subscribe((response) => {
                     const newApplicationLinks = ApplicationLinkModule.parseApplicationLinks(response['data']['profile'][0]);
-                    if (this._user) {
-                        this._user.applicationLinks = newApplicationLinks;
+                    if (this.profile) {
+                        this.profile.applicationLinks = newApplicationLinks;
                     }
                 })
 
                 getAccountQuery.onResult((result) => {
                     if (result.loading) {
-                        this.userLoadingStatus = LoadingStatus.Loading;
+                        this.profileLoadingStatus = LoadingStatus.Loading;
                     }
                     if (result.data && !result.loading && authModule.account) {
                         // Manage Acccount info
@@ -63,10 +63,10 @@ export default class AccountModule extends VuexModule {
                                     chainLinks.push(new ChainLink(chainLink.external_address, chainLink.chain_config.name));
                                 })
                             }
-                            this._user = new User(profileRaw.dtag, profileRaw.address, profileRaw.nickname, profileRaw.bio, profileRaw.profile_pic, profileRaw.cover_pic, applicationLinks, chainLinks);
+                            this.profile = new Profile(profileRaw.dtag, profileRaw.address, profileRaw.nickname, profileRaw.bio, profileRaw.profile_pic, profileRaw.cover_pic, applicationLinks, chainLinks);
                         } else {
                             // The profile doesn't exists
-                            this._user = new User(authModule.account?.username, authModule.account?.address, "", "", "", "", [], []);
+                            this.profile = new Profile(authModule.account?.dtag, authModule.account?.address, "", "", "", "", [], []);
                         }
 
                         // Manage acccount data
@@ -81,17 +81,17 @@ export default class AccountModule extends VuexModule {
                                     delegationsTot += Number(delegation.amount?.amount);
                                 });
                             } catch { null }
-                            this._account = new Account(authModule.account.address, Number(accountRaw.account_balances[0]?.coins[0]?.amount) / 1000000, delegationsTot / 1000000);
+                            this.account = new Account(authModule.account.address, Number(accountRaw.account_balances[0]?.coins[0]?.amount) / 1000000, delegationsTot / 1000000);
                         } else {
                             // The user hasn't done any transaction on chain, completelly new account
-                            this._account = new Account(authModule.account.address, 0, 0);
+                            this.account = new Account(authModule.account.address, 0, 0);
                         }
-                        this.userLoadingStatus = LoadingStatus.Loaded;
+                        this.profileLoadingStatus = LoadingStatus.Loaded;
                     } else {
                         // Connection / graphQL issues
-                        this._user = false;
-                        this._account = false;
-                        this.userLoadingStatus = LoadingStatus.Error;
+                        this.profile = false;
+                        this.account = false;
+                        this.profileLoadingStatus = LoadingStatus.Error;
                     }
                 })
                 getAccountQuery.load();
@@ -104,27 +104,10 @@ export default class AccountModule extends VuexModule {
      */
     @Mutation
     reset(): void {
-        this._user = false;
-        this._account = false;
-        this.userLoadingStatus = LoadingStatus.Loading;
+        this.profile = false;
+        this.account = false;
+        this.profileLoadingStatus = LoadingStatus.Loading;
     }
 
-
-    /**
-     * Getter user
-     * @return {User | false }
-     */
-    public get user(): User | false {
-        return this._user;
-    }
-
-    /**
-    /**
-     * Setter user
-     * @param {User | false } value
-     */
-    public set user(value: User | false) {
-        this._user = value;
-    }
 
 }

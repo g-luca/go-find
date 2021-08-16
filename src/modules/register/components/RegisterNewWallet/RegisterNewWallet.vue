@@ -8,7 +8,7 @@
       </div>
       <div>
         <h2 class="dark:text-gray-50 text-gray-800 pb-1 font-medium text-3xl text-center">
-          Your Desmos wallet for @<span class="text-brand">{{ $store.state.RegisterModule.username }}</span>
+          Your Desmos wallet for @<span class="text-brand">{{ $store.state.RegisterModule.dtag }}</span>
         </h2>
         <div class="text-center w-full">
           <button

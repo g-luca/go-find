@@ -58,7 +58,7 @@ export default defineComponent({
         ref(transactionModule);
         watchEffect(() => {
             // check if is processing the right transaction and the status
-            if (accountModule.user && transactionModule.tx === this.tx && (transactionModule.transactionStatus === TransactionStatus.Error || transactionModule.transactionStatus === TransactionStatus.Success)) {
+            if (accountModule.profile && transactionModule.tx === this.tx && (transactionModule.transactionStatus === TransactionStatus.Error || transactionModule.transactionStatus === TransactionStatus.Success)) {
                 if (transactionModule.errorMessage) {
                     // the transaction has an error message, failed
                     console.log('chain link failure!')
@@ -68,15 +68,15 @@ export default defineComponent({
                     // handle new chain link
                     if (this.tx?.messages[0].typeUrl === "/desmos.profiles.v1beta1.MsgLinkChainAccount" && this.newChainLink) {
                         console.log('chain link success!')
-                        accountModule.user.chainLinks.push(new ChainLink(this.newChainLink.address, this.newChainLink.chain));
+                        accountModule.profile.chainLinks.push(new ChainLink(this.newChainLink.address, this.newChainLink.chain));
                         this.newChainLink = null;
                         this.deletedChainLink = null;
                     }
 
                     // handle chain unlink
                     if (this.tx?.messages[0].typeUrl === "/desmos.profiles.v1beta1.MsgUnlinkChainAccount" && this.deletedChainLink) {
-                        accountModule.user.chainLinks.slice(accountModule.user.chainLinks.indexOf(new ChainLink(this.deletedChainLink.address, this.deletedChainLink.chain)), 1);
-                        accountModule.user.chainLinks = accountModule.user.chainLinks.filter((chainLink: ChainLink) => {
+                        accountModule.profile.chainLinks.slice(accountModule.profile.chainLinks.indexOf(new ChainLink(this.deletedChainLink.address, this.deletedChainLink.chain)), 1);
+                        accountModule.profile.chainLinks = accountModule.profile.chainLinks.filter((chainLink: ChainLink) => {
                             return chainLink.address !== this.deletedChainLink?.address && chainLink.chain !== this.deletedChainLink?.chain;
                         });
                         this.newChainLink = null;

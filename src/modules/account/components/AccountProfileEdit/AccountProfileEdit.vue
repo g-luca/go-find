@@ -6,11 +6,11 @@
       :initial-values="initialValues"
       @submit="submitEdit"
     >
-      <span v-if="$store.state.AccountModule.userLoadingStatus">
+      <span v-if="$store.state.AccountModule.profileLoadingStatus">
         <div class="w-full text-center md:text-left dark:text-white">
           <div class="pb-4 pt-8">
             <h2 class="dark:text-white font-bold text-5xl">
-              Welcome back, <span class="text-brand">{{ $store.state.AccountModule._user.username }}</span>
+              Welcome back, <span class="text-brand">{{ $store.state.AccountModule.profile.dtag }}</span>
             </h2>
           </div>
 

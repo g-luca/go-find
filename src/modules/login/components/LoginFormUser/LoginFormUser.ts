@@ -1,5 +1,5 @@
 import { LoadingStatus } from "@/core/types/LoadingStatus";
-import User from "@/core/types/User";
+import { Profile } from "@/core/types/Profile";
 import LinkBlockSample from "@/modules/landing/components/LinkBlockSample/LinkBlockSample.vue"
 import LoginModule, { LoginState } from "@/store/modules/LoginModule";
 import CryptoUtils from "@/utils/CryptoUtils";
@@ -14,23 +14,23 @@ export default defineComponent({
     data() {
         return {
             isLoading: LoadingStatus.Loaded,
-            isValidUsername: false,
+            isValidDtag: false,
             isValidEPassword: false,
             isValidAddress: false,
             hasLoginError: false,
             isTouched: false,
-            inputUsername: "",
+            inputDtag: "",
             inputAddress: "",
             inputEPassword: "",
             isLoginWithAddress: false,
         };
     },
     methods: {
-        validateUsername() {
-            this.isValidUsername = User.USERNAME_REGEX.test(this.inputUsername);
+        validateDtag() {
+            this.isValidDtag = Profile.DTAG_REGEX.test(this.inputDtag);
         },
         validatePassword() {
-            this.isValidEPassword = User.PASSWORD_REGEX.test(this.inputEPassword);
+            this.isValidEPassword = Profile.PASSWORD_REGEX.test(this.inputEPassword);
         },
         validateAddress() {
             //TODO: add better control with regex
@@ -42,16 +42,16 @@ export default defineComponent({
         },
         async signin() {
             this.isTouched = true;
-            this.validateUsername();
+            this.validateDtag();
             this.validatePassword();
             this.validateAddress();
 
-            if (this.isValidEPassword && this.isValidUsername && (!this.isLoginWithAddress) || (this.isLoginWithAddress && this.isValidAddress)) {
+            if (this.isValidEPassword && this.isValidDtag && (!this.isLoginWithAddress) || (this.isLoginWithAddress && this.isValidAddress)) {
                 const ePassword = CryptoUtils.sha256(this.inputEPassword); // generate the hashed ePassword
 
-                // Call the login endpoint, if username and ePassword matches it will return eKey, empty string otherwise
+                // Call the login endpoint, if dtag and ePassword matches it will return eKey, empty string otherwise
                 this.isLoading = LoadingStatus.Loading;
-                await loginModule.login({ username: this.inputUsername, ePassword, address: this.inputAddress });
+                await loginModule.login({ dtag: this.inputDtag, ePassword, address: this.inputAddress });
                 const eKey = loginModule.eKey;
                 if (eKey) {
                     this.isLoading = LoadingStatus.Loaded;

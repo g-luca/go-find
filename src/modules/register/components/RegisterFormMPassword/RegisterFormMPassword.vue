@@ -3,7 +3,7 @@
     <div class="mt-8 space-y-6 w-11/12 xl:w-1/2 mx-auto">
       <div class="text-gray-500 text-sm">
         <button @click="goBack()">
-          <i class="bi bi-arrow-left" /> Change username
+          <i class="bi bi-arrow-left" /> Change dtag
         </button>
       </div>
 

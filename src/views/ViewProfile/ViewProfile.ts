@@ -7,9 +7,9 @@ import ProfileHeading from "@/modules/profile/components/ProfileHeading/ProfileH
 import ProfileAppLinks from "@/modules/profile/components/ProfileAppLinks/ProfileAppLinks.vue";
 import Error404 from "@/ui/components/errors/Error404.vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
-import UserModule from '@/store/modules/UserModule';
+import ProfileModule from '@/store/modules/ProfileModule';
 import { getModule } from 'vuex-module-decorators';
-const userModule = getModule(UserModule);
+const profileModule = getModule(ProfileModule);
 
 export default defineComponent({
 
@@ -22,10 +22,10 @@ export default defineComponent({
         ProfileAppLinks,
         ApolloQuery,
     }, beforeRouteUpdate(to, from, next) {
-        userModule.loadUser(to.params['username'].toLocaleString());
+        profileModule.loadUser(to.params['dtag'].toLocaleString());
         next()
     },
     mounted() {
-        userModule.loadUser(this.$route.params['username'].toLocaleString());
+        profileModule.loadUser(this.$route.params['dtag'].toLocaleString());
     },
 });

@@ -64,7 +64,7 @@ export default defineComponent({
         ref(transactionModule);
         watchEffect(() => {
             // check if is processing the right transaction and the status
-            if (accountModule.user && transactionModule.tx === this.tx && (transactionModule.transactionStatus === TransactionStatus.Error || transactionModule.transactionStatus === TransactionStatus.Success)) {
+            if (accountModule.profile && transactionModule.tx === this.tx && (transactionModule.transactionStatus === TransactionStatus.Error || transactionModule.transactionStatus === TransactionStatus.Success)) {
                 if (transactionModule.errorMessage) {
                     // the transaction has an error message, failed
                     console.log('application link failure!')
@@ -75,13 +75,13 @@ export default defineComponent({
                     if (this.tx?.messages[0].typeUrl === "/desmos.profiles.v1beta1.MsgLinkApplication" && this.newApplicationLink) {
                         console.log('application link success!')
                         // application link message sent, now we need also to wait the verification process
-                        accountModule.user.applicationLinks.push(this.newApplicationLink);
+                        accountModule.profile.applicationLinks.push(this.newApplicationLink);
                     }
 
                     // handle application unlink
                     if (this.tx?.messages[0].typeUrl === "/desmos.profiles.v1beta1.MsgUnlinkApplication" && this.deletedApplicationLink) {
-                        accountModule.user.applicationLinks.slice(accountModule.user.applicationLinks.indexOf(this.deletedApplicationLink), 1);
-                        accountModule.user.applicationLinks = accountModule.user.applicationLinks.filter((applicationLink: ApplicationLink) => {
+                        accountModule.profile.applicationLinks.slice(accountModule.profile.applicationLinks.indexOf(this.deletedApplicationLink), 1);
+                        accountModule.profile.applicationLinks = accountModule.profile.applicationLinks.filter((applicationLink: ApplicationLink) => {
                             return applicationLink.username !== this.deletedApplicationLink?.username && applicationLink.name !== this.deletedApplicationLink?.name;
                         });
                         this.newApplicationLink = null;
