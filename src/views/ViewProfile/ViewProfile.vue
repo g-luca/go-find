@@ -2,7 +2,7 @@
   <div>
     <AppHeader />
     <div class="w-full dark:bg-denim-900 bg-gray-50">
-      <span v-if="$store.state.UserModule.userLoadingStatus>=0">
+      <span v-if="$store.state.ProfileModule.profileLoadingStatus>=0">
         <!-- Profile Heading -->
         <ProfileHeading />
 
@@ -12,10 +12,10 @@
         <!-- <section>
           <div class="px-2 md:px-16 lg:mx-40 pt-8">
             <div class="py-2 md:py-8 px-2">
-              <span v-if="$store.state.UserModule.userLoadingStatus">
+              <span v-if="$store.state.ProfileModule.profileLoadingStatus">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 text-center">
                   <div
-                    v-for="postLink in $store.state.UserModule.user.postLinks"
+                    v-for="postLink in $store.state.ProfileModule.profile.postLinks"
                     :key="postLink"
                     class="col-span-1 bg-gray-100 dark:bg-gray-700 rounded-3xl cursor-pointer py-4 ring-brand dark:ring-offset-denim-900 ring-offset-2 hover:ring-2"
                   >

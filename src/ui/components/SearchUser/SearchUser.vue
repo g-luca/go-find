@@ -3,7 +3,7 @@
     <i class="bi bi-search absolute left-0 z-20 w-4 h-4 ml-4 mb-2 text-gray-400 pointer-events-none fill-current group-hover:text-gray-400" />
     <input
       ref="searchInput"
-      v-model="searchUsername"
+      v-model="searchDtag"
       type="text"
       class="block w-full py-1.5 pl-10 pr-4 leading-normal rounded-2xl focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 ring-opacity-90 bg-gray-100 dark:bg-gray-800 text-gray-400 aa-input"
       placeholder="Search"
@@ -39,7 +39,7 @@
             >
               <div
                 class="flex-row gap-4 flex"
-                @click="openProfile(user.username)"
+                @click="openProfile(user.dtag)"
               >
                 <div class="flex-shrink-0">
                   <a
@@ -58,7 +58,7 @@
                     {{ user.nickname }}
                   </span>
                   <span class="text-gray-400 text-xs">
-                    @{{ user.username }}
+                    @{{ user.dtag }}
                   </span>
                 </div>
               </div>

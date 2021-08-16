@@ -17,7 +17,7 @@ export default defineComponent({
             const obj = { address: registerModule.address, mnemonic: registerModule.mnemonic };
             const json = JSON.stringify(obj);
             const file = "data:text/json;charset=utf-8," + encodeURIComponent(json);
-            const filename = `${registerModule.username}-wallet.json`;
+            const filename = `${registerModule.dtag}-wallet.json`;
             const downloadElem = document.createElement('a');
             if (downloadElem != null) {
                 downloadElem.setAttribute("href", file);

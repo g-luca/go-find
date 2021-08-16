@@ -9,7 +9,7 @@
     </div>
     <div class="text-center pt-10 xl:pt-20">
       <h1 class="text-4xl xl:text-6xl dark:text-white">
-        Welcome aboard @<span class="text-brand">{{ $store.state.RegisterModule.username }}</span>!
+        Welcome aboard @<span class="text-brand">{{ $store.state.RegisterModule.dtag }}</span>!
       </h1>
     </div>
     <div class="pt-10 w-1/2 mx-auto pb-10 text-center">

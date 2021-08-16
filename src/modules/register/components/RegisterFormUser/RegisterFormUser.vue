@@ -29,37 +29,37 @@
         v-slot="{ errors, meta }"
         :validation-schema="formSchema"
       >
-        <!-- Username -->
+        <!-- Dtag -->
         <div>
           <label
             class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
-            for="username"
+            for="dtag"
           > <span v-if="!$store.state.RegisterModule.hasDesmosProfile">
               Choose your
             </span>
             <span v-else>
               Your Desmos profile
             </span>
-            <span class="text-brand">username</span>
+            <span class="text-brand">dtag</span>
           </label>
 
           <div class="mt-1 relative rounded-md shadow-sm">
             <Field
-              id="username"
-              v-model="inputUsername"
-              :class="{'border-red-700 dark:border-red-700': meta.dirty && (errors.username || !isUsernameAvailable),
-                       'focus:border-brand dark:border-gray-700 ': !errors.username}"
+              id="dtag"
+              v-model="inputDtag"
+              :class="{'border-red-700 dark:border-red-700': meta.dirty && (errors.dtag || !isDtagAvailable),
+                       'focus:border-brand dark:border-gray-700 ': !errors.dtag}"
               type="text"
-              name="username"
+              name="dtag"
               class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
-              placeholder="Username"
-              @input="validateUsername()"
+              placeholder="Dtag"
+              @input="validateDtag()"
             />
             <div
-              v-if="isValidUsername"
+              v-if="isValidDtag"
               class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none z-10"
             >
-              <div v-if="isVerifyingUsernameAvailability">
+              <div v-if="isVerifyingDtagAvailability">
                 <svg
                   class="animate-spin -ml-1 mr-3 h-5 w-5 text-brand"
                   xmlns="http://www.w3.org/2000/svg"
@@ -81,26 +81,26 @@
                   />
                 </svg>
               </div>
-              <div v-if="isUsernameAvailable&&!isVerifyingUsernameAvailability">
+              <div v-if="isDtagAvailable&&!isVerifyingDtagAvailability">
                 <i class="bi bi-check-circle text-green-700" />
               </div>
-              <div v-else-if="!isVerifyingUsernameAvailability">
-                <!-- Username already taken-->
+              <div v-else-if="!isVerifyingDtagAvailability">
+                <!-- Dtag already taken-->
                 <i class="bi bi-x-circle text-red-700" />
               </div>
             </div>
           </div>
           <div
-            v-if="errors.username"
+            v-if="errors.dtag"
             class="text-red-700 text-sm px-2 pt-2 font-light"
           >
-            <p>Usernames must be 3-30 characters, can contains numbers and underscores.</p>
+            <p>Dtags must be 3-30 characters, can contains numbers and underscores.</p>
           </div>
           <div
-            v-if="isValidUsername&&!isUsernameAvailable"
+            v-if="isValidDtag&&!isDtagAvailable"
             class="text-red-700 text-sm px-2 pt-2 font-light"
           >
-            <p>This username is already taken.</p>
+            <p>This dtag is already taken.</p>
           </div>
         </div>
 
@@ -161,7 +161,7 @@
         </div>
 
         <div
-          v-if="meta.valid&&isUsernameAvailable"
+          v-if="meta.valid&&isDtagAvailable"
           class="py-3"
         >
           <button

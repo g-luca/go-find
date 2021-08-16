@@ -1,6 +1,6 @@
 import store from '@/store'
 import { getModule, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import User from '@/core/types/User';
+import { Profile } from '@/core/types/Profile';
 import * as bip39 from "bip39";
 import CryptoUtils from '@/utils/CryptoUtils';
 import AuthModule from '@/store/modules/AuthModule';
@@ -26,7 +26,7 @@ export enum RegisterState {
 
 @Module({ store, name: 'RegisterModule', dynamic: true })
 export default class RegisterModule extends VuexModule {
-    public username = '';
+    public dtag = '';
     public mPassword = '';
     public ePassword = '';
     public currentState: RegisterState = RegisterState.StateUserInput;
@@ -35,9 +35,9 @@ export default class RegisterModule extends VuexModule {
     public hasDesmosProfile = false;
 
     @Mutation
-    setUsername(username: string): void {
-        if (User.USERNAME_REGEX.test(username)) {
-            this.username = username;
+    setDtag(dtag: string): void {
+        if (Profile.DTAG_REGEX.test(dtag)) {
+            this.dtag = dtag;
         }
     }
 
@@ -48,13 +48,13 @@ export default class RegisterModule extends VuexModule {
 
     @Mutation
     setMPassword(mPassword: string): void {
-        if (User.PASSWORD_REGEX.test(mPassword)) {
+        if (Profile.PASSWORD_REGEX.test(mPassword)) {
             this.mPassword = mPassword;
         }
     }
     @Mutation
     setEPassword(ePassword: string): void {
-        if (User.PASSWORD_REGEX.test(ePassword)) {
+        if (Profile.PASSWORD_REGEX.test(ePassword)) {
             this.ePassword = ePassword;
         }
     }
@@ -96,15 +96,15 @@ export default class RegisterModule extends VuexModule {
 
         if (!this.hasDesmosProfile) {
             // register a completelly new user
-            success = await RegisterModule.completeNewUserRegistration(this.username, eKey, this.address);
+            success = await RegisterModule.completeNewUserRegistration(this.dtag, eKey, this.address);
         } else {
             // register a new user with already a Desmos Profile
-            success = await RegisterModule.completeDesmosUserRegistration(this.username, eKey, wallet);
+            success = await RegisterModule.completeDesmosUserRegistration(this.dtag, eKey, wallet);
         }
 
         if (success) {
             authModule.saveMKey({ mKey, mPassword }); // store mKey on localStorage
-            authModule.saveAuthAccount({ account: new AuthAccount(this.username, this.address) });
+            authModule.saveAuthAccount({ account: new AuthAccount(this.dtag, this.address) });
             this.currentState = RegisterState.StateRegistrationSuccess;
         } else {
             this.currentState = RegisterState.StateRegistrationFail;
@@ -129,7 +129,7 @@ export default class RegisterModule extends VuexModule {
     @Mutation
     reset(): void {
         this.currentState = RegisterState.StateUserInput;
-        this.username = "";
+        this.dtag = "";
         this.mPassword = "";
         this.ePassword = "";
         this.address = "";
@@ -139,20 +139,20 @@ export default class RegisterModule extends VuexModule {
 
     /**
      * Complete the registration of a user with already a Desmos Profile by calling the rest endpoint
-     * @param username username string
+     * @param dtag dtag string
      * @param eKey eKey string
      * @param address user wallet address string
      * @returns true if the operation succeed
      */
-    private static async completeDesmosUserRegistration(username: string, eKey: string, wallet: Wallet): Promise<boolean> {
+    private static async completeDesmosUserRegistration(dtag: string, eKey: string, wallet: Wallet): Promise<boolean> {
         const hash: Buffer = CryptoUtils.sha256Buffer(Buffer.from(JSON.stringify({
-            username,
+            dtag,
             eKey
         })));
         const signature = (Transaction.signBytes(hash, wallet.privateKey) as Buffer).toString('hex');
 
         const response = await Api.post(Api.endpoint + 'recover', JSON.stringify({
-            username,
+            username: dtag,
             eKey,
             signature: signature,
         }));
@@ -165,14 +165,14 @@ export default class RegisterModule extends VuexModule {
 
     /**
      * Complete the registration of a completelly new user by calling the rest endpoint
-     * @param username username string
+     * @param dtag dtag string
      * @param eKey eKey string
      * @param address user wallet address string
      * @returns true if the operation succeed
      */
-    private static async completeNewUserRegistration(username: string, eKey: string, address: string): Promise<boolean> {
+    private static async completeNewUserRegistration(dtag: string, eKey: string, address: string): Promise<boolean> {
         const response = await Api.post(Api.endpoint + 'signup', JSON.stringify({
-            username,
+            username: dtag,
             eKey,
             address,
         }));

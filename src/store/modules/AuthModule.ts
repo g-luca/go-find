@@ -151,7 +151,7 @@ export default class AuthModule extends VuexModule {
             try {
                 const accountRaw = JSON.parse(accountJSON);
                 if (accountRaw) {
-                    return new AuthAccount(accountRaw['_username'], accountRaw['_address']);
+                    return new AuthAccount(accountRaw['_dtag'], accountRaw['_address']);
                 }
             } catch (e) {
                 return null;

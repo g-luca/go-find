@@ -1,5 +1,5 @@
 import AuthAccount from "@/core/types/AuthAccount";
-import User from "@/core/types/User";
+import { Profile } from "@/core/types/Profile";
 import LinkBlockSample from "@/modules/landing/components/LinkBlockSample/LinkBlockSample.vue"
 import router from "@/router";
 import AuthModule from "@/store/modules/AuthModule";
@@ -24,7 +24,7 @@ export default defineComponent({
     },
     methods: {
         validatePassword() {
-            this.isValidMPassword = User.PASSWORD_REGEX.test(this.inputMPassword);
+            this.isValidMPassword = Profile.PASSWORD_REGEX.test(this.inputMPassword);
         },
         signin() {
             this.validatePassword();
@@ -38,7 +38,7 @@ export default defineComponent({
                     this.hasLoginError = false
                     authModule.saveMKey({ mKey, mPassword });
 
-                    authModule.saveAuthAccount({ account: new AuthAccount(loginModule.username, loginModule.address) });
+                    authModule.saveAuthAccount({ account: new AuthAccount(loginModule.dtag, loginModule.address) });
                     loginModule.reset();
                     router.push({ path: '/me' });
                 } catch (e) {

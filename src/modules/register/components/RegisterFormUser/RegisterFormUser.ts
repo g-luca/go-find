@@ -1,4 +1,4 @@
-import User from "@/core/types/User";
+import { Profile } from "@/core/types/Profile";
 import RegisterModule, { RegisterState } from "@/store/modules/RegisterModule";
 import LinkBlockSample from "@/modules/landing/components/LinkBlockSample/LinkBlockSample.vue"
 import { defineComponent } from "vue";
@@ -15,56 +15,56 @@ export default defineComponent({
     },
     data() {
         const formSchema = {
-            username: { required: true, regex: User.USERNAME_REGEX },
-            ePassword: { required: true, regex: User.PASSWORD_REGEX },
-            ePasswordConfirm: { required: true, regex: User.PASSWORD_REGEX, confirmed: "@ePassword" },
+            dtag: { required: true, regex: Profile.DTAG_REGEX },
+            ePassword: { required: true, regex: Profile.PASSWORD_REGEX },
+            ePasswordConfirm: { required: true, regex: Profile.PASSWORD_REGEX, confirmed: "@ePassword" },
         };
         return {
             formSchema,
-            isValidUsername: false,
-            isUsernameAvailable: false,
-            isVerifyingUsernameAvailability: false,
+            isValidDtag: false,
+            isDtagAvailable: false,
+            isVerifyingDtagAvailability: false,
             isEPasswordEqual: false,
-            inputUsername: "",
+            inputDtag: "",
             inputEPassword: "",
             inputEPasswordConfirm: ""
         };
     },
     methods: {
-        validateUsername() {
-            this.isUsernameAvailable = false;
-            this.isValidUsername = User.USERNAME_REGEX.test(this.inputUsername);
-            if (this.isValidUsername) {
-                this.isVerifyingUsernameAvailability = true;
-                const username = this.inputUsername.toString(); // deep copy
+        validateDtag() {
+            this.isDtagAvailable = false;
+            this.isValidDtag = Profile.DTAG_REGEX.test(this.inputDtag);
+            if (this.isValidDtag) {
+                this.isVerifyingDtagAvailability = true;
+                const dtag = this.inputDtag.toString(); // deep copy
                 setTimeout(() => {
-                    if (this.inputUsername === username) { // verify if the username is not changed while waiting the timeout
-                        Api.get('https://lcd.go-find.me/desmos/profiles/v1beta1/profiles/' + this.inputUsername).then((response) => {
-                            if (this.inputUsername === username && response['profile']) {
-                                //username already taken
+                    if (this.inputDtag === dtag) { // verify if the dtag is not changed while waiting the timeout
+                        Api.get('https://lcd.go-find.me/desmos/profiles/v1beta1/profiles/' + this.inputDtag).then((response) => {
+                            if (this.inputDtag === dtag && response['profile']) {
+                                // dtag already taken
                                 // the availability value depends if is recovering the account
-                                this.isUsernameAvailable = registerModule.hasDesmosProfile;
+                                this.isDtagAvailable = registerModule.hasDesmosProfile;
                             } else {
-                                this.isUsernameAvailable = !registerModule.hasDesmosProfile;;
+                                this.isDtagAvailable = !registerModule.hasDesmosProfile;;
                             }
-                            this.isVerifyingUsernameAvailability = false;
+                            this.isVerifyingDtagAvailability = false;
                         })
 
                     } else {
-                        this.isVerifyingUsernameAvailability = false;
+                        this.isVerifyingDtagAvailability = false;
                     }
                 }, 200);
             }
-            return this.isValidUsername;
+            return this.isValidDtag;
         },
         setUserInfo() {
-            registerModule.setUsername(this.inputUsername);
+            registerModule.setDtag(this.inputDtag);
             registerModule.setEPassword(this.inputEPassword);
             registerModule.nextState(RegisterState.StateMPasswordInput);
         },
         setSignupWithDesmosProfile(has: boolean) {
             registerModule.setHasDesmosProfile(has);
-            this.validateUsername();
+            this.validateDtag();
         }
     },
 });

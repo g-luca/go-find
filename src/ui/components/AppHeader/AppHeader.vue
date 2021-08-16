@@ -29,7 +29,7 @@
               <div>
                 <MenuButton class="">
                   <img
-                    :src="$store.state.AccountModule._user._profilePic || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
+                    :src="$store.state.AccountModule.profile._profilePic || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
                     class="mx-auto object-cover h-10 w-10 rounded-full"
                   >
                 </MenuButton>

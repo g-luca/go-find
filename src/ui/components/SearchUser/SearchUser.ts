@@ -1,5 +1,3 @@
-import Api from "@/core/api/Api";
-import User from "@/core/types/User";
 import router from "@/router";
 import SearchModule from "@/store/modules/SearchModule";
 import { DesmosJS } from "desmosjs";
@@ -11,7 +9,7 @@ export default defineComponent({
     components: {},
     data() {
         return {
-            searchUsername: "",
+            searchDtag: "",
             showSearchResults: false,
         }
     },
@@ -26,23 +24,23 @@ export default defineComponent({
         });
     }, methods: {
         search() {
-            const username = this.searchUsername.toString();
-            const isUsernameValid = DesmosJS.usernameRegex.test(username) || DesmosJS.addressRegex.test(username);
-            this.showSearchResults = isUsernameValid;
-            if (isUsernameValid) {
-                searchUser.search(username);
+            const dtag = this.searchDtag.toString();
+            const isDtagValid = DesmosJS.usernameRegex.test(dtag) || DesmosJS.addressRegex.test(dtag);
+            this.showSearchResults = isDtagValid;
+            if (isDtagValid) {
+                searchUser.search(dtag);
             }
         },
         directSearch() {
-            const username = this.searchUsername;
-            const isUsernameValid = DesmosJS.usernameRegex.test(username) || DesmosJS.addressRegex.test(username);
-            if (isUsernameValid) {
-                router.push(`/${username}`);
+            const dtag = this.searchDtag;
+            const isDtagValid = DesmosJS.usernameRegex.test(dtag) || DesmosJS.addressRegex.test(dtag);
+            if (isDtagValid) {
+                router.push(`/${dtag}`);
             }
         },
-        openProfile(username: string) {
+        openProfile(dtag: string) {
             this.showSearchResults = false;
-            router.push(`/${username}`);
+            router.push(`/${dtag}`);
         }
     }
 });

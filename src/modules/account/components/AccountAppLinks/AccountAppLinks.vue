@@ -1,18 +1,18 @@
 <template>
   <div class="p-4 pr-8">
-    <section v-if="$store.state.AccountModule.userLoadingStatus==0||$store.state.AccountModule.userLoadingStatus">
-      <span v-if="$store.state.AccountModule.userLoadingStatus">
+    <section v-if="$store.state.AccountModule.profileLoadingStatus==0||$store.state.AccountModule.profileLoadingStatus">
+      <span v-if="$store.state.AccountModule.profileLoadingStatus">
         <div class="pt-2 pb-3 md:pt-6 px-2 bg-white dark:bg-gray-900 rounded-3xl shadow-xl hover:shadow-2xl">
           <h1 class="pb-8 pl-4 text-5xl md:text-6xl text-brand font-extrabold">
             Social Networks
           </h1>
-          <span v-if="$store.state.AccountModule._user.applicationLinks&&$store.state.AccountModule._user.applicationLinks.length>0">
+          <span v-if="$store.state.AccountModule.profile.applicationLinks&&$store.state.AccountModule.profile.applicationLinks.length>0">
             <div class="grid grid-cols-12">
               <div class="col-span-12 mx-4">
                 <div class="pt-2 pb-3 md:pt-6 px-2 bg-gray-100 dark:bg-denim-900 dark:bg-gray-700 rounded-3xl shadow-xl">
                   <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 text-center">
                     <div
-                      v-for="applicationLink in $store.state.AccountModule._user.applicationLinks"
+                      v-for="applicationLink in $store.state.AccountModule.profile.applicationLinks"
                       :key="applicationLink"
                       class="m-auto cursor-pointer"
                     >

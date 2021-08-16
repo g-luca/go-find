@@ -4,8 +4,8 @@ import ApplicationLinkGithub from '@/core/types/ApplicationLinks/ApplicationLink
 import ApplicationLinkTwitch from '@/core/types/ApplicationLinks/ApplicationLinkTwitch';
 import ApplicationLinkTwitter from '@/core/types/ApplicationLinks/ApplicationLinkTwitter';
 import store from '@/store'
-import { CosmosTxBody, DesmosData, DesmosMsgLinkApplication } from 'desmosjs';
-import { getModule, Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import { CosmosTxBody, DesmosMsgLinkApplication } from 'desmosjs';
+import { getModule, Module, VuexModule } from 'vuex-module-decorators'
 import AuthModule from './AuthModule';
 import TransactionModule from './TransactionModule';
 const transactionModule = getModule(TransactionModule);
@@ -18,7 +18,7 @@ export default class ApplicationLinkModule extends VuexModule {
     /**
      * Generate the TxBody needed for a MsgLinkApplication
      * @param application application name (ex. "twitter")
-     * @param username username to link to the application 
+     * @param dtag dtag to link to the application 
      * @param callData callData related to the specific application
      * @returns 
      */

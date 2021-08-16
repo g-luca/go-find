@@ -43,8 +43,8 @@ const routes: Array<RouteRecordRaw> = [
     name: "My Profile",
     component: ViewAccount,
     meta: { requiresAuth: true, hiddenWithAuth: false }
-  }, { // must be the last one path: "/@/:username([A-Za-z0-9_]{3,45}$)",
-    path: "/:username",
+  }, { // must be the last one path: "/@/:dtag([A-Za-z0-9_]{3,45}$)",
+    path: "/:dtag",
     name: "Profile",
     component: ViewProfile,
     meta: { requiresAuth: false, hiddenWithAuth: false }
@@ -53,15 +53,6 @@ const routes: Array<RouteRecordRaw> = [
     path: "/:catchAll(.*)",
     component: ViewError404, // TODO: change to Error 404
   },
-  /* {
-    path: "/about",
-    name: "About",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    //component: () =>
-    //  import( webpackChunkName: "about" "../views/ViewAbout.vue"),
-  }, */
 ];
 
 const router = createRouter({

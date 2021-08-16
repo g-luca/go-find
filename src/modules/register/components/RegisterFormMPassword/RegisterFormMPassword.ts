@@ -1,4 +1,4 @@
-import User from "@/core/types/User";
+import { Profile } from "@/core/types/Profile";
 import RegisterModule, { RegisterState } from "@/store/modules/RegisterModule";
 import LinkBlockSample from "@/modules/landing/components/LinkBlockSample/LinkBlockSample.vue"
 import { defineComponent } from "vue";
@@ -14,8 +14,8 @@ export default defineComponent({
     },
     data() {
         const formSchema = {
-            mPassword: { required: true, regex: User.PASSWORD_REGEX },
-            mPasswordConfirm: { required: true, regex: User.PASSWORD_REGEX, confirmed: "@mPassword" },
+            mPassword: { required: true, regex: Profile.PASSWORD_REGEX },
+            mPasswordConfirm: { required: true, regex: Profile.PASSWORD_REGEX, confirmed: "@mPassword" },
         };
         return {
             formSchema,

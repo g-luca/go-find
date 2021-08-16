@@ -1,19 +1,19 @@
 export default class AuthAccount {
-    private _username: string;
+    private _dtag: string;
     private _address: string;
 
 
-    constructor(username: string, address: string) {
-        this._username = username;
+    constructor(dtag: string, address: string) {
+        this._dtag = dtag;
         this._address = address;
     }
 
     /**
-     * Getter username
+     * Getter dtag
      * @return {string}
      */
-    public get username(): string {
-        return this._username;
+    public get dtag(): string {
+        return this._dtag;
     }
 
     /**

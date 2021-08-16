@@ -2,8 +2,8 @@ import PostLink from "./PostLink";
 import ApplicationLink from "./ApplicationLink";
 import ChainLink from "./ChainLink";
 
-export default class User {
-    private _username: string;
+export class Profile {
+    private _dtag: string;
     private _nickname: string;
     private _bio: string;
     private _address: string;
@@ -20,12 +20,12 @@ export default class User {
     ]
 
 
-    static USERNAME_REGEX = /^[A-Za-z0-9_]{3,30}$/;
+    static DTAG_REGEX = /^[A-Za-z0-9_]{3,30}$/;
     static PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\w\W]{10,}$/;
 
 
-    constructor(username: string, address: string, nickname = "", bio = "", profilePic = "", profileCover = "", applicationLinks: ApplicationLink[] = [], chainLinks: ChainLink[] = []) {
-        this._username = username;
+    constructor(dtag: string, address: string, nickname = "", bio = "", profilePic = "", profileCover = "", applicationLinks: ApplicationLink[] = [], chainLinks: ChainLink[] = []) {
+        this._dtag = dtag;
         this._address = address;
         this._nickname = nickname;
         this._bio = bio;
@@ -37,19 +37,19 @@ export default class User {
 
 
     /**
-     * Getter username
+     * Getter dtag
      * @return {string}
      */
-    public get username(): string {
-        return this._username;
+    public get dtag(): string {
+        return this._dtag;
     }
 
     /**
-     * Setter username
+     * Setter dtag
      * @param {string} value
      */
-    public set username(value: string) {
-        this._username = value;
+    public set dtag(value: string) {
+        this._dtag = value;
     }
 
     /**

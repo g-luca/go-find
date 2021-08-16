@@ -1,4 +1,4 @@
-import User from '@/core/types/User';
+import { Profile } from '@/core/types/Profile';
 import store from '@/store';
 import { Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { LoadingStatus } from '@/core/types/LoadingStatus';
@@ -11,10 +11,10 @@ import ApplicationLinkModule from './ApplicationLinkModule';
 
 provideApolloClient(apolloClient)
 
-@Module({ store, name: 'UserModule', dynamic: true })
-export default class UserModule extends VuexModule {
-    public user: User | false = false;
-    public userLoadingStatus: LoadingStatus = LoadingStatus.Loading;
+@Module({ store, name: 'ProfileModule', dynamic: true })
+export default class ProfileModule extends VuexModule {
+    public profile: Profile | false = false;
+    public profileLoadingStatus: LoadingStatus = LoadingStatus.Loading;
 
 
     /**
@@ -29,7 +29,7 @@ export default class UserModule extends VuexModule {
         });
         getProfileQuery.onResult((result) => {
             if (result.loading) {
-                this.userLoadingStatus = LoadingStatus.Loading;
+                this.profileLoadingStatus = LoadingStatus.Loading;
             }
             if (result.data && result.data.profile[0] && !result.loading) {
                 const profileRaw = result.data.profile[0];
@@ -40,11 +40,11 @@ export default class UserModule extends VuexModule {
                         chainLinks.push(new ChainLink(chainLink.external_address, chainLink.chain_config.name));
                     })
                 }
-                this.user = new User(profileRaw.dtag, profileRaw.address, profileRaw.nickname, profileRaw.bio, profileRaw.profile_pic, profileRaw.cover_pic, applicationLinks, chainLinks);
-                this.userLoadingStatus = LoadingStatus.Loaded;
+                this.profile = new Profile(profileRaw.dtag, profileRaw.address, profileRaw.nickname, profileRaw.bio, profileRaw.profile_pic, profileRaw.cover_pic, applicationLinks, chainLinks);
+                this.profileLoadingStatus = LoadingStatus.Loaded;
             } else if (!result.loading) {
-                this.user = false;
-                this.userLoadingStatus = LoadingStatus.Error;
+                this.profile = false;
+                this.profileLoadingStatus = LoadingStatus.Error;
             }
         })
         getProfileQuery.load();
