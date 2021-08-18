@@ -1,14 +1,17 @@
 import RegisterModule, { RegisterState } from "@/store/modules/RegisterModule";
 import { defineComponent } from "vue";
 import { getModule } from "vuex-module-decorators";
-import { validateMnemonic } from "bip39";
+import InputMnemonic from "@/ui/components/InputMnemonic.vue";
+
 const registerModule = getModule(RegisterModule);
 
 export default defineComponent({
+    components: {
+        InputMnemonic,
+    },
     data() {
         return {
             isValidMnemonic: false,
-            inputMnemonic: new Array<string>(24),
         }
     },
     methods: {
@@ -18,14 +21,10 @@ export default defineComponent({
         completeRegistration(): void {
             registerModule.completeRegistration();
         },
-        validateInputMnemonic(): void {
-            this.inputMnemonic.forEach((word, i) => {
-                this.inputMnemonic[i] = word.trim();
-            });
-            const mnemonic = this.inputMnemonic.join(' ');
-            if (validateMnemonic(mnemonic)) {
+        onMnemonic(mnemonic: string): void {
+            if (mnemonic) {
                 this.isValidMnemonic = true;
-                registerModule.generateBip(mnemonic);
+                registerModule.generateWallet({ mnemonic: mnemonic, isNew: false });
             } else {
                 this.isValidMnemonic = false;
             }

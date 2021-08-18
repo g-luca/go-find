@@ -1,17 +1,9 @@
 <template>
   <div class="">
-    <div class="mt-8 space-y-6 w-11/12 xl:w-1/2 mx-auto">
-      <div class="text-gray-500 text-sm">
-        <router-link
-          to="/"
-          tag="button"
-        >
-          <i class="bi bi-arrow-left" /> Home
-        </router-link>
-      </div>
-      <LinkBlockSample :username="inputUsername" />
+    <div class="mt-8 space-y-6 w-11/12 mx-auto">
+      <LinkBlockSample :username="inputDtag" />
 
-      <div class="pb-4 w-full text-center font-semibold">
+      <div class="pb-1 w-full text-center text-lg font-semibold">
         <h6
           class="dark:text-white cursor-pointer select-none"
           @click="setSignupWithDesmosProfile(!$store.state.RegisterModule.hasDesmosProfile)"
@@ -38,7 +30,7 @@
               Choose your
             </span>
             <span v-else>
-              Your Desmos profile
+              Your Desmos
             </span>
             <span class="text-brand">dtag</span>
           </label>
@@ -51,7 +43,7 @@
                        'focus:border-brand dark:border-gray-700 ': !errors.dtag}"
               type="text"
               name="dtag"
-              class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+              class="text-xl md:text-2xl rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
               placeholder="Dtag"
               @input="validateDtag()"
             />
@@ -117,14 +109,14 @@
             :class="{'border-red-700 dark:border-red-700': meta.dirty && errors.ePassword,
                      'focus:border-brand dark:border-gray-700 ': !errors.ePassword}"
             type="password"
-            class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+            class="text-xl md:text-2xl rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
             placeholder="Password"
           />
           <div
             v-if="errors.ePassword"
             class="text-red-700 text-sm px-2 pt-2 font-light"
           >
-            <p>Password must be at least 10 characters, contains a special character and an uppercase letter.</p>
+            <p>Password must be at least 10 characters, and contains an uppercase letter.</p>
             <p>
               Why this requirements? Check it
               <a
@@ -149,7 +141,7 @@
             :class="{'border-red-700 dark:border-red-700': meta.dirty && errors.ePasswordConfirm,
                      'focus:border-brand dark:border-gray-700 ': !errors.ePasswordConfirm}"
             type="password"
-            class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+            class="text-xl md:text-2xl rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
             placeholder="Confirm password"
           />
           <div

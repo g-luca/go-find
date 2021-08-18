@@ -1,6 +1,6 @@
 <template>
   <div class="">
-    <div class="mt-8 space-y-6 w-11/12 xl:w-1/2 mx-auto">
+    <div class="mt-8 space-y-6 w-11/12 mx-auto">
       <div class="text-gray-500 text-sm">
         <button @click="goBack()">
           <i class="bi bi-arrow-left" /> Change dtag
@@ -9,18 +9,19 @@
 
       <!-- mPassword -->
       <div class="pb-2">
-        <h2 class="font-bold text-2xl text-brand">
+        <h2 class="font-bold text-3xl lg:text-3xl text-brand">
           Wallet Password
         </h2>
-        <p class="text-lg pt-1 dark:text-white font-semibold">
+        <p class="text-xl pt-1 dark:text-white font-semibold">
           This password is used to provide another layer of encryption to ensure your wallet safety.
         </p>
         <p class="pt-1 dark:text-white">
-          In this way no one will have access to your keys, even us! <a
+          In this way no one will have access to your wallet, <u>even us</u>!
+          <!-- <a
             target="_blank"
             href=""
             class="text-blue-400"
-          >Learn more</a>
+          >Learn more</a> -->
         </p>
       </div>
 
@@ -40,7 +41,7 @@
             :class="{'border-red-700 dark:border-red-700': meta.dirty && (errors.mPassword||!isValidMPassword),
                      'focus:border-brand dark:border-gray-700 ': !errors.mPassword}"
             type="password"
-            class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+            class="text-xl md:text-2xl rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
             placeholder="Wallet Password"
             @input="validateMPassword()"
           />
@@ -48,7 +49,7 @@
             v-if="errors.mPassword||!isValidMPassword"
             class="text-red-700 text-sm px-2 pt-2 font-light"
           >
-            <p>Password must be at least 10 characters, contains a special character and an uppercase letter. <span class="underline">Must be different from the other password.</span></p>
+            <p>Password must be at least 10 characters, and contains an uppercase letter. <span class="underline">Must be different from the other password.</span></p>
             <p>
               Why this requirements? Check it
               <a
@@ -73,7 +74,7 @@
             :class="{'border-red-700 dark:border-red-700': meta.dirty && errors.mPasswordConfirm,
                      'focus:border-brand dark:border-gray-700 ': !errors.mPasswordConfirm}"
             type="password"
-            class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+            class="text-xl md:text-2xl rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
             placeholder="Confirm password"
           />
           <div

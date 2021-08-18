@@ -1,6 +1,6 @@
 <template>
   <div class="">
-    <div class="mt-8 space-y-6 w-11/12 xl:w-1/2 mx-auto">
+    <div class="mt-8 space-y-6 w-11/12 mx-auto">
       <h2 class="font-bold text-2xl text-brand">
         Wallet Password
       </h2>
