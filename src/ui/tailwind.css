@@ -2,4 +2,11 @@
 
 @tailwind components;
 
+
+@font-face {
+    font-family: 'Raleway';
+    src: local('Raleway'), url(/public/fonts/Raleway/Raleway-Regular.ttf) format('ttf');
+}
+
+
 @tailwind utilities;
