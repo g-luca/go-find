@@ -8,4 +8,7 @@ export const supportedChainLinks: Blockchain[] = [
     new Blockchain("dogecoin", "Dogecoin", "DOGE", "m/44'/3'/0'/0/0", "D"),
     new Blockchain("cardano", "Cardano", "ADA", "m/44'/1815'/0'/0/0", "A"),
     new Blockchain("band", "Band Protocol", "BAND", "m/44'/494'/0'/0/0", "band"),
+    new Blockchain("osmosis", "Osmosis", "OSMO", "m/44'/118'/0'/0/0", "osmosis"),
+    new Blockchain("akash", "Akash", "AKT", "m/44'/118'/0'/0/0", "akash"),
+    new Blockchain("crypto", "Crypto.org", "CRO", "m/44'/118'/0'/0/0", "cro"),
 ];
