@@ -1,30 +1,24 @@
 import RegisterModule, { RegisterState } from "@/store/modules/RegisterModule";
 import { defineComponent } from "vue";
 import { getModule } from "vuex-module-decorators";
+import InputMnemonic from "@/ui/components/InputMnemonic.vue";
 const registerModule = getModule(RegisterModule)
 
 export default defineComponent({
+    components: {
+        InputMnemonic
+    },
     data() {
         return {
-            hasWroteMnemonic: false
+            hasWroteMnemonic: false,
+            mnemonic: "",
         }
     },
     mounted() {
-        registerModule.generateBip();
+        registerModule.generateWallet({ mnemonic: "", isNew: true });
+        this.mnemonic = registerModule.mnemonic.join(' ')
     },
     methods: {
-        downloadMnemonic(): void {
-            const obj = { address: registerModule.address, mnemonic: registerModule.mnemonic };
-            const json = JSON.stringify(obj);
-            const file = "data:text/json;charset=utf-8," + encodeURIComponent(json);
-            const filename = `${registerModule.dtag}-wallet.json`;
-            const downloadElem = document.createElement('a');
-            if (downloadElem != null) {
-                downloadElem.setAttribute("href", file);
-                downloadElem.setAttribute("download", filename);
-                downloadElem.click();
-            }
-        },
         wroteMnemonic(): void {
             this.hasWroteMnemonic = true;
         },

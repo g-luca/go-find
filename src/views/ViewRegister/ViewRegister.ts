@@ -21,7 +21,7 @@ export default defineComponent({
         RegisterSuccess,
         RegisterFail,
         RegisterImportWallet,
-        RegisterResponseLoading
+        RegisterResponseLoading,
     },
     data() {
         return {

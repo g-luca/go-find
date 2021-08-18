@@ -62,16 +62,20 @@ export default class RegisterModule extends VuexModule {
     /**
      * Generate the wallet from a given mnemonic
      * @param mnemonic user input mnemonic
+     * @param isNew generate also a new mnemonic
      */
     @Mutation
-    generateBip(mnemonic = ""): void {
+    generateWallet(payload: { mnemonic: string, isNew: boolean }): void {
+        let mnemonic = payload.mnemonic
         bip39.setDefaultWordlist('english')
-        if (!mnemonic) {
+        if (payload.isNew) {
             mnemonic = bip39.generateMnemonic(256);
         }
-        const wallet = new Wallet(mnemonic, '44\'/852\'/0\'/0/0', "desmos", "morpheus-apollo-1");
-        this.address = wallet.address;
-        this.mnemonic = mnemonic.split(' ');
+        if (mnemonic) {
+            const wallet = new Wallet(mnemonic);
+            this.address = wallet.address;
+            this.mnemonic = mnemonic.split(' ');
+        }
     }
 
 
@@ -152,7 +156,7 @@ export default class RegisterModule extends VuexModule {
         const signature = (Transaction.signBytes(hash, wallet.privateKey) as Buffer).toString('hex');
 
         const response = await Api.post(Api.endpoint + 'recover', JSON.stringify({
-            username: dtag,
+            dtag,
             eKey,
             signature: signature,
         }));
@@ -172,7 +176,7 @@ export default class RegisterModule extends VuexModule {
      */
     private static async completeNewUserRegistration(dtag: string, eKey: string, address: string): Promise<boolean> {
         const response = await Api.post(Api.endpoint + 'signup', JSON.stringify({
-            username: dtag,
+            dtag,
             eKey,
             address,
         }));

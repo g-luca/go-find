@@ -3,7 +3,7 @@
     <div>
       <div class="text-gray-500 text-sm pb-5">
         <button @click="goBack()">
-          <i class="bi bi-arrow-left" /> Generate Wallet
+          <i class="bi bi-arrow-left" /> Change Wallet password
         </button>
       </div>
       <div>
@@ -12,37 +12,10 @@
         </h2>
       </div>
     </div>
-    <div class="pt-4 text-xl">
-      <span class="text-gray-500"> Write your mnemonic: </span>
-    </div>
-    <div class="grid grid-cols-8 gap-x-8 gap-y-4 pt-2 pb-8">
-      <div
-        v-for="(word,index) in inputMnemonic"
-        class="col-span-4 lg:col-span-2 border-b-2 border-gray-300 dark:border-gray-500 bg-gray-50 dark:bg-gray-900 rounded"
-      >
-        <div class="mt-1 relative rounded-md shadow-sm">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span class="text-gray-500 text-sm">
-              {{ index+1 }}
-            </span>
-          </div>
-          <input
-            :key="index"
-            v-model="inputMnemonic[index]"
-            class="block w-full pl-8 dark:bg-gray-900 bg-gray-50 text-xl lowercase dark:text-white"
-            @input="validateInputMnemonic()"
-          >
-        </div>
-      </div>
-    </div>
+
+    <InputMnemonic @onMnemonic="onMnemonic($event)" />
 
     <div v-if="isValidMnemonic">
-      <div class="py-2">
-        <span class="text-xl break-all pl-1">
-          <span class="text-gray-500"> Address: </span>
-          <span class="font-medium border-b-2 border-gray-300 dark:border-gray-500 bg-gray-50 dark:bg-gray-900 dark:text-white rounded pl-2 pr-2">{{ $store.state.RegisterModule.address }}</span>
-        </span>
-      </div>
       <button
         type="button"
         class="relative block w-full justify-center py-2 px-4 border border-transparent text-md rounded-md font-extrabold

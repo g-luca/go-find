@@ -31,7 +31,7 @@ export default class LoginModule extends VuexModule {
     async login(payload: { dtag: string, ePassword: string, address: string }): Promise<{ eKey: string, ePassword: string, dtag: string, address: string }> {
         if (payload.dtag && payload.ePassword) {
             const response = await Api.post(Api.endpoint + 'signin', JSON.stringify({
-                username: payload.dtag,
+                dtag: payload.dtag,
                 ePassword: payload.ePassword,
                 address: payload.address,
             }));
