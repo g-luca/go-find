@@ -15,6 +15,9 @@ module.exports = {
   darkMode: 'class',
   theme: {
     extend: {
+      fontFamily: {
+        'sans': ['Raleway', 'Helvetica', 'Arial', 'sans-serif']
+      },
       colors: {
         brand: '#DC8C00',
         olive: {
