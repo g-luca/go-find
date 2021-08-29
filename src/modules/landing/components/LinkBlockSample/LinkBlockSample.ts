@@ -1,7 +1,7 @@
 
 import { defineComponent } from "vue";
 
-const WORDS: string[] = ["instagram", "facebook", "yourlink", "twitch", "website"];
+const WORDS: string[] = ["instagram", "facebook", "twitch", "yourlink"];
 
 export default defineComponent({
     props: {

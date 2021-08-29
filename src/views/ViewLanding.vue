@@ -2,7 +2,7 @@
   <div class="home">
     <AppHeader />
     <LandingHero />
-    <AppFooter />
+    <AppFooter :force-black="true" />
   </div>
 </template>
 
