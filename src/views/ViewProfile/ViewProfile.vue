@@ -3,58 +3,38 @@
     <Clipboard />
     <AppHeader />
     <div class="w-full dark:bg-denim-900 bg-gray-50">
-      <span v-if="$store.state.ProfileModule.profileLoadingStatus>=0">
-        <!-- Profile Heading -->
-        <ProfileHeading />
-
-        <!-- Profile App Links -->
-        <ProfileAppLinks />
-
-        <!-- <section>
-          <div class="px-2 md:px-16 lg:mx-40 pt-8">
-            <div class="py-2 md:py-8 px-2">
-              <span v-if="$store.state.ProfileModule.profileLoadingStatus">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 text-center">
-                  <div
-                    v-for="postLink in $store.state.ProfileModule.profile.postLinks"
-                    :key="postLink"
-                    class="col-span-1 bg-gray-100 dark:bg-gray-700 rounded-3xl cursor-pointer py-4 ring-brand dark:ring-offset-denim-900 ring-offset-2 hover:ring-2"
-                  >
-                    <div class="flex px-4">
-                      <h4 class="flex-1 dark:text-white select-none focus:underline font-semibold text-lg">
-                        {{ postLink._displayName }}
-                      </h4>
-                      <i class="flex-none bi bi-arrow-right dark:text-white" />
-                    </div>
-                  </div>
-                </div>
+      <!-- Link is present in the URL -->
+      <span v-if="link.length>0">
+        <div class="min-h-screen h-screen">
+          <img
+            src="@/assets/illustrations/user/link-loading.svg"
+            class="h-1/2 mx-auto"
+          >
+          <div class="pt-10">
+            <h1 class="text-4xl md:text-7xl text-center">
+              Skyrocketing to
+              <span class="text-brand font-semibold"> @{{ $route.params['dtag'] }} </span><br>
+              <span class="text-transparent bg-clip-text bg-gradient-to-br from-royalblue-400 via-royalblue-500 to-royalblue-700 font-bold capitalize">{{ link }}
               </span>
-              <span v-else>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 text-center">
-                  <div
-                    v-for="loadingItem in [1,2,3,4,5]"
-                    class="col-span-1"
-                  >
-                    <SkeletonLoader
-                      shape="rectangle"
-                      class="py-0 w-full h-14"
-                    >{{ loadingItem }}</SkeletonLoader>
-                  </div>
-                </div>
-
-              </span>
-            </div>
+            </h1>
           </div>
-        </section> -->
-
-        <section>
-          <div class="pt-8" />
-        </section>
+        </div>
       </span>
       <span v-else>
-        <Error404 :message="'The user is not here'" />
+        <span v-if="$store.state.ProfileModule.profileLoadingStatus>=0">
+          <!-- Profile Heading -->
+          <ProfileHeading />
+
+          <!-- Profile App Links -->
+          <ProfileAppLinks />
+
+        </span>
+        <span v-else>
+          <Error404 :message="'The user is not here'" />
+        </span>
       </span>
-      <AppFooter />
+
+      <AppFooter class="mt-16" />
     </div>
   </div>
 </template>

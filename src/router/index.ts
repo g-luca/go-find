@@ -43,8 +43,8 @@ const routes: Array<RouteRecordRaw> = [
     name: "My Profile",
     component: ViewAccount,
     meta: { requiresAuth: true, hiddenWithAuth: false }
-  }, { // must be the last one path: "/@/:dtag([A-Za-z0-9_]{3,45}$)",
-    path: "/:dtag",
+  }, {
+    path: "/:dtag/:link?",
     name: "Profile",
     component: ViewProfile,
     meta: { requiresAuth: false, hiddenWithAuth: false }
