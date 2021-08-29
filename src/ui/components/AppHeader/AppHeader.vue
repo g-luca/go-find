@@ -8,10 +8,15 @@
             class="block relative w-10"
             to="/"
           >
-            <img
-              src="@/assets/brands/go-find/logo.svg"
-              class="mx-auto object-cover h-10 w-10 rounded-full"
-            >
+            <div class="flex">
+              <img
+                src="@/assets/brands/go-find/logo.svg"
+                class="mx-auto object-cover h-10 w-10 rounded-full"
+              >
+              <span class="my-auto ml-1 px-2 md:px-4 py-0.5 text-white font-medium text-lg rounded-xl bg-gradient-to-r from-indigo-900 via-indigo-800 to-indigo-700">
+                Beta
+              </span>
+            </div>
           </router-link>
         </div>
 
@@ -84,4 +89,34 @@
   </header>
 </template>
 
-<script lang="ts" src="./AppHeader.ts"></script>
+<script lang="ts">
+import { defineComponent } from "vue";
+import ToggleTheme from "@/ui/components/ToggleTheme/ToggleTheme.vue";
+import SearchUser from "../SearchUser/SearchUser.vue";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
+import { getModule } from "vuex-module-decorators";
+import AuthModule from "@/store/modules/AuthModule";
+import router from "@/router";
+const authModule = getModule(AuthModule);
+
+export default defineComponent({
+  components: {
+    ToggleTheme,
+    SearchUser,
+
+    Menu,
+    MenuButton,
+    MenuItem,
+    MenuItems,
+  },
+  data() {
+    return {};
+  },
+  methods: {
+    logout() {
+      authModule.logout();
+      router.push("/");
+    },
+  },
+});
+</script>

@@ -1,7 +1,8 @@
 <template>
   <div>
+    <AppHeader />
     <div class="min-h-screen justify-center bg-gray-100 dark:bg-gray-900 px-4 pb-2">
-      <div class="pt-14 md:pt-44 w-full">
+      <div class="pt-14 md:pt-32 w-full">
         <div class="lg:w-4/6 xl:w-1/2 mx-auto bg-gray-50 dark:bg-denim-900 p-4 rounded-3xl shadow-md">
           <div class="flex justify-center">
             <img

@@ -24,7 +24,7 @@
                   .{{ splitNumberRight($store.state.AccountModule.account._balance,".") }}
                 </span>
                 <span class="text-black dark:text-white pl-4 text-4xl">
-                  DARIC
+                  DSM
                 </span>
               </span>
             </div>
@@ -43,7 +43,7 @@
                         .{{ splitNumberRight($store.state.AccountModule.account._delegations,".") }}
                       </span>
                       <span class="text-gray-700 dark:text-gray-300 pl-2 text-lg">
-                        DARIC
+                        DSM
                       </span>
                     </span>
                   </div>
@@ -61,7 +61,7 @@
                         .{{ splitNumberRight($store.state.AccountModule.account._delegations+ $store.state.AccountModule.account._balance,".") }}
                       </span>
                       <span class="text-gray-700 dark:text-gray-300 pl-2 text-lg">
-                        DARIC
+                        DSM
                       </span>
                     </span>
                   </div>

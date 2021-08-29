@@ -77,17 +77,23 @@
                 {{ $store.state.ProfileModule.profile.bio }}
               </h4>
 
+              <!-- Chain Links -->
               <div
                 v-if="$store.state.ProfileModule.profile.chainLinks.length>0"
                 class="pt-2"
               >
-                <h3 class="text-xl font-bold text-indigo-700">
+                <h3 class="text-2xl font-bold text-orchid-500">
                   Connected Blockchains
                 </h3>
-                <div class="grid grid-cols-12 gap-3 text-center">
+                <div
+                  class="grid grid-cols-12 gap-3 text-center"
+                  :class="{
+                    'overflow-y-auto max-h-40':$store.state.ProfileModule.profile.chainLinks.length>3
+                  }"
+                >
                   <div
                     v-for="chainLink in $store.state.ProfileModule.profile.chainLinks"
-                    class="col-span-12 lg:col-span-6 bg-indigo-50 dark:bg-indigo-900 rounded-2xl mx-4 md:mx-0 md:mr-4 py-1"
+                    class="col-span-12 xl:col-span-6 bg-indigo-50 dark:bg-indigo-800 rounded-2xl mx-4 md:mx-0 md:mr-4 py-1"
                   >
                     <div class="grid grid-cols-12">
                       <div class="col-span-2 my-auto">
@@ -154,3 +160,26 @@
 
 
 <script lang="ts" src="./ProfileHeading.ts"/>
+
+
+<style scoped>
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(55, 48, 163) transparent;
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgb(55, 48, 163);
+  border-radius: 20px;
+  border: 3px solid transparent;
+}
+</style>
