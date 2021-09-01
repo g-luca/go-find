@@ -73,7 +73,7 @@ export default class AuthModule extends VuexModule {
         if (mKey) {
             try {
                 const privKey = CryptoUtils.decryptAes(mPassword, mKey);
-                const desmosNet = new Network("https://lcd.go-find.me/");
+                const desmosNet = new Network(`${process.env.VUE_APP_LCD_ENDPOINT}`);
                 const account = await desmosNet.getAccount(address);
                 console.log(account)
                 if (account) {

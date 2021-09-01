@@ -20,7 +20,7 @@
     "autoprefixer": "^9",
     "bip39": "^3.0.4",
     "bootstrap-icons": "^1.5.0",
-    "desmosjs": "^0.1.14",
+    "desmosjs": "^0.1.16",
     "graphql": "^15.5.1",
     "postcss": "^7",
     "subscriptions-transport-ws": "^0.9.19",

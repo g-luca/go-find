@@ -29,7 +29,7 @@
       <div class="col-span-4 md:col-span-2 my-auto text-center py-2">
         <a
           class="px-4 font-medium hover:underline hover:cursor-pointer text-lg"
-          href="https://morpheus.desmos.network/validators/desmosvaloper16c60y8t8vra27zjg2arlcd58dck9cwn7lhp6pl"
+          href="https://explorer.desmos.network/validators/desmosvaloper1gupgnsfgvs08watwtfdl4a5r9589cus3f36mhz"
           target="_blank"
         >Staking</a>
       </div>

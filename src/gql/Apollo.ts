@@ -10,7 +10,7 @@ const httpLink = createHttpLink({
 })
 
 const wsLink = new WebSocketLink({
-    uri: `wss://${process.env.VUE_APP_GRAPH_ENDPOINT}`,
+    uri: `wss://${process.env.VUE_APP_GRAPH_WS_ENDPOINT}`,
     options: {
         reconnect: true,
         timeout: 30000,
