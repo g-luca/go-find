@@ -105,7 +105,7 @@ export default class TransactionModule extends VuexModule {
      */
     private static async handleBroadcast(signedTx: Transaction): Promise<boolean> {
         try {
-            const desmosNet = new Network('https://lcd.go-find.me');
+            const desmosNet = new Network(`${process.env.VUE_APP_LCD_ENDPOINT}`);
             const broadcastRawResult = await desmosNet.broadcast(signedTx, CosmosBroadcastMode.BROADCAST_MODE_SYNC);
             const broadcastResult = CosmosTxResponse.fromJSON(broadcastRawResult.tx_response);
             console.log(`tx hash: ${broadcastResult.txhash}`);
