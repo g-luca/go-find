@@ -85,7 +85,7 @@ export default class AuthModule extends VuexModule {
                         };
 
                         const feeValue: CosmosFee = {
-                            amount: [{ denom: "udaric", amount: "200" }],
+                            amount: [{ denom: "udsm", amount: "200" }],
                             gasLimit: 200000,
                             payer: "",
                             granter: ""
