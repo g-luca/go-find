@@ -28,7 +28,7 @@ export default defineComponent({
     },
     beforeRouteUpdate(to, from, next) {
         if (to.params['dtag'] !== from.params['dtag']) {
-            profileModule.loadUser(to.params['dtag'].toLocaleString());
+            profileModule.loadUser({ dtag: to.params['dtag'].toLocaleString(), address: "" });
             this.parseLink(to.params['link'].toLocaleString());
         }
         next()
@@ -40,7 +40,7 @@ export default defineComponent({
         }
     },
     mounted() {
-        profileModule.loadUser(this.$route.params['dtag'].toLocaleString());
+        profileModule.loadUser({ dtag: this.$route.params['dtag'].toLocaleString(), address: "" });
         this.parseLink(this.$route.params['link'].toLocaleString());
     },
     methods: {

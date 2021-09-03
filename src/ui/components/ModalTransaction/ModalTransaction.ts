@@ -8,6 +8,7 @@ import {
 } from "@headlessui/vue";
 import { getModule } from "vuex-module-decorators";
 import TransactionModule from "@/store/modules/TransactionModule";
+import AuthModule from "@/store/modules/AuthModule";
 const transactionModule = getModule(TransactionModule);
 
 export default defineComponent({
@@ -28,6 +29,6 @@ export default defineComponent({
         },
         async sign() {
             await transactionModule.send({ mPassword: this.inputMPassword })
-        }
+        },
     }
 });

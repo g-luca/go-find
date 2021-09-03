@@ -1,11 +1,13 @@
 export default class AuthAccount {
     private _dtag: string;
     private _address: string;
+    private _isUsingKeplr: boolean;
 
 
-    constructor(dtag: string, address: string) {
+    constructor(dtag: string, address: string, isUsingKeplr = false) {
         this._dtag = dtag;
         this._address = address;
+        this._isUsingKeplr = isUsingKeplr;
     }
 
     /**
@@ -22,6 +24,15 @@ export default class AuthAccount {
      */
     public get address(): string {
         return this._address;
+    }
+
+
+    /**
+     * Getter isUsingKeplr
+     * @return {boolean}
+     */
+    public get isUsingKeplr(): boolean {
+        return this._isUsingKeplr;
     }
 
 }

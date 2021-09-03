@@ -38,7 +38,7 @@ export default defineComponent({
                     this.hasLoginError = false
                     authModule.saveMKey({ mKey, mPassword });
 
-                    authModule.saveAuthAccount({ account: new AuthAccount(loginModule.dtag, loginModule.address) });
+                    authModule.saveAuthAccount({ account: new AuthAccount(loginModule.dtag, loginModule.address, false) });
                     loginModule.reset();
                     router.push({ path: '/me' });
                 } catch (e) {
