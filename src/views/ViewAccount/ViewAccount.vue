@@ -30,6 +30,17 @@
           </div>
         </section>
 
+        <section v-if="$store.state.AccountModule.isNewProfile">
+          <div class="w-full px-4 pt-4">
+            <div class="py-6 border-2 border-red-700 rounded-3xl dark:text-white text-center bg-gray-100 shadow-lg dark:bg-gray-800">
+              <h1 class="text-2xl md:text-3xl lg:text-4xl dark:text-white font-bold text-5xl"> <i class="bi bi-exclamation-circle-fill text-red-600" /> Your Profile is not saved on chain</h1>
+              <p class="text-lg pt-2 text-gray-600 dark:text-gray-400">
+                To save your profile you need to edit and save at least one field of your profile details (nickname, pictures, bio)
+              </p>
+            </div>
+          </div>
+        </section>
+
         <!-- Content -->
         <div class="grid grid-cols-12 pt-8 mx-4">
 
@@ -45,12 +56,12 @@
             <AccountBalance />
 
             <!-- Chain Links -->
-            <AccountChainLinks />
+            <AccountChainLinks v-if="!$store.state.AccountModule.isNewProfile" />
           </div>
         </div>
 
         <!-- Application Links -->
-        <AccountAppLinks />
+        <AccountAppLinks v-if="!$store.state.AccountModule.isNewProfile" />
 
       </span>
       <AppFooter class="mt-8" />
