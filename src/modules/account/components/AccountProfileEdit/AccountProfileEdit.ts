@@ -13,6 +13,8 @@ import AccountChainLinks from "@/modules/account/components/AccountChainLinks/Ac
 import AccountModule from "@/store/modules/AccountModule";
 import { CosmosTxBody, DesmosMsgSaveProfile } from "desmosjs";
 import TransactionModule, { TransactionStatus } from "@/store/modules/TransactionModule";
+import marked from "marked";
+import { sanitize } from "dompurify";
 const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
 const transactionModule = getModule(TransactionModule);
@@ -44,6 +46,7 @@ export default defineComponent({
             inputProfilePic: '',
             inputProfileCover: '',
             inputBio: '',
+            markedInputBio: '',
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             resetForm: (_values?: unknown) => { return; }
         }
@@ -128,6 +131,13 @@ export default defineComponent({
                 this.resetForm = resetForm;
             }
         },
+        /**
+         * Convert the input bio in markdown html
+         * @param bio input bio
+         */
+        markInputBio(bio: string) {
+            this.markedInputBio = sanitize(marked(bio));
+        },
 
         /**
          * Reset the form and the input data
@@ -138,6 +148,7 @@ export default defineComponent({
                 this.inputProfilePic = accountModule.profile.profilePic;
                 this.inputProfileCover = accountModule.profile.profileCover;
                 this.inputBio = accountModule.profile.bio;
+                this.markedInputBio = sanitize(marked(accountModule.profile.bio));
                 this.resetForm({
                     values: {
                         nickname: this.inputNickname,

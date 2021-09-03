@@ -14,11 +14,11 @@
             </h2>
           </div>
 
-          <div class="font-bold text-xl px-4 md:px-0">
-            <div class="py-2">
+          <div class="px-4 md:px-0">
+            <div class="py-2 font-bold text-xl ">
               <label
                 for="nickname"
-                class="text-gray-700 dark:text-white py-9"
+                class="text-gray-700 dark:text-white py-9 font-bold text-xl "
               >
                 Nickname
               </label>
@@ -40,7 +40,7 @@
             <div class="py-2">
               <label
                 for="profilePic"
-                class="text-gray-700 dark:text-white"
+                class="text-gray-700 dark:text-white font-bold text-xl "
               >
                 Profile picture
               </label>
@@ -62,7 +62,7 @@
             <div class="py-2">
               <label
                 for="profileCover"
-                class="text-gray-700 dark:text-white"
+                class="text-gray-700 dark:text-white font-bold text-xl "
               >
                 Cover
               </label>
@@ -84,7 +84,7 @@
             <div class="py-2">
               <label
                 for="bio"
-                class="text-gray-700 dark:text-white"
+                class="text-gray-700 dark:text-white font-bold text-xl "
               >
                 Bio
               </label>
@@ -99,6 +99,27 @@
                 name="bio"
                 rows="3"
                 cols="40"
+                @input="markInputBio($event.target.value)"
+              />
+              <div class="w-full">
+                <span
+                  v-if="markedInputBio.length>0"
+                  class="text-left text-gray-500"
+                >
+                  Preview
+                </span>
+                <span class="float-right">
+                  <a
+                    href="https://www.markdownguide.org/basic-syntax/"
+                    target="_blank"
+                  >
+                    <i class="bi bi-markdown-fill text-gray-700" />
+                  </a>
+                </span>
+              </div>
+              <span
+                class="prose prose-xl"
+                v-html="markedInputBio"
               />
               <span
                 v-if="errors.bio"

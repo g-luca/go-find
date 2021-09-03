@@ -73,9 +73,10 @@
                   </div>
                 </div>
               </div>
-              <h4 class="dark:text-gray-300">
-                {{ $store.state.ProfileModule.profile.bio }}
-              </h4>
+              <div
+                class="prose prose-xl"
+                v-html="$store.state.ProfileModule.profile.bio"
+              />
 
               <!-- Chain Links -->
               <div
