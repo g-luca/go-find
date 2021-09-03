@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client/core";
 
 export const ProfileQuery = gql`
-    query profile($dtag: String!) {
-        profile(where: {dtag: {_ilike: $dtag}}){
+    query profile($dtag: String!, $address:String) {
+        profile(where: { _or: [{dtag: {_ilike: $dtag}}, {address: {_ilike: $address}} ] }){
             dtag
             nickname
             address

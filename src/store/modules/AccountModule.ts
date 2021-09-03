@@ -17,6 +17,7 @@ export default class AccountModule extends VuexModule {
     public profile: Profile | false = false;
     public account: Account | false = false;
     public profileLoadingStatus: LoadingStatus = LoadingStatus.Loading;
+    public isNewProfile = false;
 
 
     /**
@@ -25,6 +26,10 @@ export default class AccountModule extends VuexModule {
      */
     @Mutation
     async loadAccount(force = false): Promise<void> {
+        this.isNewProfile = false;
+        this.profile = false;
+        this.account = false;
+        this.profileLoadingStatus = LoadingStatus.Loading;
         if (this.profile === false || force) {
             this.profileLoadingStatus = LoadingStatus.Loading;
             if (authModule.authLevel > AuthLevel.None && authModule.account) {
@@ -66,6 +71,7 @@ export default class AccountModule extends VuexModule {
                             this.profile = new Profile(profileRaw.dtag, profileRaw.address, profileRaw.nickname, profileRaw.bio, profileRaw.profile_pic, profileRaw.cover_pic, applicationLinks, chainLinks);
                         } else {
                             // The profile doesn't exists
+                            this.isNewProfile = true;
                             this.profile = new Profile(authModule.account?.dtag, authModule.account?.address, "", "", "", "", [], []);
                         }
 

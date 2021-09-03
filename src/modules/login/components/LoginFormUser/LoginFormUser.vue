@@ -108,6 +108,20 @@
         </span>
       </div>
     </div>
+    <button
+      type="button"
+      class="mt-4 py-1 px-1 flex justify-center items-center w-1/2 md:w-1/4 xl:w-1/5 mx-auto rounded-xl  bg-gradient-to-br from-blue-400 to-violet-700 hover:bg-gradient-to-tl"
+      @click="$router.push('/login/keplr')"
+    >
+      <img
+        class="h-8"
+        :src="require('@/assets/brands/keplr/logo.svg')"
+        alt=""
+      >
+      <span class="text-white pl-3 text-lg">
+        Use Keplr
+      </span>
+    </button>
   </div>
 </template>
         

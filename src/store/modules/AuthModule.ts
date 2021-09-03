@@ -2,8 +2,9 @@ import store from '@/store';
 import CryptoUtils from '@/utils/CryptoUtils';
 import { getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import AuthAccount from '@/core/types/AuthAccount';
-import { CosmosAuthInfo, CosmosFee, CosmosSignerInfo, CosmosSignMode, CosmosTxBody, Network, Transaction } from 'desmosjs';
+import { CosmosAuthInfo, CosmosBroadcastMode, CosmosFee, CosmosPubKey, CosmosSignDoc, CosmosSignerInfo, CosmosSignMode, CosmosTxBody, CosmosTxRaw, DesmosJS, Network, Transaction } from 'desmosjs';
 import AccountModule from './AccountModule';
+import Long from 'long';
 
 export enum AuthLevel {
     None,
@@ -36,7 +37,7 @@ export default class AuthModule extends VuexModule {
      */
     @Mutation
     public authenticate(): void {
-        if (localStorage.getItem('mKey') && localStorage.getItem('account')) {
+        if (localStorage.getItem('account')) {
             this._authLevel = AuthLevel.AuthAccount;
             this._account = AuthModule.getAccount();
 
@@ -60,6 +61,86 @@ export default class AuthModule extends VuexModule {
         localStorage.removeItem("account");
     }
 
+
+    static async signTx(tx: CosmosTxBody, adddress: string, mPasswordClear = ""): Promise<Transaction | false> {
+        if (mPasswordClear) {
+            return this.signTxWithPassword(tx, adddress, mPasswordClear);
+        } else {
+            return this.signTxWithKeplr(tx, adddress);
+        }
+    }
+
+
+    /**
+     * Sign a Tx object with Keplr
+     * @param tx Transaction body object to sign
+     * @param address address of the signer
+     * @returns A signed Traansaction object or the string error
+     */
+    private static async signTxWithKeplr(txBody: CosmosTxBody, address: string): Promise<Transaction | false> {
+        const desmosNet = new Network(`${process.env.VUE_APP_LCD_ENDPOINT}`);
+        const account = await desmosNet.getAccount(address);
+        const pubKey = await window.keplr?.getKey(DesmosJS.chainId);
+        if (account && pubKey) {
+            try {
+
+                // Get Keplr signer
+                const signer = window.keplr?.getOfflineSigner(DesmosJS.chainId);
+
+
+                const signerInfo: CosmosSignerInfo = {
+                    publicKey: {
+                        typeUrl: "/cosmos.crypto.secp256k1.PubKey",
+                        value: CosmosPubKey.encode({
+                            key: pubKey.pubKey,
+                        }).finish(),
+                    },
+                    modeInfo: { single: { mode: CosmosSignMode.SIGN_MODE_DIRECT } },
+                    sequence: account.sequence
+                };
+
+                const feeValue: CosmosFee = {
+                    amount: [{ denom: "udsm", amount: "200" }],
+                    gasLimit: 200000,
+                    payer: "",
+                    granter: "",
+                };
+
+                const authInfo: CosmosAuthInfo = { signerInfos: [signerInfo], fee: feeValue };
+
+
+
+                const bodyBytes = CosmosTxBody.encode(txBody).finish();
+                const authInfoBytes = CosmosAuthInfo.encode(authInfo).finish();
+
+                const signedTx = await signer?.signDirect(address, {
+                    accountNumber: Long.fromNumber(account.accountNumber),
+                    authInfoBytes: authInfoBytes,
+                    bodyBytes: bodyBytes,
+                    chainId: DesmosJS.chainId,
+                });
+
+
+
+                if (signedTx) {
+                    const broadcastTx: CosmosTxRaw = {
+                        bodyBytes: signedTx.signed.bodyBytes,
+                        authInfoBytes: signedTx.signed.authInfoBytes,
+                        signatures: [Buffer.from(signedTx.signature.signature, 'base64')],
+                    };
+                    const broadcastBytes = CosmosTxRaw.encode(broadcastTx).finish();
+                    return broadcastBytes;
+                }
+
+                return false;
+            } catch (e) {
+                //return new Error("Error signing the transaction");
+            }
+        }
+        return false;
+    }
+
+
     /**
      * Sign a Tx object
      * @param tx Transaction body object to sign
@@ -67,7 +148,7 @@ export default class AuthModule extends VuexModule {
      * @param mPasswordClear wallet mPassword in clear
      * @returns A signed Traansaction object or the string error
      */
-    static async signTx(tx: CosmosTxBody, address: string, mPasswordClear: string): Promise<Transaction | false> {
+    private static async signTxWithPassword(tx: CosmosTxBody, address: string, mPasswordClear: string): Promise<Transaction | false> {
         const mPassword = CryptoUtils.sha256(mPasswordClear);
         const mKey = AuthModule.getMKey(mPassword);
         if (mKey) {
@@ -94,6 +175,7 @@ export default class AuthModule extends VuexModule {
                         const authInfo: CosmosAuthInfo = { signerInfos: [signerInfo], fee: feeValue };
 
                         const signedTx = Transaction.signTxBody(tx, authInfo, account.accountNumber, Buffer.from(privKey, 'hex'));
+                        console.log(signedTx)
                         return signedTx;
                     } catch (e) {
                         //return new Error("Error signing the transaction");
@@ -151,7 +233,7 @@ export default class AuthModule extends VuexModule {
             try {
                 const accountRaw = JSON.parse(accountJSON);
                 if (accountRaw) {
-                    return new AuthAccount(accountRaw['_dtag'], accountRaw['_address']);
+                    return new AuthAccount(accountRaw['_dtag'], accountRaw['_address'], (accountRaw['_isUsingKeplr'] === true));
                 }
             } catch (e) {
                 return null;
