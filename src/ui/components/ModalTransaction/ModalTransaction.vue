@@ -41,7 +41,8 @@
               </span>
             </DialogTitle>
             <section v-if="$store.state.TransactionModule.transactionStatus!==2">
-              <div class="pt-3 pb-1">
+              <!-- Registered user Transaction -->
+              <span v-if="!$store.state.AuthModule._account.isUsingKeplr">
                 <label
                   class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
                   for="inputMPassword"
@@ -56,6 +57,9 @@
                 dark:bg-denim-900 dark:placeholder-gray-600 dark:text-white"
                   placeholder="Wallet Password"
                 >
+              </span>
+
+              <div class="pt-3 pb-1">
                 <!-- <div class="pt-4">
               <span class="font-semibold text-lg dark:text-white">
                 Fees:
@@ -69,7 +73,7 @@
             </div> -->
                 <div class="pt-4">
                   <button
-                    v-if="inputMPassword.length>0"
+                    v-if="(!$store.state.AuthModule._account.isUsingKeplr&&inputMPassword.length>0)||$store.state.AuthModule._account.isUsingKeplr"
                     :disabled="$store.state.TransactionModule.transactionStatus===1"
                     type="button"
                     :class="{'bg-gray-500 hover:bg-gray-500': $store.state.TransactionModule.transactionStatus===1, 'bg-indigo-600 hover:bg-indigo-700': $store.state.TransactionModule.transactionStatus!==1}"

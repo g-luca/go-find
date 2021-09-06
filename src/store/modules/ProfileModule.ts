@@ -18,14 +18,16 @@ export default class ProfileModule extends VuexModule {
 
 
     /**
-     * Retrieve a user Desmos profile from a given dtag
-     * @param dtag dtag of the profile to get
+     * Retrieve a user Desmos profile from a given dtag or address
+     * @param dtag if set retrieve the Desmos profile using the DTag
+     *@param address if set retrieve the Desmos profile using the address
      */
     @Mutation
-    async loadUser(dtag: string): Promise<void> {
+    async loadUser(payload: { dtag: string, address: string }): Promise<void> {
         const getProfileQuery = useLazyQuery(
             ProfileQuery, {
-            dtag: dtag
+            dtag: payload.dtag,
+            address: payload.address
         });
         getProfileQuery.onResult((result) => {
             if (result.loading) {

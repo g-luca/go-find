@@ -43,7 +43,8 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-12 pt-10 border-t border-gray-500">
+    <div class="bg-gradient-to-r from-purple-600 via-red-500  to-brand pt-0.5 rounded-3xl" />
+    <div class="grid grid-cols-12 pt-10">
       <div class="col-span-12 md:col-span-4 my-auto text-center py-1">
         <h5 class="px-4  text-lg">
           <span class="flex justify-center font-semibold pb-1">

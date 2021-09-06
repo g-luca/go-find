@@ -108,7 +108,7 @@ export default class RegisterModule extends VuexModule {
 
         if (success) {
             authModule.saveMKey({ mKey, mPassword }); // store mKey on localStorage
-            authModule.saveAuthAccount({ account: new AuthAccount(this.dtag, this.address) });
+            authModule.saveAuthAccount({ account: new AuthAccount(this.dtag, this.address, false) });
             this.currentState = RegisterState.StateRegistrationSuccess;
         } else {
             this.currentState = RegisterState.StateRegistrationFail;
