@@ -92,7 +92,7 @@ export default class KeplrModule extends VuexModule {
                 chainId: "desmos-mainnet",
                 chainName: "Desmos",
                 rpc: "https://rpc.mainnet.desmos.network:26657",
-                rest: "https://lcd.go-find.me/",
+                rest: "https://api.mainnet.desmos.network/",
                 bip44: {
                     coinType: 852,
                 },
