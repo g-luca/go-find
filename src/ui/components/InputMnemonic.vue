@@ -2,16 +2,15 @@
   <div>
     <section>
       <div class="pt-4 text-xl">
-        <span class="text-gray-500"> Write your mnemonic: </span>
+        <span class="text-gray-500"> Your mnemonic: </span>
       </div>
 
-      <span v-if="isNew">
+      <span v-if="!isNew">
         <input
           id="isInputMnemonicString"
           v-model="isInputMnemonicString"
           type="checkbox"
-        >
-        <label
+        ><label
           for="isInputMnemonicString"
           class="select-none text-gray-500"
         > Input as text</label><br>
@@ -32,7 +31,7 @@
               <input
                 :key="index"
                 v-model="inputMnemonic[index]"
-                :disabled="!isNew"
+                :disabled="isNew"
                 class="block w-full pl-8 dark:bg-gray-900 bg-gray-50 text-xl lowercase dark:text-white"
                 @input="validateInputMnemonic()"
               >
@@ -41,31 +40,31 @@
         </div>
       </span>
 
-      <span v-if="isNew&&isInputMnemonicString">
+      <span v-if="isInputMnemonicString">
         <textarea
           v-model="inputMnemonicString"
           rows="3"
-          class="block w-full px-1 my-4 py-2 dark:bg-gray-900 bg-gray-100 rounded-md text-xl lowercase dark:text-white"
+          class="block w-full px-1 my-4 py-2 dark:bg-denim-900 bg-gray-100 dark:border-black rounded-md text-xl lowercase dark:text-white"
           @input="validateInputMnemonic()"
         />
       </span>
 
-      <div v-if="isValidMnemonic||!isNew">
+      <div v-if="generatedAddress">
         <div class="py-2">
           <span class="text-xl break-all pl-1">
             <span class="text-gray-500"> Address: </span>
-            <span class="font-medium border-b-2 border-gray-300 dark:border-gray-500 bg-gray-50 dark:bg-gray-900 dark:text-white rounded pl-2 pr-2">{{ $store.state.RegisterModule.address }}</span>
+            <span class="font-medium border-b-2 border-gray-300 dark:border-gray-500 bg-gray-50 dark:bg-gray-900 dark:text-white rounded pl-2 pr-2">{{ generatedAddress }}</span>
           </span>
         </div>
       </div>
 
-      <div v-if="!isValidMnemonic&&isNew&&((inputMnemonicString.split(' ').length>12&&isInputMnemonicString)||(inputMnemonic.length>12&&!isInputMnemonicString))">
+      <div v-if="!isValidMnemonic&&isNew&&((inputMnemonicString.split(' ').length>=12&&isInputMnemonicString)||(inputMnemonic.length>=12&&!isInputMnemonicString))">
         <p class="text-gray-500">
           This mnemonic is not valid. Check each word carefully!
         </p>
       </div>
 
-      <div v-if="!isNew">
+      <div v-if="isNew">
         <div class="text-right text-sm grid grid-cols-12 pt-6">
           <div class="col-span-9 text-left my-auto">
             <h4 class="lg:text-lg dark:text-white">
@@ -89,6 +88,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { validateMnemonic } from "bip39";
+import { Wallet } from "desmosjs";
 
 export default defineComponent({
   props: {
@@ -96,24 +96,59 @@ export default defineComponent({
       type: String,
       default: "",
     },
+    customHdPath: {
+      type: String,
+      default: "m/44'/0'/0'/0/0",
+    },
+    customBech32Prefix: {
+      type: String,
+      default: "desmos",
+    },
+    isNew: {
+      type: Boolean,
+      default: false,
+    },
   },
   emits: ["onMnemonic"],
   data() {
+    // if receive mnemonic input
+    let generatedAddress = "";
+    let inputMnemonic = new Array<string>(24);
+    if (this.generatedMnemonic) {
+      const wallet = new Wallet(
+        this.generatedMnemonic,
+        this.customHdPath,
+        this.customBech32Prefix
+      );
+
+      generatedAddress = wallet.address;
+      inputMnemonic = this.generatedMnemonic.split(" ");
+    }
     return {
-      isNew: true,
       isValidMnemonic: false,
-      inputMnemonic: new Array<string>(24),
+      inputMnemonic: inputMnemonic,
       isInputMnemonicString: false,
-      inputMnemonicString: "",
+      inputMnemonicString: this.generatedMnemonic,
+      generatedAddress: generatedAddress,
     };
+  },
+  watch: {
+    customHdPath(value, old) {
+      if (value !== old) this.generateWallet();
+    },
+    customBech32Prefix(value, old) {
+      if (value !== old) this.generateWallet();
+    },
   },
   updated() {
     if (this.generatedMnemonic) {
-      this.isNew = false;
       this.inputMnemonic = this.generatedMnemonic.split(" ");
     }
   },
   methods: {
+    /**
+     * Parse & Validate mnemonic input
+     */
     validateInputMnemonic(): void {
       let mnemonic = "";
       if (!this.isInputMnemonicString) {
@@ -121,15 +156,37 @@ export default defineComponent({
           this.inputMnemonic[i] = word.trim();
         });
         mnemonic = this.inputMnemonic.join(" ");
+        this.inputMnemonicString = mnemonic;
       } else {
         mnemonic = this.inputMnemonicString;
+        this.inputMnemonic = this.inputMnemonicString.split(" ");
       }
-      if (validateMnemonic(mnemonic)) {
-        this.isValidMnemonic = true;
+      this.isValidMnemonic = validateMnemonic(mnemonic);
+      if (this.isValidMnemonic) {
+        this.generateWallet();
         this.$emit("onMnemonic", mnemonic);
       } else {
         this.isValidMnemonic = false;
         this.$emit("onMnemonic", "");
+      }
+    },
+    /**
+     * Generate Wallet
+     */
+    generateWallet(): void {
+      if (validateMnemonic(this.inputMnemonicString)) {
+        this.$emit("onMnemonic", this.inputMnemonicString);
+        this.inputMnemonic = this.inputMnemonicString.split(" ");
+        try {
+          const wallet = new Wallet(
+            this.inputMnemonicString,
+            this.customHdPath,
+            this.customBech32Prefix
+          );
+          this.generatedAddress = wallet.address;
+        } catch (e) {
+          this.$emit("onMnemonic", "");
+        }
       }
     },
     downloadMnemonic(): void {

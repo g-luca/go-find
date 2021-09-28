@@ -21,7 +21,10 @@
       </div>
     </div>
 
-    <InputMnemonic :generatedMnemonic="mnemonic" />
+    <InputMnemonic
+      :generated-mnemonic="mnemonic"
+      :is-new="true"
+    />
 
     <div class="pt-8">
       <input
