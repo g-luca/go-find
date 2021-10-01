@@ -113,12 +113,12 @@
                         <div class="col-span-4">
                           <img
                             class="p-4 pointer-events-none select-none h-16 w-auto"
-                            :src="require('@/assets/brands/'+chain.id+'/logo.svg')"
+                            :src="getChainLogo(chain.id)"
                             alt=""
                           >
                         </div>
                         <div class="col-span-5 my-auto">
-                          <h5 class="dark:text-white text-2xl capitalize lg:block hidden">
+                          <h5 class="dark:text-white text-2xl lg:block hidden">
                             {{ chain.name }}
                           </h5>
                           <h5 class="dark:text-white text-2xl capitalize block lg:hidden">
@@ -182,146 +182,135 @@
                   </div>
                 </div>
               </div>
+              <span v-if="!isLinkingWithKeplr">
 
-              <!-- Mnemonic Input -->
-              <div
-                v-if="selectedChain||isCustomChain"
-                class="md:flex -mx-4"
-              >
-                <div class="px-4">
-                  <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 text-blue-600">
-                    2
-                  </span>
-                </div>
-                <div class="px-4 w-full">
-                  <h3 class="mt-4 text-2xl font-bold dark:text-white">
-                    Enter the <span
-                      v-if="!isCustomChain"
-                      class="capitalize font-bolder text-brand"
-                    >{{ selectedChain.name }}</span> mnemonic
-                  </h3>
-                  <h4 class="dark:text-white">
-                    <span class="text-yellow-400">Keep calm</span>: your mnemonic <strong><u>never</u></strong> leaves this form
-                  </h4>
-                  <div class="grid grid-cols-8 gap-x-8 gap-y-4 py-2">
-                    <div
-                      v-for="(word,index) in inputMnemonic"
-                      class="col-span-4 lg:col-span-2 border-b-2 border-gray-300 dark:border-gray-500 bg-gray-50 dark:bg-gray-900 rounded"
-                    >
-                      <div class="mt-1 relative rounded-md shadow-sm">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span class="text-gray-500 text-sm">
-                            {{ index+1 }}
-                          </span>
-                        </div>
-                        <input
-                          :key="index"
-                          v-model="inputMnemonic[index]"
-                          class="block w-full pl-8 dark:bg-gray-900 bg-gray-50 text-xl lowercase dark:text-white"
+                <!-- Mnemonic Input -->
+                <div
+                  v-if="selectedChain||isCustomChain"
+                  class="md:flex -mx-4"
+                >
+                  <div class="px-4">
+                    <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 text-blue-600">
+                      2
+                    </span>
+                  </div>
+                  <div class="px-4 w-full">
+                    <h3 class="mt-4 text-2xl font-bold dark:text-white">
+                      Enter the <span
+                        v-if="!isCustomChain"
+                        class="capitalize font-bolder text-brand"
+                      >{{ selectedChain.name }}</span> mnemonic
+                    </h3>
+                    <h4 class="dark:text-white">
+                      <span class="text-yellow-400">Keep calm</span>: your mnemonic <strong><u>never</u></strong> leaves this form
+                    </h4>
+                    <InputMnemonic
+                      :skip-valid-mnemonic-check="true"
+                      :custom-hd-path="customHdPath"
+                      :custom-bech32-prefix="customBechPrefix"
+                      @onMnemonic="onMnemonic($event)"
+                    />
+                    <h4 class="text-gray-600 dark:text-gray-300 text-xs pb-6">
+                      Note: You can also use mnemonic of 12 and 18 words.
+                    </h4>
+
+                    <div class="">
+                      <h4 class="dark:text-white text-xl font-bold">
+                        Advanced Options
+                        <i
+                          v-if="!isAdvancedOptionsOpen"
+                          class="bi bi-chevron-down cursor-pointer"
+                          @click="toggleAdvancedOptions()"
+                        />
+                        <i
+                          v-else
+                          class="bi bi-chevron-up cursor-pointer"
+                          @click="toggleAdvancedOptions()"
+                        />
+                        <div
+                          v-if="isAdvancedOptionsOpen"
+                          class=""
                         >
+                          <div>
+                            <label
+                              for="hdpath"
+                              class="text-gray-700 text-sm"
+                            >
+                              Derivation Path
+                            </label>
+                            <input
+                              id="hdpath"
+                              v-model="customHdPath"
+                              type="text"
+                              class=" rounded-lg w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+                              name="hdpath"
+                              :placeholder="(selectedChain)? selectedChain.hdpath : supportedChainLinks[0].hdpath"
+                            >
+                          </div>
+
+                          <div class="pt-4">
+                            <label
+                              for="bechPrefix"
+                              class="text-gray-700 text-sm"
+                            >
+                              Address Prefix
+                            </label>
+                            <input
+                              id="bechPrefix"
+                              v-model="customBechPrefix"
+                              type="text"
+                              class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none"
+                              name="bechPrefix"
+                            >
+                          </div>
+                        </div>
+                      </h4>
+                    </div>
+
+                    <div class="pt-4">
+                      <button
+                        type="button"
+                        class="py-2 px-4 w-full bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                        @click="generateProof()"
+                      >
+                        Connect
+                      </button>
+                      <div class="pt-4">
+                        <span v-if="generateProofError">
+                          <h6 class="text-red-700">
+                            {{ generateProofError }}
+                          </h6>
+                        </span>
                       </div>
                     </div>
                   </div>
-                  <h4 class="text-gray-600 dark:text-gray-300 text-xs pb-6">
-                    Note: You can also use mnemonic of 12 and 18 words.
-                  </h4>
+                </div>
 
-                  <div class="">
-                    <h4 class="dark:text-white text-xl font-bold">
-                      Advanced Options
-                      <i
-                        v-if="!isAdvancedOptionsOpen"
-                        class="bi bi-chevron-down cursor-pointer"
-                        @click="toggleAdvancedOptions()"
-                      />
-                      <i
-                        v-else
-                        class="bi bi-chevron-up cursor-pointer"
-                        @click="toggleAdvancedOptions()"
-                      />
-                      <div
-                        v-if="isAdvancedOptionsOpen"
-                        class=""
-                      >
-                        <div>
-                          <label
-                            for="hdpath"
-                            class="text-gray-700 text-sm"
-                          >
-                            Derivation Path
-                          </label>
-                          <input
-                            id="hdpath"
-                            v-model="customHdpath"
-                            type="text"
-                            class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
-                            name="hdpath"
-                            :placeholder="(selectedChain)? selectedChain.hdpath : supportedChainLinks[0].hdpath"
-                          >
-                        </div>
-
-                        <div class="pt-4">
-                          <label
-                            for="bechPrefix"
-                            class="text-gray-700 text-sm"
-                          >
-                            Address Prefix
-                          </label>
-                          <input
-                            id="bechPrefix"
-                            v-model="customBechPrefix"
-                            type="text"
-                            class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
-                            name="bechPrefix"
-                          >
-                        </div>
-                      </div>
-                    </h4>
+                <!-- Confirm -->
+                <div
+                  v-if="generatedProof"
+                  class="md:flex -mx-4 w-full"
+                >
+                  <div class="px-4">
+                    <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 text-blue-600">
+                      3
+                    </span>
                   </div>
-
-                  <div class="pt-4">
+                  <div class="px-4 w-full">
+                    <h3 class="my-4 text-2xl font-bold dark:text-white">
+                      Confirm the operation
+                    </h3>
                     <button
                       type="button"
-                      class="py-2 px-4 w-full bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
-                      @click="generateProof()"
+                      :disabled="isExecutingTransaction||generatedProof===''"
+                      class="py-2 px-4 w-6/12 bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                      @click="submitChainLink()"
                     >
-                      Connect
+                      Submit
                     </button>
-                    <div class="pt-4">
-                      <span v-if="generateProofError">
-                        <h6 class="text-red-700">
-                          {{ generateProofError }}
-                        </h6>
-                      </span>
-                    </div>
                   </div>
                 </div>
-              </div>
-
-              <!-- Confirm -->
-              <div
-                v-if="generatedProof"
-                class="md:flex -mx-4 w-full"
-              >
-                <div class="px-4">
-                  <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 text-blue-600">
-                    3
-                  </span>
-                </div>
-                <div class="px-4 w-full">
-                  <h3 class="my-4 text-2xl font-bold dark:text-white">
-                    Confirm the operation
-                  </h3>
-                  <button
-                    type="button"
-                    :disabled="isExecutingTransaction||generatedProof===''"
-                    class="py-2 px-4 w-6/12 bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
-                    @click="submitChainLink()"
-                  >
-                    Submit
-                  </button>
-                </div>
-              </div>
+              </span>
             </section>
           </div>
         </div>
