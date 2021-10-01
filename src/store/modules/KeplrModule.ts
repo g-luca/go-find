@@ -33,7 +33,14 @@ export default class KeplrModule extends VuexModule {
             window.addEventListener("keplr_keystorechange", () => {
                 authModule.logout();
                 router.push('/')
-            })
+            });
+
+            (window.keplr as any).defaultOptions = {
+                sign: {
+                    preferNoSetFee: true,
+                    preferNoSetMemo: true,
+                }
+            }
         }
     }
 
