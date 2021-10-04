@@ -25,7 +25,7 @@
     <!-- Profile Pic -->
     <div class=" -mt-36">
       <div class="grid grid-cols-12">
-        <div class="md:col-start-2 lg:col-start-3 md:col-span-3 col-span-12 my-auto mt-8">
+        <div class="md:col-start-2 lg:col-start-2 md:col-span-3 col-span-12 my-auto mt-8">
           <span v-if="$store.state.ProfileModule.profileLoadingStatus">
             <img
               alt="avatar"
@@ -43,7 +43,7 @@
         </div>
 
         <!-- User Info -->
-        <div class="md:col-start-6 md:col-span-5 lg:col-span-4 col-span-12 my-auto pt-4 md:pt-8">
+        <div class="md:col-start-6 md:col-span-5 lg:col-start-5 lg:col-span-6 col-span-12 my-auto pt-4 md:pt-8">
           <div class="md:w-full text-center md:text-left dark:text-gray-100 bg-gray-50 md:bg-white dark:bg-denim-900 md:bg-gray-50 md:dark:bg-gray-900 md:bg-opacity-95 backdrop-grayscale md:shadow-2xl rounded-2xl md:pl-7 py-2 md:py-6">
             <span v-if="$store.state.ProfileModule.profileLoadingStatus">
               <div class="font-bold text-5xl">
@@ -74,7 +74,8 @@
                 </div>
               </div>
               <div
-                class="prose prose-xl"
+                class="prose max-w-none dark:text-white prose-indigo dark:prose-blue"
+                style="max-height:200px;overflow:auto;text-color:white"
                 v-html="$store.state.ProfileModule.profile.bio"
               />
 
