@@ -28,8 +28,8 @@
                     >
                   </div>
                   <div class="col-span-7 my-auto text-left">
-                    <h1 class="dark:text-white text-xl font-bold capitalize">
-                      {{ chainLink.chain }}
+                    <h1 class="dark:text-white text-xl font-bold">
+                      {{ getChainName(chainLink.chain) }}
                     </h1>
                     <h4 class="dark:text-white text-md md:font-mono truncate">
                       {{ chainLink.address }}

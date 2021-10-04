@@ -220,7 +220,6 @@ export default defineComponent({
                         msgs: [],
                         sequence: "0"
                     }
-                    console.log(proofObj)
                     const signedTx = await signer?.signAmino(keplrWallet.bech32Address, proofObj); // sign with Keplr
                     const plainText = JSON.stringify(proofObj, null, 0); // convert to string to be used as plain_text
                     if (signedTx && authModule.account) {
@@ -312,7 +311,18 @@ export default defineComponent({
             } catch (e) {
                 return '';
             }
-        }, onMnemonic(mnemonic: string) {
+        },
+        getChainName(nameRaw: string) {
+            const supportedChain = supportedChainLinks.find((v) => {
+                return v.id === nameRaw;
+            });
+            if (supportedChain) {
+                return supportedChain.name;
+            } else {
+                return nameRaw;
+            }
+        }
+        , onMnemonic(mnemonic: string) {
             this.inputMnemonic = mnemonic.split(" ");
         }
     },
