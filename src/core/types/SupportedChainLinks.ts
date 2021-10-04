@@ -11,4 +11,8 @@ export const supportedChainLinks: Blockchain[] = [
     new Blockchain("osmosis", "Osmosis", "osmo", "osmosis-1", "m/44'/118'/0'/0/0", "osmo"),
     new Blockchain("akash", "Akash", "akt", "akashnet-2", "m/44'/118'/0'/0/0", "akash"),
     new Blockchain("crypto", "Crypto.org", "cro", "crypto-org-chain-mainnet-1", "m/44'/118'/0'/0/0", "cro"),
+    new Blockchain("regen", "Regen", "regen", "regen-1", "m/44'/118'/0'/0/0", "regen"),
+    new Blockchain("sentinel", "Sentinel", "dvpn", "sentinelhub-2", "m/44'/118'/0'/0/0", "sent"),
+    new Blockchain("kava", "Kava", "kava", "kava-3", "m/44'/459'/0'/0/0", "kava"),
+    new Blockchain("emoney", "e-Money", "ngm", "emoney-3", "m/44'/118'/0'/0/0", "emoney"),
 ];
