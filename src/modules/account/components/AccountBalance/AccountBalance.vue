@@ -10,7 +10,7 @@
         <div class="px-4 pt-5 pb-2 sm:pt-6">
           <dl>
             <dt class="text-3xl leading-5 font-medium dark:text-gray-200 truncate py-1">
-              Balance
+              Wallet
             </dt>
             <div class="font-mono text-md truncate py-2 dark:text-gray-400 text-gray-700">
               {{ $store.state.AccountModule.account._address }}
