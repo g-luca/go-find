@@ -41,27 +41,29 @@
           </div>
         </section>
 
-        <!-- Content -->
-        <div class="grid grid-cols-12 pt-8 mx-4">
+        <span v-if="$store.state.AccountModule.profile">
+          <!-- Content -->
+          <div class="grid grid-cols-12 pt-8 mx-4">
 
-          <!-- Profile Edit -->
-          <div class="col-span-12 lg:col-span-6 px-4 md:px-10 bg-white dark:bg-gray-900 rounded-3xl shadow-xl hover:shadow-2xl">
-            <AccountProfileEdit />
+            <!-- Profile Edit -->
+            <div class="col-span-12 lg:col-span-6 px-4 md:px-10 bg-white dark:bg-gray-900 rounded-3xl shadow-xl hover:shadow-2xl">
+              <AccountProfileEdit />
+            </div>
+
+            <!-- Account  -->
+            <div class="col-span-12 lg:col-span-6 lg:mx-4">
+
+              <!-- Balance -->
+              <AccountBalance />
+
+              <!-- Chain Links -->
+              <AccountChainLinks v-if="!$store.state.AccountModule.isNewProfile" />
+            </div>
           </div>
 
-          <!-- Account  -->
-          <div class="col-span-12 lg:col-span-6 lg:mx-4">
-
-            <!-- Balance -->
-            <AccountBalance />
-
-            <!-- Chain Links -->
-            <AccountChainLinks v-if="!$store.state.AccountModule.isNewProfile" />
-          </div>
-        </div>
-
-        <!-- Application Links -->
-        <AccountAppLinks v-if="!$store.state.AccountModule.isNewProfile" />
+          <!-- Application Links -->
+          <AccountAppLinks v-if="!$store.state.AccountModule.isNewProfile" />
+        </span>
 
       </span>
       <AppFooter class="mt-8" />
