@@ -1,8 +1,16 @@
 import { defineComponent, ref, watchEffect } from "vue";
-import { Form, Field, } from 'vee-validate';
+import { Form, Field } from 'vee-validate';
 import AppFooter from "@/ui/components/AppFooter/AppFooter.vue";
 import AppHeader from "@/ui/components/AppHeader/AppHeader.vue";
 
+
+import {
+    TransitionRoot,
+    TransitionChild,
+    Dialog,
+    DialogOverlay,
+    DialogTitle,
+} from "@headlessui/vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import { getModule } from 'vuex-module-decorators';
 import AuthModule from "@/store/modules/AuthModule";
@@ -19,6 +27,11 @@ const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
 const transactionModule = getModule(TransactionModule);
 
+enum UploadImageType {
+    'profilePic' = 'profilePic',
+    'profileCover' = 'profileCover'
+}
+
 export default defineComponent({
     components: {
         AppHeader,
@@ -30,6 +43,11 @@ export default defineComponent({
         Field,
         AccountBalance,
         AccountChainLinks,
+        TransitionRoot,
+        TransitionChild,
+        Dialog,
+        DialogOverlay,
+        DialogTitle,
     },
     data() {
         const formSchema = {
@@ -38,8 +56,18 @@ export default defineComponent({
             profileCover: { regex: /^(http)s?:?(\/\/[^"']*$)/ },
             bio: { max: 1000 }
         };
+        let initialValues = {}
+        // set the default values form the accountModule
+        if (accountModule.profile) {
+            initialValues = {
+                nickname: accountModule.profile.nickname,
+                profilePic: accountModule.profile.profilePic,
+                profileCover: accountModule.profile.profileCover,
+                bio: accountModule.profile.bio,
+            }
+        }
         return {
-            initialValues: {},
+            initialValues,
             formSchema,
             txSent: null as CosmosTxBody | null,
             inputNickname: '',
@@ -47,6 +75,16 @@ export default defineComponent({
             inputProfileCover: '',
             inputBio: '',
             markedInputBio: '',
+
+            isUploadingImage: false,
+            hasUploadImageError: '',
+            hasUploadedImage: false,
+            isModalUploadImageOpen: false,
+            imageUploadPreviewUrl: '',
+            imageUploadFile: null as any,
+            imageUploadType: UploadImageType.profilePic,
+
+
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             resetForm: (_values?: unknown) => { return; }
         }
@@ -55,15 +93,6 @@ export default defineComponent({
         const account = authModule.account;
         if (account) {
             await accountModule.loadAccount();
-            // set the default values form the accountModule
-            if (accountModule.profile) {
-                this.initialValues = {
-                    nickname: accountModule.profile.nickname,
-                    profilePic: accountModule.profile.profilePic,
-                    profileCover: accountModule.profile.profileCover,
-                    bio: accountModule.profile.bio,
-                }
-            }
 
             //register the watcher of the accountModule user account profile
             ref(accountModule.profile);
@@ -158,7 +187,87 @@ export default defineComponent({
                     },
                 });
             }
+        },
+
+        openModalUploadImage(e: any, type: UploadImageType) {
+            // retrieve the image
+            this.imageUploadFile = null;
+            try {
+                const image = e.target.files[0] || e.dataTransfer.files[0];
+                this.imageUploadFile = image;
+                this.imageUploadType = type;
+                this.imageUploadPreviewUrl = URL.createObjectURL(image);
+                this.isModalUploadImageOpen = true;
+                this.isUploadingImage = false;
+                this.hasUploadImageError = '';
+                this.hasUploadedImage = false;
+            } catch (e) {
+                // input file removed
+            }
+        },
+        closeModalUploadImage() {
+            this.isModalUploadImageOpen = false;
+        },
+
+
+        /**
+         * Upload generic profile image (using IPFS)
+         * @param image image file
+         */
+        async uploadProfileImage() {
+            this.isUploadingImage = true;
+            this.hasUploadedImage = false;
+            this.hasUploadImageError = '';
+            const uploadedImageUrl = await this.uploadFileIpfs(this.imageUploadFile);
+            if (uploadedImageUrl !== false) {
+                this.hasUploadedImage = true;
+                switch (this.imageUploadType) {
+                    case UploadImageType.profilePic:
+                        this.inputProfilePic = uploadedImageUrl;
+                        break;
+
+                    case UploadImageType.profileCover:
+                        this.inputProfileCover = uploadedImageUrl;
+                        break;
+                }
+                window.setTimeout(() => { this.closeModalUploadImage() }, 1000)
+            } else {
+                this.hasUploadImageError = 'Ops, something went wrong uploading the image. Try again!';
+            }
+            this.isUploadingImage = false;
+        },
+
+        /**
+         * Upload a file to IPFS
+         * @param file file to upload
+         * @returns uploaded file URL if uploaded successfully, false otherwise
+         */
+        async uploadFileIpfs(file: any): Promise<string | false> {
+
+            // define the IPFS gateway
+            const ipfsGateway = 'https://ipfs.infura.io';
+
+            // prepare the file to be uploaded
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // try to upload the file
+            try {
+                const res = await (await fetch(`${ipfsGateway}:5001/api/v0/add`, {
+                    method: 'POST',
+                    body: formData as any,
+                })).json();
+                // if uploaded, get the response CID
+                const cid = res.Hash;
+                if (cid) {
+                    return `${ipfsGateway}/ipfs/${cid}`;
+                }
+            } catch (e) {
+                // damn, upload failed!
+            }
+            return false;
         }
+
 
     }
 });

@@ -44,16 +44,31 @@
               >
                 Profile picture
               </label>
-              <Field
-                id="profilePic"
-                v-model="inputProfilePic"
-                type="text"
-                class=" rounded-lg flex-1 appearance-none border w-full py-2 px-4 my-1 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
-                :class="{'border-red-700 dark:border-red-700': errors.profilePic,
-                         'focus:border-brand dark:focus:border-brand border-gray-300 dark:border-gray-900': !errors.profilePic }"
-                name="profilePic"
-                placeholder="https://profile-picture.com/image.png"
-              />
+              <div class="grid grid-cols-12">
+                <div class="col-span-10 md:col-span-11">
+                  <Field
+                    id="profilePic"
+                    v-model="inputProfilePic"
+                    type="text"
+                    class=" rounded-lg flex-1 appearance-none w-full py-2 px-4 my-1 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+                    :class="{'border-red-700 dark:border-red-700': errors.profilePic,
+                             'focus:border-brand dark:focus:border-brand border-gray-300 dark:border-gray-900': !errors.profilePic }"
+                    name="profilePic"
+                    placeholder="https://profile-picture.com/image.png"
+                  />
+                </div>
+                <div class="col-span-2 md:col-span-1 mx-auto align-middle my-auto bg-gray-100 dark:bg-gray-800 rounded-full px-2 p-1 shadow-md">
+                  <label class="cursor-pointer bi bi-images hover:text-brand text-2xl fa fa-cloud-upload-fill">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      class="hidden"
+                      @change="openModalUploadImage($event,'profilePic')"
+                    >
+                  </label>
+                </div>
+              </div>
+
               <span
                 v-if="errors.profilePic"
                 class="text-red-700 text-sm"
@@ -66,16 +81,30 @@
               >
                 Cover
               </label>
-              <Field
-                id="profileCover"
-                v-model="inputProfileCover"
-                type="text"
-                class=" rounded-lg flex-1 appearance-none border w-full py-2 px-4 my-1 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
-                :class="{'border-red-700 dark:border-red-700': errors.profileCover,
-                         'focus:border-brand dark:focus:border-brand border-gray-300 dark:border-gray-900': !errors.profileCover }"
-                name="profileCover"
-                placeholder="https://profile-cover.com/image.png"
-              />
+              <div class="grid grid-cols-12">
+                <div class="col-span-10 md:col-span-11">
+                  <Field
+                    id="profileCover"
+                    v-model="inputProfileCover"
+                    type="text"
+                    class=" rounded-lg flex-1 appearance-none w-full py-2 px-4 my-1 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+                    :class="{'border-red-700 dark:border-red-700': errors.profileCover,
+                             'focus:border-brand dark:focus:border-brand border-gray-300 dark:border-gray-900': !errors.profileCover }"
+                    name="profileCover"
+                    placeholder="https://profile-cover.com/image.png"
+                  />
+                </div>
+                <div class="col-span-2 md:col-span-1 mx-auto align-middle my-auto bg-gray-100 dark:bg-gray-800 rounded-full px-2 p-1 shadow-md">
+                  <label class="cursor-pointer bi bi-images hover:text-brand text-2xl fa fa-cloud-upload-fill">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      class="hidden"
+                      @change="openModalUploadImage($event,'profileCover')"
+                    >
+                  </label>
+                </div>
+              </div>
               <span
                 v-if="errors.profileCover"
                 class="text-red-700 text-sm"
@@ -91,7 +120,7 @@
               <Field
                 id="bio"
                 v-model="inputBio"
-                class=" rounded-lg flex-1 appearance-none border w-full py-2 px-4 my-1 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+                class=" rounded-lg flex-1 appearance-none w-full py-2 px-4 my-1 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
                 :class="{'border-red-700 dark:border-red-700': errors.bio,
                          'focus:border-brand dark:focus:border-brand border-gray-300 dark:border-gray-900': !errors.bio }"
                 placeholder="Your incredible bio"
@@ -118,7 +147,7 @@
                 </span>
               </div>
               <span
-                class="prose prose-xl"
+                class="prose max-w-none dark:text-white prose-indigo dark:prose-blue"
                 v-html="markedInputBio"
               />
               <span
@@ -129,15 +158,16 @@
             </div>
             <div class="grid grid-cols-12 items-center justify-between gap-4 my-6">
               <button
-                v-if="$store.state.TransactionModule.transactionStatus!==1&&(meta.valid&&meta.touched&&meta.dirty)"
+                v-if="$store.state.TransactionModule.transactionStatus!==1&&(meta.valid&&meta.dirty)"
                 type="submit"
                 :disabled="$store.state.TransactionModule.transactionStatus===1"
                 class="py-2 px-4 col-span-9 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
               >
                 Save changes
               </button>
+
               <button
-                v-if="$store.state.TransactionModule.transactionStatus!==1&&(meta.touched&&meta.dirty)"
+                v-if="$store.state.TransactionModule.transactionStatus!==1&&(meta.dirty)"
                 type="button"
                 :class="{'col-start-10':!meta.valid}"
                 class="py-2 px-4 col-span-3 bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
@@ -177,6 +207,71 @@
         </div>
       </span>
     </Form>
+
+    <Dialog
+      :open="isModalUploadImageOpen"
+      @close="closeModalUploadImage()"
+    >
+      <div class="fixed inset-0 z-20 overflow-y-auto bg-opacity-50 bg-gray-500">
+        <div class="min-h-screen px-4 text-center">
+          <span class="inline-block h-screen align-middle"> &#8203; </span>
+
+          <div class="inline-block w-full max-w-6xl p-6 pb-1 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-900 shadow-xl rounded-2xl">
+            <DialogTitle class="text-3xl font-bold leading-6 text-gray-900 dark:text-white pb-3">
+              <span class="flex">
+                <div class="flex dark:text-chocolate-500 text-chocolate-500 text-4xl">Upload Image</div>
+                <div class="flex-auto text-right">
+                  <button>
+                    <i
+                      class="bi bi-x h-12 w-12"
+                      @click="closeModalUploadImage()"
+                    />
+                  </button>
+                </div>
+              </span>
+            </DialogTitle>
+            <div class="w-full">
+              <img
+                class="mx-auto object-cover pointer-events-none select-none"
+                :class="{
+                  'rounded-full h-44 w-44 md:h-56 md:w-56': imageUploadType==='profilePic',
+                  'rounded-xl max-h-80  w-full': imageUploadType==='profileCover'
+                }"
+                :src="imageUploadPreviewUrl"
+                alt=""
+              >
+            </div>
+            <div class="py-5 align-middle flex">
+              <button
+                :disabled="isUploadingImage||hasUploadedImage"
+                type="button"
+                class="mx-auto rounded-2xl bg-chocolate-500 hover:bg-chocolate-600 py-2 w-1/3 text-xl text-white"
+                :class="{
+                  'brightness-50 cursor-wait':isUploadingImage,
+                  'bg-green-600 hover:bg-green-600 cursor-default':!isUploadingImage&&hasUploadedImage&&!hasUploadImageError
+                }"
+                @click="uploadProfileImage()"
+              >
+                <span v-if="!isUploadingImage&&!hasUploadedImage">
+                  Upload <i class="bi bi-cloud-arrow-up-fill" />
+                </span>
+                <span v-if="isUploadingImage">
+                  Uploading <i class="bi bi-cloud-upload-fill animate animate-bounce h-6 w-6" />
+                </span>
+                <span v-if="hasUploadedImage">
+                  Uploaded <i class="bi bi-check2-circle" />
+                </span>
+              </button>
+            </div>
+            <div v-if="hasUploadImageError">
+              <p class="text-red-600 text-center">
+                {{ hasUploadImageError }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Dialog>
   </section>
 </template>
 
