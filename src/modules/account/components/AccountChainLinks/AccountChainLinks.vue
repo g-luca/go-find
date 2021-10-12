@@ -7,7 +7,12 @@
             Blockchains
           </h1>
           <span v-if="$store.state.AccountModule.profile.chainLinks&&$store.state.AccountModule.profile.chainLinks.length>0">
-            <div class="grid grid-cols-2 gap-3 text-center">
+            <div
+              class="grid grid-cols-2 gap-3 text-center"
+              :class="{
+                'md:overflow-y-auto md:max-h-96':$store.state.AccountModule.profile.chainLinks.length>3
+              }"
+            >
               <div
                 v-for="chainLink in $store.state.AccountModule.profile.chainLinks"
                 :key="chainLink"
@@ -320,3 +325,24 @@
 </template>
 
 <script lang="ts" src="./AccountChainLinks.ts"/>
+<style scoped>
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(55, 48, 163) transparent;
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgb(55, 48, 163);
+  border-radius: 20px;
+  border: 3px solid transparent;
+}
+</style>
