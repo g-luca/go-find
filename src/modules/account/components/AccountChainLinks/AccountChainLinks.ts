@@ -39,6 +39,7 @@ export default defineComponent({
     data() {
         return {
             supportedChainLinks,
+            filteredSupportedChainLinks: supportedChainLinks,
             isCustomChain: false,
             customChainName: "",
             customBechPrefix: "",
@@ -95,8 +96,21 @@ export default defineComponent({
             this.isChainLinkEditorOpen = !this.isChainLinkEditorOpen;
             //this.inputMnemonic = new Array<string>(24);
             this.selectedChain = null;
+            this.filteredSupportedChainLinks = this.supportedChainLinks
         }, toggleAdvancedOptions(): void {
             this.isAdvancedOptionsOpen = !this.isAdvancedOptionsOpen;
+        },
+        /**
+         * Filter supported chain links by text input
+         * @param e input event
+         */
+        searchChainLink(e: any) {
+            const input = (e.target.value as string).toLowerCase();
+            if (input) {
+                this.filteredSupportedChainLinks = this.supportedChainLinks.filter(x => x.name.toLowerCase().match(input) || x.symbol.toLowerCase().match(input))
+            } else {
+                this.filteredSupportedChainLinks = this.supportedChainLinks
+            }
         },
         /**
          * Delete a connected chain link

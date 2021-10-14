@@ -104,20 +104,28 @@
                     1
                   </span>
                 </div>
-                <div class="px-4 w-full pb-4">
-                  <h3 class="mt-4 text-2xl font-bold dark:text-white">
-                    Select the Blockchain
-                  </h3>
-                  <div class="grid grid-cols-12">
+                <div class="w-full pb-4  overflow-y-scroll">
+                  <div class="fixed">
+                    <h3 class="mt-4 text-2xl font-bold dark:text-white ">
+                      Select the Blockchain
+                    </h3>
+                    <input
+                      class="bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-lg focus:outline-none focus:ring-0 dark:text-white"
+                      placeholder="Search..."
+                      type="text"
+                      @input="searchChainLink"
+                    >
+                  </div>
+                  <div class="flex flex-nowrap min-w-full mt-24">
                     <div
-                      v-for="chain of supportedChainLinks"
-                      class="col-span-12 md:col-span-4 xl:col-span-3 m-1 rounded-3xl bg-gray-100 dark:bg-denim-900 dark:hover:bg-purple-800 hover:bg-purple-200 cursor-pointer"
+                      v-for="chain of filteredSupportedChainLinks"
+                      class="flex-initial m-1 rounded-3xl bg-gray-100 dark:bg-denim-900 dark:hover:bg-purple-800 hover:bg-purple-200 cursor-pointer select-none"
                       @click="selectChain(chain)"
                     >
-                      <div class="grid grid-cols-12">
+                      <div class="grid grid-cols-12 w-44 md:w-60">
                         <div class="col-span-4">
                           <img
-                            class="p-4 pointer-events-none select-none h-16 w-auto"
+                            class="p-3 pointer-events-none select-none h-16 w-16"
                             :src="getChainLogo(chain.id)"
                             alt=""
                           >
@@ -143,12 +151,12 @@
                       </div>
                     </div>
                     <div
-                      class="col-span-12 md:col-span-4 xl:col-span-3 m-1 rounded-3xl bg-gray-100 dark:bg-denim-900 dark:hover:bg-purple-800 hover:bg-purple-200 cursor-pointer"
+                      class="flex-initial m-1 rounded-3xl bg-gray-100 dark:bg-denim-900 dark:hover:bg-purple-800 hover:bg-purple-200 cursor-pointer"
                       @click="selectChain(null)"
                     >
-                      <div class="grid grid-cols-12 py-3">
+                      <div class="grid grid-cols-12 w-44 md:w-60 py-3">
                         <div class="col-span-4">
-                          <i class="p-4 pointer-events-none select-none text-4xl w-auto my-auto bi bi-link text-seagreen-500" />
+                          <i class="p-3 pointer-events-none select-none text-4xl w-auto my-auto bi bi-link text-seagreen-500" />
                         </div>
                         <div class="col-span-5 my-auto">
                           <h5 class="dark:text-white text-2xl capitalize">
@@ -334,6 +342,7 @@
 /* Works on Chrome, Edge, and Safari */
 *::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 *::-webkit-scrollbar-track {
