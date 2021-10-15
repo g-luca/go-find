@@ -46,7 +46,11 @@ export default class TransactionModule extends VuexModule {
                         this.errorMessage = "Ops, the chain refused the message, retry later."
                     }
                 } else {
-                    this.errorMessage = "Wrong password"
+                    if (authModule.account?.isUsingKeplr) {
+                        this.errorMessage = "Transaction error";
+                    } else {
+                        this.errorMessage = "Transaction error or wrong password";
+                    }
                     this.transactionStatus = TransactionStatus.Error;
                 }
             } else {
