@@ -3,9 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "TAILWIND_MODE=watch vue-cli-service serve --mode development",
+    "serve-testnet": "TAILWIND_MODE=watch vue-cli-service serve --mode testnet",
+    "build-testnet": "vue-cli-service build --mode testnet --prod",
+
+    "serve-mainnet": "TAILWIND_MODE=watch vue-cli-service serve --mode mainnet",
+    "build-mainnet": "vue-cli-service build --mode mainnet --prod",
+
     "serve-dist": "serve -s dist",
-    "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

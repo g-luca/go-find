@@ -4,6 +4,11 @@ export default defineComponent({
     components: {
         SkeletonLoader,
     },
+    data() {
+        return {
+            coinDenom: `${process.env.VUE_APP_COIN_DENOM}`,
+        }
+    },
     methods: {
         splitNumberLeft(value: number, separator: string) {
             return String(value).split(separator)[0];

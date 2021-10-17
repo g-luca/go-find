@@ -5,6 +5,8 @@ import AuthAccount from '@/core/types/AuthAccount';
 import { CosmosAuthInfo, CosmosBroadcastMode, CosmosFee, CosmosPubKey, CosmosSignDoc, CosmosSignerInfo, CosmosSignMode, CosmosTxBody, CosmosTxRaw, DesmosJS, Network, Transaction } from 'desmosjs';
 import AccountModule from './AccountModule';
 import Long from 'long';
+import DesmosNetworkModule from './DesmosNetworkModule';
+const desmosNetworkModule = getModule(DesmosNetworkModule);
 
 export enum AuthLevel {
     None,
@@ -78,14 +80,13 @@ export default class AuthModule extends VuexModule {
      * @returns A signed Traansaction object or the string error
      */
     private static async signTxWithKeplr(txBody: CosmosTxBody, address: string): Promise<Transaction | false> {
-        const desmosNet = new Network(`${process.env.VUE_APP_LCD_ENDPOINT}`);
-        const account = await desmosNet.getAccount(address);
-        const pubKey = await window.keplr?.getKey(DesmosJS.chainId);
+        const account = await desmosNetworkModule.network.getAccount(address);
+        const pubKey = await window.keplr?.getKey(desmosNetworkModule.chainId);
         if (account && pubKey) {
             try {
 
                 // Get Keplr signer
-                const signer = window.keplr?.getOfflineSigner(DesmosJS.chainId);
+                const signer = window.keplr?.getOfflineSigner(desmosNetworkModule.chainId);
 
 
                 const signerInfo: CosmosSignerInfo = {
@@ -100,7 +101,7 @@ export default class AuthModule extends VuexModule {
                 };
 
                 const feeValue: CosmosFee = {
-                    amount: [{ denom: "udsm", amount: "200" }],
+                    amount: [{ denom: `${process.env.VUE_APP_COIN_FEE_DENOM}`, amount: "200" }],
                     gasLimit: 200000,
                     payer: "",
                     granter: "",
@@ -117,7 +118,7 @@ export default class AuthModule extends VuexModule {
                     accountNumber: Long.fromNumber(account.accountNumber),
                     authInfoBytes: authInfoBytes,
                     bodyBytes: bodyBytes,
-                    chainId: DesmosJS.chainId,
+                    chainId: desmosNetworkModule.chainId,
                 });
 
 
@@ -154,8 +155,7 @@ export default class AuthModule extends VuexModule {
         if (mKey) {
             try {
                 const privKey = CryptoUtils.decryptAes(mPassword, mKey);
-                const desmosNet = new Network(`${process.env.VUE_APP_LCD_ENDPOINT}`);
-                const account = await desmosNet.getAccount(address);
+                const account = await desmosNetworkModule.network.getAccount(address);
                 console.log(account)
                 if (account) {
                     try {
@@ -166,7 +166,7 @@ export default class AuthModule extends VuexModule {
                         };
 
                         const feeValue: CosmosFee = {
-                            amount: [{ denom: "udsm", amount: "200" }],
+                            amount: [{ denom: `${process.env.VUE_APP_COIN_FEE_DENOM}`, amount: "200" }],
                             gasLimit: 200000,
                             payer: "",
                             granter: ""

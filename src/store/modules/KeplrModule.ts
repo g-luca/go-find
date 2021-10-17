@@ -6,7 +6,9 @@ import { ProfileQuery } from '@/gql/ProfileQuery';
 import AuthModule from './AuthModule';
 import AuthAccount from '@/core/types/AuthAccount';
 import router from '@/router';
+import DesmosNetworkModule from './DesmosNetworkModule';
 const authModule = getModule(AuthModule);
+const desmosNetworkModule = getModule(DesmosNetworkModule);
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -50,12 +52,15 @@ export default class KeplrModule extends VuexModule {
      */
     @Mutation
     public async auth(): Promise<void> {
-        console.log('init')
         if (window.keplr) {
             this.isInstalled = true;
             this.isWaitingAuthentication = true;
-            await KeplrModule.setupDesmosMainnet();
-            this.address = await (await window.keplr.getKey('desmos-mainnet')).bech32Address;
+            if (!process.env.VUE_APP_IS_TESTNET) {
+                await KeplrModule.setupDesmosMainnet();
+            } else {
+                await KeplrModule.setupDesmosTestnet();
+            }
+            this.address = await (await window.keplr.getKey(desmosNetworkModule.chainId)).bech32Address;
 
             const getProfileQuery = useLazyQuery(
                 ProfileQuery, {
@@ -96,10 +101,10 @@ export default class KeplrModule extends VuexModule {
     private static async setupDesmosMainnet(): Promise<void> {
         if (window.keplr) {
             await window.keplr.experimentalSuggestChain({
-                chainId: "desmos-mainnet",
+                chainId: desmosNetworkModule.chainId,
                 chainName: "Desmos",
-                rpc: "https://rpc.mainnet.desmos.network:26657",
-                rest: "https://api.mainnet.desmos.network/",
+                rpc: `${process.env.VUE_APP_RPC_ENDPOINT}`,
+                rest: `${process.env.VUE_APP_LCD_ENDPOINT}`,
                 bip44: {
                     coinType: 852,
                 },
@@ -143,4 +148,53 @@ export default class KeplrModule extends VuexModule {
         }
     }
 
+    private static async setupDesmosTestnet(): Promise<void> {
+        if (window.keplr) {
+            await window.keplr.experimentalSuggestChain({
+                chainId: desmosNetworkModule.chainId,
+                chainName: "Desmos Testnet",
+                rpc: `${process.env.VUE_APP_RPC_ENDPOINT}`,
+                rest: `${process.env.VUE_APP_LCD_ENDPOINT}`,
+                bip44: {
+                    coinType: 852,
+                },
+                bech32Config: {
+                    bech32PrefixAccAddr: "desmos",
+                    bech32PrefixAccPub: "desmos" + "pub",
+                    bech32PrefixValAddr: "desmos" + "valoper",
+                    bech32PrefixValPub: "desmos" + "valoperpub",
+                    bech32PrefixConsAddr: "desmos" + "valcons",
+                    bech32PrefixConsPub: "desmos" + "valconspub",
+                },
+                currencies: [
+                    {
+                        coinDenom: "DARIC",
+                        coinMinimalDenom: "udaric",
+                        coinDecimals: 6,
+                        coinGeckoId: "desmos",
+                    },
+                ],
+                feeCurrencies: [
+                    {
+                        coinDenom: "udaric",
+                        coinMinimalDenom: "udaric",
+                        coinDecimals: 6,
+                        coinGeckoId: "desmos",
+                    },
+                ],
+                stakeCurrency: {
+                    coinDenom: "DARIC",
+                    coinMinimalDenom: "udaric",
+                    coinDecimals: 6,
+                    coinGeckoId: "udaric",
+                },
+                coinType: 852,
+                gasPriceStep: {
+                    low: 0.002,
+                    average: 0.025,
+                    high: 0.03,
+                },
+            });
+        }
+    }
 }

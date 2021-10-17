@@ -2,7 +2,9 @@ import store from '@/store';
 import { CosmosBroadcastMode, CosmosTxBody, CosmosTxResponse, Network, Transaction } from 'desmosjs';
 import { getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import AuthModule from './AuthModule';
+import DesmosNetworkModule from './DesmosNetworkModule';
 const authModule = getModule(AuthModule);
+const desmosNetworkModule = getModule(DesmosNetworkModule);
 
 export enum TransactionStatus {
     Error = -1,
@@ -109,8 +111,7 @@ export default class TransactionModule extends VuexModule {
      */
     private static async handleBroadcast(signedTx: Transaction): Promise<boolean> {
         try {
-            const desmosNet = new Network(`${process.env.VUE_APP_LCD_ENDPOINT}`);
-            const broadcastRawResult = await desmosNet.broadcast(signedTx, CosmosBroadcastMode.BROADCAST_MODE_SYNC);
+            const broadcastRawResult = await desmosNetworkModule.network.broadcast(signedTx, CosmosBroadcastMode.BROADCAST_MODE_SYNC);
             const broadcastResult = CosmosTxResponse.fromJSON(broadcastRawResult.tx_response);
             console.log(`tx hash: ${broadcastResult.txhash}`);
             //TODO: is this check enough?
