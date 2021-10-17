@@ -98,7 +98,7 @@ export default defineComponent({
     },
     customHdPath: {
       type: String,
-      default: "m/44'/0'/0'/0/0",
+      default: "m/44'/852'/0'/0/0",
     },
     customBech32Prefix: {
       type: String,
