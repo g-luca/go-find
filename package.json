@@ -5,10 +5,8 @@
   "scripts": {
     "serve-testnet": "TAILWIND_MODE=watch vue-cli-service serve --mode testnet",
     "build-testnet": "vue-cli-service build --mode testnet --prod",
-
     "serve-mainnet": "TAILWIND_MODE=watch vue-cli-service serve --mode mainnet",
     "build-mainnet": "vue-cli-service build --mode mainnet --prod",
-
     "serve-dist": "serve -s dist",
     "lint": "vue-cli-service lint"
   },
@@ -20,6 +18,8 @@
     "@vee-validate/rules": "^4.4.7",
     "@vue/apollo-composable": "^4.0.0-alpha.14",
     "@vue/apollo-option": "^4.0.0-alpha.14",
+    "@walletconnect/client": "^1.6.6",
+    "@walletconnect/qrcode-modal": "^1.6.6",
     "apollo-link-ws": "^1.0.20",
     "apollo-utilities": "^1.3.4",
     "autoprefixer": "^9",
