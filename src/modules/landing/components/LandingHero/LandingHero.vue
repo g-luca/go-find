@@ -42,20 +42,45 @@
             >Already have an account? <span class="underline">Sign In</span></a>
           </div>
 
-          <button
-            type="button"
-            class="mt-4 py-1 px-1 flex justify-center items-center w-1/2 md:w-1/4 xl:w-1/5 mx-auto rounded-xl  bg-gradient-to-br from-blue-400 to-violet-700 hover:bg-gradient-to-tl"
-            @click="$router.push('/login/keplr')"
-          >
-            <img
-              class="h-8"
-              :src="require('@/assets/brands/keplr/logo.svg')"
-              alt=""
-            >
-            <span class="text-white pl-3 text-lg">
-              Use Keplr
-            </span>
-          </button>
+          <div class="grid grid-cols-2 pt-3">
+            <div class="col-span-2 md:col-span-1 text-right px-2 pt-3">
+              <button
+                type="button"
+                class="w-full rounded-xl bg-gradient-to-br from-royalblue-400 to-blue-700 hover:bg-gradient-to-tl"
+                @click="openWalletConnect()"
+              >
+                <div class="flex py-2 justify-center">
+                  <img
+                    class="h-8"
+                    :src="require('@/assets/brands/walletconnect/logo.svg')"
+                    alt=""
+                  >
+                  <span class="text-white pl-3 text-lg my-auto">
+                    Use WalletConnect
+                  </span>
+                </div>
+              </button>
+            </div>
+
+            <div class="col-span-2 md:col-span-1 text-left px-2 pt-3">
+              <button
+                type="button"
+                class="w-full rounded-xl bg-gradient-to-br from-blue-400 to-violet-700 hover:bg-gradient-to-tl"
+                @click="$router.push('/login/keplr')"
+              >
+                <div class="flex py-2 justify-center">
+                  <img
+                    class="h-8"
+                    :src="require('@/assets/brands/keplr/logo.svg')"
+                    alt=""
+                  >
+                  <span class="text-white pl-3 text-lg my-auto">
+                    Use Keplr
+                  </span>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
