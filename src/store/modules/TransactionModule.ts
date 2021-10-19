@@ -1,5 +1,5 @@
 import store from '@/store';
-import { CosmosBroadcastMode, CosmosTxBody, CosmosTxResponse, Network, Transaction } from 'desmosjs';
+import { CosmosBroadcastMode, CosmosTxBody, CosmosTxResponse, Transaction } from 'desmosjs';
 import { getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import AuthModule from './AuthModule';
 import DesmosNetworkModule from './DesmosNetworkModule';
@@ -95,7 +95,7 @@ export default class TransactionModule extends VuexModule {
      */
     private static async handleSign(tx: CosmosTxBody, mPassword: string): Promise<Transaction | null> {
         if (authModule.account) {
-            const signedTx = await AuthModule.signTx(tx, authModule.account.address, mPassword);
+            const signedTx = await AuthModule.signTx(tx, authModule.account.address, mPassword, authModule.account.isUsingKeplr, authModule.account.isUsingWalletConnect);
             if (signedTx) {
                 return signedTx;
             }

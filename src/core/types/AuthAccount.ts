@@ -2,12 +2,14 @@ export default class AuthAccount {
     private _dtag: string;
     private _address: string;
     private _isUsingKeplr: boolean;
+    private _isUsingWalletConnect: boolean;
 
 
-    constructor(dtag: string, address: string, isUsingKeplr = false) {
+    constructor(dtag: string, address: string, isUsingKeplr = false, isUsingWalletConnect = false) {
         this._dtag = dtag;
         this._address = address;
         this._isUsingKeplr = isUsingKeplr;
+        this._isUsingWalletConnect = isUsingWalletConnect;
     }
 
     /**
@@ -33,6 +35,15 @@ export default class AuthAccount {
      */
     public get isUsingKeplr(): boolean {
         return this._isUsingKeplr;
+    }
+
+
+    /**
+     * Getter isUsingWalletConnect
+     * @return {boolean}
+     */
+    public get isUsingWalletConnect(): boolean {
+        return this._isUsingWalletConnect;
     }
 
 }
