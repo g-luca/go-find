@@ -1,18 +1,15 @@
 import store from '@/store';
 import { getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
-import WalletConnect from "@walletconnect/client";
-import QRCodeModal from "@walletconnect/qrcode-modal";
 import AuthModule from './AuthModule';
 import router from '@/router';
 import AuthAccount from '@/core/types/AuthAccount';
-import { useLazyQuery } from '@vue/apollo-composable';
-import { ProfileQuery } from '@/gql/ProfileQuery';
 const authModule = getModule(AuthModule);
 
 @Module({ store, name: 'WalletConnectModule', dynamic: true })
 export default class WalletConnectModule extends VuexModule {
-    public hasProfile = false;
-    private connectedAddress = '';
+    private _hasProfile = false;
+    private _connectedAddress = '';
+
 
 
     @Mutation
@@ -31,17 +28,19 @@ export default class WalletConnectModule extends VuexModule {
     @Mutation
     public async connect(): Promise<void> {
         const auth = async () => {
+            let address = '';
             if (AuthModule.walletConnectClient.accounts[0]) {
                 // try to retrieve address from session
-                this.connectedAddress = AuthModule.walletConnectClient.accounts[0];
+                address = AuthModule.walletConnectClient.accounts[0];
             }
             // if the address exists, check if has a Desmos Profile
-            if (this.connectedAddress) {
-                const result = await (await fetch(`${process.env.VUE_APP_LCD_ENDPOINT}cosmos/auth/v1beta1/accounts/${this.connectedAddress}`)).json();
+            if (address) {
+                const result = await (await fetch(`${process.env.VUE_APP_LCD_ENDPOINT}cosmos/auth/v1beta1/accounts/${address}`)).json();
+                this.connectedAddress = address;
                 if (result.account && result.account.dtag) {
                     const dtag = result.account.dtag;
                     this.hasProfile = true;
-                    authModule.saveAuthAccount({ account: new AuthAccount(dtag, this.connectedAddress, false, true) });
+                    authModule.saveAuthAccount({ account: new AuthAccount(dtag, address, false, true) });
                     authModule.authenticate();
                     router.push('/me')
                 } else {
@@ -89,8 +88,44 @@ export default class WalletConnectModule extends VuexModule {
      */
     @Mutation
     public async setupProfile(payload: { dtag: string }): Promise<void> {
+        console.log
         authModule.saveAuthAccount({ account: new AuthAccount(payload.dtag, this.connectedAddress, false, true) });
         authModule.authenticate();
         router.push('/me')
+    }
+
+
+    // Getters / Setters
+
+    /**
+     * Getter hasProfile
+     * @return {boolean}
+     */
+    public get hasProfile(): boolean {
+        return this._hasProfile;
+    }
+
+    /**
+     * Setter hasProfile
+     * @param value 
+     */
+    public set hasProfile(value: boolean) {
+        this._hasProfile = value;
+    }
+
+
+    /**
+     * Getter connectedAddress
+     * @return {string}
+     */
+    public get connectedAddress(): string {
+        return this._connectedAddress;
+    }
+    /**
+     * Setter connectedAddress
+     * @param value address string
+     */
+    public set connectedAddress(value: string) {
+        this._connectedAddress = value;
     }
 }

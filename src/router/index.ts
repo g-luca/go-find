@@ -6,6 +6,7 @@ import ViewRegister from "../views/ViewRegister/ViewRegister.vue";
 import ViewProfile from "../views/ViewProfile/ViewProfile.vue";
 import ViewAccount from "../views/ViewAccount/ViewAccount.vue";
 import ViewKeplr from "../views/ViewKeplr.vue";
+import ViewWalletConnect from "../views/ViewWalletConnect.vue";
 
 import ViewError404 from "../views/errors/ViewError404/ViewError404.vue";
 
@@ -45,6 +46,12 @@ const routes: Array<RouteRecordRaw> = [
     path: "/login/keplr",
     name: "Sign with Keplr",
     component: ViewKeplr,
+    meta: { requiresAuth: false, hiddenWithAuth: true }
+  },
+  {
+    path: "/login/walletconnect",
+    name: "Sign with WalletConnect",
+    component: ViewWalletConnect,
     meta: { requiresAuth: false, hiddenWithAuth: true }
   },
   {

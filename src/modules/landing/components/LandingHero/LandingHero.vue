@@ -19,17 +19,17 @@
 
         <div class="relative rounded text-center text-white pl-1 text-transparent bg-clip-text bg-gradient-to-br  from-purple-600 via-red-500  to-brand">
           <h1
-            class="text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-bold"
+            class="text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold"
             style="-webkit-text-stroke: .2px black;"
           >Connecting <br> Networks.</h1>
-          <h2 class="leading-none font-medium text-4xl text-3xl md:text-5xl xl:text-7xl py-12 mb-10">
+          <h2 class="leading-none font-medium text-5xl md:text-7xl py-12 mb-10">
             <span class="text-white">
               One profile
             </span>for everything.
           </h2>
           <button
             type="button"
-            class="py-4 my-4 px-6 text-white w-1/2 rounded-xl bg-gradient-to-r from-blue-400 via-teal-400 to-green-500 hover:from-green-600 text-xl font-bold uppercase"
+            class="py-4 my-4 px-6 text-white w-2/3 md:w-1/2 rounded-xl bg-gradient-to-r from-blue-400 via-teal-400 to-green-500 hover:from-green-600 text-xl font-bold uppercase"
             @click="$router.push('register')"
           >
             Get started
@@ -42,12 +42,12 @@
             >Already have an account? <span class="underline">Sign In</span></a>
           </div>
 
-          <div class="grid grid-cols-2 pt-3">
-            <div class="col-span-2 md:col-span-1 text-right px-2 pt-3">
+          <div class="grid grid-cols-8 pt-3">
+            <div class="col-span-8 sm:col-span-3 sm:col-start-2 text-right px-2 pt-3">
               <button
                 type="button"
                 class="w-full rounded-xl bg-gradient-to-br from-royalblue-400 to-blue-700 hover:bg-gradient-to-tl"
-                @click="openWalletConnect()"
+                @click="$router.push('/login/walletconnect')"
               >
                 <div class="flex py-2 justify-center">
                   <img
@@ -62,7 +62,7 @@
               </button>
             </div>
 
-            <div class="col-span-2 md:col-span-1 text-left px-2 pt-3">
+            <div class="col-span-8 sm:col-span-3 text-left px-2 pt-3">
               <button
                 type="button"
                 class="w-full rounded-xl bg-gradient-to-br from-blue-400 to-violet-700 hover:bg-gradient-to-tl"

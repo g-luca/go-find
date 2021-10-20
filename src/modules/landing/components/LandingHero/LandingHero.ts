@@ -17,9 +17,4 @@ export default {
       squares,
     }
   },
-  methods: {
-    openWalletConnect(): void {
-      walletConnectModule.connect();
-    }
-  }
 }
