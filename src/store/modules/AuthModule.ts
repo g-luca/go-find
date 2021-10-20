@@ -92,7 +92,6 @@ export default class AuthModule extends VuexModule {
 
     private static async signWithWalletConenct(txBody: CosmosTxBody, address: string): Promise<Transaction | false> {
         const account = await desmosNetworkModule.network.getAccount(address);
-        console.log(account)
         if (account) {
 
             const signerInfo: CosmosSignerInfo = {
@@ -112,7 +111,6 @@ export default class AuthModule extends VuexModule {
             const bodyBytes = CosmosTxBody.encode(txBody).finish();
             const authInfoBytes = CosmosAuthInfo.encode(authInfo).finish();
             const accountNumber = account.accountNumber;
-            console.log(bodyBytes);
             const params = [{
                 signerAddress: account.address,
                 signDoc: this.stringifySignDocValues({
@@ -134,7 +132,6 @@ export default class AuthModule extends VuexModule {
                     authInfoBytes: signedTx.authInfoBytes,
                     signatures: [Buffer.from(signedTx.signature, 'hex')],
                 } as TxRaw;
-                console.log(txRaw)
                 return CosmosTxRaw.encode(txRaw).finish();
             } catch (e) {
                 // refused by the user
