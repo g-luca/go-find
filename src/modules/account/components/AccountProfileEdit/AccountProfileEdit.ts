@@ -121,6 +121,7 @@ export default defineComponent({
                         accountModule.profile.profilePic = this.inputProfilePic;
                         accountModule.profile.profileCover = this.inputProfileCover;
                         accountModule.profile.bio = this.inputBio;
+                        accountModule.isNewProfile = false;
                         this.txSent = null;
                         this.handleResetForm();
                     }

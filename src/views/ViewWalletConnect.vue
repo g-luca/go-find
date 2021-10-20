@@ -128,7 +128,7 @@
                 <button
                   type="button"
                   class="w-1/2 rounded-xl bg-gradient-to-br from-royalblue-400 to-blue-700 hover:bg-gradient-to-tl"
-                  @click="this.openWalletConnect()"
+                  @click="openWalletConnect()"
                 >
                   <div class="flex py-2 justify-center">
                     <img
@@ -222,7 +222,7 @@ export default defineComponent({
       return this.isValidDtag;
     },
     setDtag() {
-      walletConnectModule.setupProfile({ dtag: this.inputDtag });
+      walletConnectModule.setupProfileWalletConnect({ dtag: this.inputDtag });
     },
   },
 });

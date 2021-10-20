@@ -87,8 +87,7 @@ export default class WalletConnectModule extends VuexModule {
      * Set the choosen dtag for the WalletConnect Account
      */
     @Mutation
-    public async setupProfile(payload: { dtag: string }): Promise<void> {
-        console.log
+    public async setupProfileWalletConnect(payload: { dtag: string }): Promise<void> {
         authModule.saveAuthAccount({ account: new AuthAccount(payload.dtag, this.connectedAddress, false, true) });
         authModule.authenticate();
         router.push('/me')
