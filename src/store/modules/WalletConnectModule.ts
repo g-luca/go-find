@@ -70,12 +70,13 @@ export default class WalletConnectModule extends VuexModule {
 
 
         AuthModule.walletConnectClient.on("disconnect", (error, payload) => {
-            authModule.logout();
+            localStorage.removeItem('walletconnect');
             authModule.resetWalletConnectClient();
-            router.push('/');
+            authModule.logout();
             if (error) {
                 throw error;
             }
+            router.push('/');
             //reinitialize WalletConnect client
         });
 

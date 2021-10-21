@@ -34,6 +34,9 @@ export default class AuthModule extends VuexModule {
             bridge: "https://bridge.walletconnect.org",
             qrcodeModal: QRCodeModal,
         });
+        if (!AuthModule.walletConnectClient.connected) {
+            localStorage.removeItem('walletconnect');
+        }
     }
 
     /**
