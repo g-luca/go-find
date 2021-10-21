@@ -14,6 +14,7 @@ export default class WalletConnectModule extends VuexModule {
 
     @Mutation
     public async logout(): Promise<void> {
+        await AuthModule.walletConnectClient.killSession();
         authModule.resetWalletConnectClient();
     }
 
