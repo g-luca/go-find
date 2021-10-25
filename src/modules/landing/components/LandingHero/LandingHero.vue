@@ -43,7 +43,10 @@
           </div>
 
           <div class="grid grid-cols-8 pt-3">
-            <div class="col-span-8 sm:col-span-3 sm:col-start-2 text-right px-2 pt-3">
+            <div
+              v-if="$store.state.DesmosNetworkModule.isTestnet"
+              class="col-span-8 sm:col-span-3 sm:col-start-2 text-right px-2 pt-3"
+            >
               <button
                 type="button"
                 class="w-full rounded-xl bg-gradient-to-br from-royalblue-400 to-blue-700 hover:bg-gradient-to-tl"
@@ -62,7 +65,10 @@
               </button>
             </div>
 
-            <div class="col-span-8 sm:col-span-3 text-left px-2 pt-3">
+            <div
+              class="px-2 pt-3"
+              :class="[!$store.state.DesmosNetworkModule.isTestnet?'col-span-8 sm:col-span-8 text-center w-1/2 mx-auto':'col-span-8 sm:col-span-3 text-left']"
+            >
               <button
                 type="button"
                 class="w-full rounded-xl bg-gradient-to-br from-blue-400 to-violet-700 hover:bg-gradient-to-tl"

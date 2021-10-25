@@ -13,8 +13,10 @@ import ViewError404 from "../views/errors/ViewError404/ViewError404.vue";
 import { getModule } from "vuex-module-decorators";
 import AuthModule, { AuthLevel } from "@/store/modules/AuthModule";
 import KeplrModule from "@/store/modules/KeplrModule";
+import DesmosNetworkModule from "@/store/modules/DesmosNetworkModule";
 const authModule = getModule(AuthModule);
 const keplrModule = getModule(KeplrModule);
+const desmosNetworkModule = getModule(DesmosNetworkModule);
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -52,7 +54,12 @@ const routes: Array<RouteRecordRaw> = [
     path: "/login/walletconnect",
     name: "Sign with WalletConnect",
     component: ViewWalletConnect,
-    meta: { requiresAuth: false, hiddenWithAuth: true }
+    meta: { requiresAuth: false, hiddenWithAuth: true },
+    beforeEnter: (to, from, next) => {
+      if (!desmosNetworkModule.isTestnet) {
+        next('/login');
+      }
+    }
   },
   {
     path: "/me",
