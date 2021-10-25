@@ -170,7 +170,7 @@ export default defineComponent({
                                 }).finish()
                             },
                             signature: Buffer.from(Transaction.signBytes(Buffer.from(CryptoUtils.sha256Buffer(Buffer.from(destWallet.address))), destWallet.privateKey)).toString('hex'),
-                            plainText: destWallet.address,
+                            plainText: Buffer.from(destWallet.address).toString('hex'),
                         }, chainConfig: {
                             name: this.selectedChain?.id.toLowerCase(),
                         },
@@ -253,7 +253,7 @@ export default defineComponent({
                                     }).finish()
                                 },
                                 signature: Buffer.from(signedTx.signature.signature, 'base64').toString('hex'), // need to convert the signature from Base64 to Hex
-                                plainText,
+                                plainText: Buffer.from(plainText).toString('hex'),
                             }, chainConfig: {
                                 name: this.selectedChain?.id.toLowerCase(),
                             },
