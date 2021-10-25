@@ -1,4 +1,7 @@
-import LinkBlockSample from '../LinkBlockSample/LinkBlockSample.vue'
+import WalletConnectModule from '@/store/modules/WalletConnectModule';
+import { getModule } from 'vuex-module-decorators';
+import LinkBlockSample from '../LinkBlockSample/LinkBlockSample.vue';
+const walletConnectModule = getModule(WalletConnectModule);
 
 
 export default {

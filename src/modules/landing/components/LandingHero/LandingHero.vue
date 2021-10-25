@@ -19,17 +19,17 @@
 
         <div class="relative rounded text-center text-white pl-1 text-transparent bg-clip-text bg-gradient-to-br  from-purple-600 via-red-500  to-brand">
           <h1
-            class="text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-bold"
+            class="text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold"
             style="-webkit-text-stroke: .2px black;"
           >Connecting <br> Networks.</h1>
-          <h2 class="leading-none font-medium text-4xl text-3xl md:text-5xl xl:text-7xl py-12 mb-10">
+          <h2 class="leading-none font-medium text-5xl md:text-7xl py-12 mb-10">
             <span class="text-white">
               One profile
             </span>for everything.
           </h2>
           <button
             type="button"
-            class="py-4 my-4 px-6 text-white w-1/2 rounded-xl bg-gradient-to-r from-blue-400 via-teal-400 to-green-500 hover:from-green-600 text-xl font-bold uppercase"
+            class="py-4 my-4 px-6 text-white w-2/3 md:w-1/2 rounded-xl bg-gradient-to-r from-blue-400 via-teal-400 to-green-500 hover:from-green-600 text-xl font-bold uppercase"
             @click="$router.push('register')"
           >
             Get started
@@ -42,20 +42,51 @@
             >Already have an account? <span class="underline">Sign In</span></a>
           </div>
 
-          <button
-            type="button"
-            class="mt-4 py-1 px-1 flex justify-center items-center w-1/2 md:w-1/4 xl:w-1/5 mx-auto rounded-xl  bg-gradient-to-br from-blue-400 to-violet-700 hover:bg-gradient-to-tl"
-            @click="$router.push('/login/keplr')"
-          >
-            <img
-              class="h-8"
-              :src="require('@/assets/brands/keplr/logo.svg')"
-              alt=""
+          <div class="grid grid-cols-8 pt-3">
+            <div
+              v-if="$store.state.DesmosNetworkModule.isTestnet"
+              class="col-span-8 sm:col-span-3 sm:col-start-2 text-right px-2 pt-3"
             >
-            <span class="text-white pl-3 text-lg">
-              Use Keplr
-            </span>
-          </button>
+              <button
+                type="button"
+                class="w-full rounded-xl bg-gradient-to-br from-royalblue-400 to-blue-700 hover:bg-gradient-to-tl"
+                @click="$router.push('/login/walletconnect')"
+              >
+                <div class="flex py-2 justify-center">
+                  <img
+                    class="h-8"
+                    :src="require('@/assets/brands/walletconnect/logo.svg')"
+                    alt=""
+                  >
+                  <span class="text-white pl-3 text-lg my-auto">
+                    Use WalletConnect
+                  </span>
+                </div>
+              </button>
+            </div>
+
+            <div
+              class="px-2 pt-3"
+              :class="[!$store.state.DesmosNetworkModule.isTestnet?'col-span-8 sm:col-span-8 text-center w-1/2 mx-auto':'col-span-8 sm:col-span-3 text-left']"
+            >
+              <button
+                type="button"
+                class="w-full rounded-xl bg-gradient-to-br from-blue-400 to-violet-700 hover:bg-gradient-to-tl"
+                @click="$router.push('/login/keplr')"
+              >
+                <div class="flex py-2 justify-center">
+                  <img
+                    class="h-8"
+                    :src="require('@/assets/brands/keplr/logo.svg')"
+                    alt=""
+                  >
+                  <span class="text-white pl-3 text-lg my-auto">
+                    Use Keplr
+                  </span>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </section>

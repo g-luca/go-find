@@ -6,6 +6,9 @@ import { CosmosAuthInfo, CosmosBroadcastMode, CosmosFee, CosmosPubKey, CosmosSig
 import AccountModule from './AccountModule';
 import Long from 'long';
 import DesmosNetworkModule from './DesmosNetworkModule';
+import WalletConnect from "@walletconnect/client";
+import QRCodeModal from "@walletconnect/qrcode-modal";
+import { SignDoc, TxRaw } from 'desmosjs/dist/types/lib/proto/cosmos/tx/v1beta1/tx';
 const desmosNetworkModule = getModule(DesmosNetworkModule);
 
 export enum AuthLevel {
@@ -20,7 +23,18 @@ export default class AuthModule extends VuexModule {
     private mPassword: string | null = null;
     private _account: AuthAccount | null = null;
     private _authLevel: AuthLevel = AuthLevel.None;
+    public static walletConnectClient = new WalletConnect({
+        bridge: "https://bridge.walletconnect.org",
+    });
 
+
+    @Mutation
+    public resetWalletConnectClient(): void {
+        AuthModule.walletConnectClient = new WalletConnect({
+            bridge: "https://bridge.walletconnect.org",
+            qrcodeModal: QRCodeModal,
+        });
+    }
 
     /**
      * Account Logout
@@ -64,14 +78,111 @@ export default class AuthModule extends VuexModule {
     }
 
 
-    static async signTx(tx: CosmosTxBody, adddress: string, mPasswordClear = ""): Promise<Transaction | false> {
+    static async signTx(tx: CosmosTxBody, adddress: string, mPasswordClear = "", isUsingKeplr = false, isUsingWalletConnect = false): Promise<Transaction | false> {
         if (mPasswordClear) {
             return this.signTxWithPassword(tx, adddress, mPasswordClear);
-        } else {
+        } else if (isUsingKeplr) {
             return this.signTxWithKeplr(tx, adddress);
+        } else if (isUsingWalletConnect) {
+            return this.signWithWalletConenct(tx, adddress);
         }
+        return false;
     }
 
+
+    private static async signWithWalletConenct(txBody: CosmosTxBody, address: string): Promise<Transaction | false> {
+        const account = await desmosNetworkModule.network.getAccount(address);
+        if (account) {
+
+            const signerInfo: CosmosSignerInfo = {
+                /* publicKey: account, */
+                modeInfo: { single: { mode: CosmosSignMode.SIGN_MODE_DIRECT } },
+                sequence: account.sequence
+            };
+
+            const feeValue: CosmosFee = {
+                amount: [{ denom: `${process.env.VUE_APP_COIN_FEE_DENOM}`, amount: "200" }],
+                gasLimit: 200000,
+                payer: "",
+                granter: ""
+            };
+
+            const authInfo: CosmosAuthInfo = { signerInfos: [signerInfo], fee: feeValue };
+            const bodyBytes = CosmosTxBody.encode(txBody).finish();
+            const authInfoBytes = CosmosAuthInfo.encode(authInfo).finish();
+            const accountNumber = account.accountNumber;
+            const params = [{
+                signerAddress: account.address,
+                signDoc: this.stringifySignDocValues({
+                    bodyBytes: bodyBytes,
+                    accountNumber: accountNumber,
+                    authInfoBytes: authInfoBytes,
+                    chainId: desmosNetworkModule.chainId
+                } as SignDoc),
+            }];
+            try {
+                const signedTxRaw = await AuthModule.walletConnectClient.sendCustomRequest({
+                    jsonrpc: "2.0",
+                    method: "cosmos_signDirect",
+                    params: params,
+                });
+                const signedTx = this.parseSignDocValues(signedTxRaw);
+                const txRaw = {
+                    bodyBytes: signedTx.bodyBytes,
+                    authInfoBytes: signedTx.authInfoBytes,
+                    signatures: [Buffer.from(signedTx.signature, 'hex')],
+                } as TxRaw;
+                return CosmosTxRaw.encode(txRaw).finish();
+            } catch (e) {
+                // refused by the user
+                console.log(e);
+                return false;
+            }
+        }
+        return false;
+    }
+
+
+    private static parseSignDocValues(signDoc: any) {
+        return {
+            ...signDoc,
+            bodyBytes: this.fromHex(signDoc.bodyBytes),
+            authInfoBytes: this.fromHex(signDoc.authInfoBytes),
+            accountNumber: Long.fromNumber(parseInt(signDoc.accountNumber, 16)),
+        };
+    }
+
+
+    private static fromHex(hexstring: string): Uint8Array {
+        if (hexstring.length % 2 !== 0) {
+            throw new Error("hex string length must be a multiple of 2");
+        }
+
+        const listOfInts: number[] = [];
+        for (let i = 0; i < hexstring.length; i += 2) {
+            const hexByteAsString = hexstring.substr(i, 2);
+            if (!hexByteAsString.match(/[0-9a-f]{2}/i)) {
+                throw new Error("hex string contains invalid characters");
+            }
+            listOfInts.push(parseInt(hexByteAsString, 16));
+        }
+        return new Uint8Array(listOfInts);
+    }
+    private static stringifySignDocValues(signDoc: any) {
+        return {
+            ...signDoc,
+            bodyBytes: this.toHex(signDoc.bodyBytes),
+            authInfoBytes: this.toHex(signDoc.authInfoBytes),
+            accountNumber: signDoc.accountNumber.toString(16),
+        };
+    }
+    private static toHex(data: Uint8Array): string {
+        let out = "";
+        for (const byte of data) {
+            out += ("0" + byte.toString(16)).slice(-2);
+        }
+        return out;
+    }
 
     /**
      * Sign a Tx object with Keplr
@@ -233,7 +344,7 @@ export default class AuthModule extends VuexModule {
             try {
                 const accountRaw = JSON.parse(accountJSON);
                 if (accountRaw) {
-                    return new AuthAccount(accountRaw['_dtag'], accountRaw['_address'], (accountRaw['_isUsingKeplr'] === true));
+                    return new AuthAccount(accountRaw['_dtag'], accountRaw['_address'], (accountRaw['_isUsingKeplr'] === true), (accountRaw['_isUsingWalletConnect'] === true));
                 }
             } catch (e) {
                 return null;
@@ -293,6 +404,5 @@ export default class AuthModule extends VuexModule {
     public get authLevel(): AuthLevel {
         return this._authLevel;
     }
-
 
 }

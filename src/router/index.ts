@@ -6,14 +6,17 @@ import ViewRegister from "../views/ViewRegister/ViewRegister.vue";
 import ViewProfile from "../views/ViewProfile/ViewProfile.vue";
 import ViewAccount from "../views/ViewAccount/ViewAccount.vue";
 import ViewKeplr from "../views/ViewKeplr.vue";
+import ViewWalletConnect from "../views/ViewWalletConnect.vue";
 
 import ViewError404 from "../views/errors/ViewError404/ViewError404.vue";
 
 import { getModule } from "vuex-module-decorators";
 import AuthModule, { AuthLevel } from "@/store/modules/AuthModule";
 import KeplrModule from "@/store/modules/KeplrModule";
+import DesmosNetworkModule from "@/store/modules/DesmosNetworkModule";
 const authModule = getModule(AuthModule);
 const keplrModule = getModule(KeplrModule);
+const desmosNetworkModule = getModule(DesmosNetworkModule);
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -46,6 +49,17 @@ const routes: Array<RouteRecordRaw> = [
     name: "Sign with Keplr",
     component: ViewKeplr,
     meta: { requiresAuth: false, hiddenWithAuth: true }
+  },
+  {
+    path: "/login/walletconnect",
+    name: "Sign with WalletConnect",
+    component: ViewWalletConnect,
+    meta: { requiresAuth: false, hiddenWithAuth: true },
+    beforeEnter: (to, from, next) => {
+      if (!desmosNetworkModule.isTestnet) {
+        next('/login');
+      }
+    }
   },
   {
     path: "/me",

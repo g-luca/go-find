@@ -107,7 +107,9 @@ import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
 import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
 import router from "@/router";
+import WalletConnectModule from "@/store/modules/WalletConnectModule";
 const authModule = getModule(AuthModule);
+const walletConnectModule = getModule(WalletConnectModule);
 
 export default defineComponent({
   components: {
@@ -127,6 +129,9 @@ export default defineComponent({
   },
   methods: {
     logout() {
+      if (authModule.account?.isUsingWalletConnect) {
+        walletConnectModule.logout();
+      }
       authModule.logout();
       router.push("/");
     },

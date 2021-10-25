@@ -42,7 +42,7 @@
             </DialogTitle>
             <section v-if="$store.state.TransactionModule.transactionStatus!==2">
               <!-- Registered user Transaction -->
-              <span v-if="!$store.state.AuthModule._account.isUsingKeplr">
+              <span v-if="!$store.state.AuthModule._account.isUsingKeplr&&!$store.state.AuthModule._account.isUsingWalletConnect">
                 <label
                   class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
                   for="inputMPassword"
@@ -74,7 +74,7 @@
                 <span v-if="$store.state.AccountModule.account._balance>0">
                   <div class="pt-4">
                     <button
-                      v-if="(!$store.state.AuthModule._account.isUsingKeplr&&inputMPassword.length>0)||$store.state.AuthModule._account.isUsingKeplr"
+                      v-if="(!$store.state.AuthModule._account.isUsingKeplr&&!$store.state.AuthModule._account.isUsingWalletConnect&&inputMPassword.length>0)||$store.state.AuthModule._account.isUsingKeplr||$store.state.AuthModule._account.isUsingWalletConnect"
                       :disabled="$store.state.TransactionModule.transactionStatus===1"
                       type="button"
                       :class="{'bg-gray-500 hover:bg-gray-500': $store.state.TransactionModule.transactionStatus===1, 'bg-indigo-600 hover:bg-indigo-700': $store.state.TransactionModule.transactionStatus!==1}"
@@ -110,6 +110,13 @@
                         Confirm
                       </span>
                     </button>
+
+                    <div
+                      v-if="$store.state.AuthModule._account.isUsingWalletConnect && $store.state.TransactionModule.transactionStatus===1"
+                      class="pt-3 text-gray-700 dark:text-gray-200 text-center"
+                    >
+                      Approve the Transaction from your DPM App.
+                    </div>
                   </div>
                 </span>
                 <span v-else>
@@ -123,7 +130,10 @@
                     {{ $store.state.TransactionModule.errorMessage }}
                   </p>
                 </div>
-                <div class="pt-2 text-gray-400">
+                <div
+                  v-if="!$store.state.AuthModule._account.isUsingKeplr&&!$store.state.AuthModule._account.isUsingWalletConnect"
+                  class="pt-2 text-gray-400"
+                >
                   <i class="bi bi-wifi-off text-md " />
                   <span class="text-xs">
                     Transactions are always signed offline
