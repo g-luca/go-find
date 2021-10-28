@@ -15,6 +15,7 @@
     "@headlessui/vue": "^1.2.0",
     "@tailwindcss/postcss7-compat": "^2.2.4",
     "@tailwindcss/typography": "^0.4.1",
+    "@types/ripemd160": "^2.0.0",
     "@vee-validate/rules": "^4.4.7",
     "@vue/apollo-composable": "^4.0.0-alpha.14",
     "@vue/apollo-option": "^4.0.0-alpha.14",
@@ -30,6 +31,7 @@
     "graphql": "^15.5.1",
     "marked": "^3.0.2",
     "postcss": "^7",
+    "ripemd160": "^2.0.2",
     "subscriptions-transport-ws": "^0.9.19",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.2.4",
     "vee-validate": "^4.4.7",
@@ -40,9 +42,9 @@
     "vuex": "^4.0.1"
   },
   "devDependencies": {
-    "@types/marked": "^3.0.0",
+    "@keplr-wallet/types": "^0.9.4",
     "@types/dompurify": "^2.2.3",
-    "@keplr-wallet/types": "^0.9.0-alpha.10",
+    "@types/marked": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^4.28.2",
     "@typescript-eslint/parser": "^4.28.2",
     "@vue/cli-plugin-babel": "^4.5.13",

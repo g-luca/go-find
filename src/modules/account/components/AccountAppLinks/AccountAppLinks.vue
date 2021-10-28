@@ -100,20 +100,33 @@
           </span>
           <span v-else>
             <div class="px-2 w-full ">
-              <h4 class="text-3xl text-center dark:text-white">
-                <!-- Wow, such empty -->
-                This feature will be enabled soon.
-              </h4>
-              <h5 class="text-lg text-gray-700 dark:text-gray-300 text-center">
-                Waiting IBC!
-                <!-- You don't have any Social Network connected to your profile -->
-              </h5>
+              <span v-if="!$store.state.DesmosNetworkModule.isTestnet">
+                <h4 class="text-3xl text-center dark:text-white">
+                  <!-- Wow, such empty -->
+                  This feature will be enabled soon.
+                </h4>
+                <h5 class="text-lg text-gray-700 dark:text-gray-300 text-center">
+                  Waiting IBC!
+                  <!-- You don't have any Social Network connected to your profile -->
+                </h5>
+              </span>
+              <span v-else>
+                <h4 class="text-3xl text-center dark:text-white">
+                  Wow, such empty
+                </h4>
+                <h5 class="text-lg text-gray-700 dark:text-gray-300 text-center">
+                  You don't have any Blockchain connected to your profile
+                </h5>
+              </span>
             </div>
-            <div class="w-full pt-5 px-2">
-              <!-- <button
+            <div
+              v-if="$store.state.DesmosNetworkModule.isTestnet"
+              class="w-full pt-5 px-2"
+            >
+              <button
                 class="bg-brand hover:bg-yellow-600 w-full rounded-xl py-3 text-xl font-bold text-white"
                 @click="toggleApplicationLinkEditor()"
-              >Connect a new Social</button> -->
+              >Connect a new Social</button>
             </div>
           </span>
         </div>
@@ -201,7 +214,7 @@
 
               <!-- Wallet Input for tx signin -->
               <div
-                v-if="selectedApplication"
+                v-if="selectedApplication!==''&&!hasUploadedProof"
                 class="md:flex -mx-4"
               >
                 <div class="px-4 pt-2">
@@ -209,53 +222,51 @@
                     2
                   </span>
                 </div>
-                <div class="grid gird-cols-2">
+                <div class="grid gird-cols-2 w-full">
                   <h3 class="mt-2 text-2xl font-bold dark:text-white">
                     Social Ownership proof
                   </h3>
 
                   <!-- Normal user signature -->
-                  <span v-if="$store.state.AuthModule._account.isUsingKeplr===false">
-                    <div class="col-span-2 py-2">
-                      <label
-                        for="applicationUsername"
-                        class="dark:text-white text-xl"
-                      >
-                        Your
-                        <span class="capitalize text-brand">
-                          {{ selectedApplication }}
-                        </span> username
-                      </label>
-                      <input
-                        id="applicationUsername"
-                        v-model="applicationUsername"
-                        type="text"
-                        class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
-                        name="applicationUsername"
-                        placeholder="Username"
-                        @input="resetGeneratedProof()"
-                      >
-                    </div>
-                    <div
-                      v-if="!generatedProof"
-                      class="col-span-2 py-2"
+                  <div class="col-span-2 py-2">
+                    <label
+                      for="applicationUsername"
+                      class="dark:text-white text-xl"
                     >
-                      <label
-                        for="mPassword"
-                        class="dark:text-white text-xl"
-                      >
-                        Wallet password
-                      </label>
-                      <input
-                        id="mPassword"
-                        v-model="mPassword"
-                        type="password"
-                        class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
-                        name="mPassword"
-                        placeholder="Password"
-                      >
-                    </div>
-                  </span>
+                      Your
+                      <span class="capitalize text-brand">
+                        {{ selectedApplication }}
+                      </span> username
+                    </label>
+                    <input
+                      id="applicationUsername"
+                      v-model="applicationUsername"
+                      type="text"
+                      class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+                      name="applicationUsername"
+                      placeholder="Username"
+                      @input="resetGeneratedProof()"
+                    >
+                  </div>
+                  <div
+                    v-if="!generatedProof&& $store.state.AuthModule._account.isUsingKeplr===false"
+                    class="col-span-2 py-2"
+                  >
+                    <label
+                      for="mPassword"
+                      class="dark:text-white text-xl"
+                    >
+                      Wallet password
+                    </label>
+                    <input
+                      id="mPassword"
+                      v-model="mPassword"
+                      type="password"
+                      class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+                      name="mPassword"
+                      placeholder="Password"
+                    >
+                  </div>
 
                   <span
                     v-if="generateProofError"
@@ -280,7 +291,7 @@
 
               <!-- Social proof tutorial -->
               <div
-                v-if="selectedApplication&&applicationUsername.length>0&&generatedProof"
+                v-if="selectedApplication!==''&&applicationUsername.length>0&&generatedProof"
                 class="pt-8"
               >
                 <h1 class="text-center w-full text-3xl font-bold pb-4 dark:text-white">
@@ -298,12 +309,14 @@
                     v-if="selectedApplication==='twitch'"
                     :username="applicationUsername"
                     :proof="generatedProof"
+                    :proof-url="proofUrl"
                     @applicationLinkSent="onApplicationLinkSent"
                   />
                   <AccountApplicationLinkTutorialTwitter
                     v-if="selectedApplication==='twitter'"
                     :username="applicationUsername"
                     :proof="generatedProof"
+                    :proof-url="proofUrl"
                     @applicationLinkSent="onApplicationLinkSent"
                   />
                 </div>
