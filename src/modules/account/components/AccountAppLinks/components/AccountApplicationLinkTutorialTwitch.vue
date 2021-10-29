@@ -1,15 +1,15 @@
 <template>
   <section>
     <!-- Pastebin Url to copy in bio -->
-    <section class="grid grid-cols-12 -mx-4 py-4">
+    <section class="grid grid-cols-12  py-4">
       <div class="col-span-12 md:col-span-1">
-        <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 text-brand select-none">
+        <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 dark:bg-gray-700 text-brand select-none">
           1
         </span>
       </div>
-      <div class="col-span-11 dark:text-white text-lg">
+      <div class="col-span-12 md:col-span-11 dark:text-white text-lg md:pl-8">
         <div class="col-span-2 py-2">
-          <p class="dark:text-white text-lg">Now add this link to your Twitch account description.</p>
+          <p class="dark:text-white text-xl font-bold">Now add this link to your Twitch account description.</p>
           <div class="my-2 p-3 bg-black rounded-xl text-sm">
             <div class="p-3 overflow-x-auto text-white">
               {{ proofUrl }}

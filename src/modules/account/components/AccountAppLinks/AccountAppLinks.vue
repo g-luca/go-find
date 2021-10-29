@@ -150,12 +150,12 @@
         <div class="min-h-screen px-4 text-center">
           <span class="inline-block h-screen align-middle"> &#8203; </span>
 
-          <div class="inline-block w-full max-w-6xl p-6 pb-1 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-900 shadow-xl rounded-2xl">
+          <div class="inline-block px-3 sm:px-10 md:px-12 lg:px-14 w-full max-w-6xl p-6 pb-1 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-900 shadow-xl rounded-2xl">
             <DialogTitle class="text-3xl font-bold leading-6 text-gray-900 dark:text-white">
               <span class="flex">
                 <div class="flex text-brand text-4xl">Connect a Social</div>
                 <div class="flex-auto text-right">
-                  <button>
+                  <button class="bg-gray-200 dark:bg-gray-800 rounded-full p-1 hover:text-red-500">
                     <i
                       class="bi bi-x h-12 w-12"
                       @click="toggleApplicationLinkEditor()"
@@ -167,13 +167,13 @@
 
             <section class="p-4">
               <!-- Blockchain Select -->
-              <div class="md:flex -mx-4">
+              <div class="md:flex">
                 <div class="px-4">
-                  <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 text-blue-600">
+                  <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 dark:bg-gray-700 text-blue-600">
                     1
                   </span>
                 </div>
-                <div class=" w-full pb-4">
+                <div class=" w-full pb-4 md:pl-4">
                   <h3 class="mt-0 text-2xl font-bold dark:text-white">
                     Select the Social Network
                   </h3>
@@ -292,9 +292,9 @@
               <!-- Social proof tutorial -->
               <div
                 v-if="selectedApplication!==''&&applicationUsername.length>0&&generatedProof"
-                class="pt-8"
+                class="pt-4"
               >
-                <h1 class="text-center w-full text-3xl font-bold pb-4 dark:text-white">
+                <h1 class="text-center w-full text-3xl font-black pb-2 text-brand ">
                   Verify the Account
                 </h1>
                 <div class="pb-4">

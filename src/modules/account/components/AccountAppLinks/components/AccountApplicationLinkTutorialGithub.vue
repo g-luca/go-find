@@ -2,13 +2,13 @@
   <section>
     <Form v-slot="{ meta, errors }">
       <!-- Github Proof -->
-      <section class="grid grid-cols-12 -mx-4 py-4">
+      <section class="grid grid-cols-12  py-4">
         <div class="col-span-12 md:col-span-1">
-          <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 text-brand select-none">
+          <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 dark:bg-gray-700 text-brand select-none">
             1
           </span>
         </div>
-        <div class="col-span-11 dark:text-white text-lg">
+        <div class="col-span-12 md:col-span-11 dark:text-white text-xl font-bold md:pl-8 md:pl-8">
           Create a <b>public</b> <a
             href="https://gist.github.com/"
             class="text-blue-500 underline"
@@ -24,17 +24,17 @@
       </section>
 
       <!-- Github Link -->
-      <section class="grid grid-cols-12 -mx-4 py-4">
+      <section class="grid grid-cols-12  py-4">
         <div class="col-span-12 md:col-span-1">
-          <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 text-brand select-none">
+          <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 dark:bg-gray-700 text-brand select-none">
             2
           </span>
         </div>
-        <div class="col-span-11 dark:text-white text-lg">
+        <div class="col-span-12 md:col-span-11 dark:text-white text-lg md:pl-8">
           <div class="col-span-2 py-2">
             <label
               for="inputGistUrl"
-              class="dark:text-white text-md"
+              class="dark:text-white text-xl font-bold"
             >
               After you have ceated the Gist, copy here the generated url
             </label>
