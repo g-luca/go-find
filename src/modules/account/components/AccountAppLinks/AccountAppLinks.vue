@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 pr-8">
+  <div class="p-4 md:pr-8">
     <section v-if="$store.state.AccountModule.profileLoadingStatus==0||$store.state.AccountModule.profileLoadingStatus">
       <span v-if="$store.state.AccountModule.profileLoadingStatus">
         <div class="pt-2 pb-3 md:pt-6 px-2 bg-white dark:bg-gray-900 rounded-3xl shadow-xl hover:shadow-2xl">
@@ -61,8 +61,8 @@
                         class="bg-gray-200 dark:bg-gray-800 rounded-3xl w-16 h-16 md:w-20 md:h-20 m-auto hover:bg-gray-300 dark:hover:bg-gray-900 shadow-md p-4"
                         @click="toggleApplicationLinkEditor()"
                       >
-                        <div class="bg-brand rounded-full text-2xl md:text-4xl font-bold text-white">
-                          <i class="bi bi-plus align-middle h-full m-auto" />
+                        <div class="bg-brand rounded-full text-2xl md:text-4xl h-full font-bold text-white align-middle md:pt-1">
+                          <i class="bi bi-plus align-middle h-full m-auto w-14" />
                         </div>
                       </div>
                       <h4 class="dark:text-white select-none pt-1 text-xl font-medium">
