@@ -15,4 +15,11 @@ export const supportedChainLinks: Blockchain[] = [
     new Blockchain("sentinel", "Sentinel", "dvpn", "sentinelhub-2", "m/44'/118'/0'/0/0", "sent"),
     new Blockchain("kava", "Kava", "kava", "kava-3", "m/44'/459'/0'/0/0", "kava"),
     new Blockchain("emoney", "e-Money", "ngm", "emoney-3", "m/44'/118'/0'/0/0", "emoney"),
+    new Blockchain("juno", "Juno", "juno", "juno-1", "m/44'/118'/0'/0/0", "juno"),
+    new Blockchain("bitsong", "Bitsong", "btsg", "bitsong-2b", "m/44'/639'/0'/0/0", "bitsong"),
+    new Blockchain("secretnetwork", "Secret Network", "scrt", "secret-3", "m/44'/529'/0'/0/0", "secret"),
+    new Blockchain("sifchain", "Sifchain", "rowan", "sifchain-1", "m/44'/118'/0'/0/0", "sif"),
+    new Blockchain("irisnet", "IRIS", "iris", "irishub-1", "m/44'/566'/0'/0/0", "iaa"),
+    new Blockchain("persistence", "Persistence", "xprt", "core-1", "m/44'/750'/0'/0/0", "persistence"),
+    new Blockchain("ixo", "IXO", "ixo", "impacthub-3", "m/44'/118'/0'/0/0", "ixo"),
 ];

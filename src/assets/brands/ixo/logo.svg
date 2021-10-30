@@ -1,0 +1,16 @@
+<svg width="66" height="66" xmlns="http://www.w3.org/2000/svg" fill="none">
+    <defs>
+        <linearGradient y2="1" x2="0.5" y1="0" x1="0.5" id="paint0_linear">
+            <stop stop-color="#57C1DE" />
+            <stop stop-color="#00D2FF" offset="1" />
+        </linearGradient>
+    </defs>
+    <g>
+        <g stroke="null" id="svg_3">
+            <circle stroke="null" id="svg_1" fill="url(#paint0_linear)" r="32.64173" cy="32.71311" cx="32.99356" />
+            <path stroke="null" id="svg_2" fill="white"
+                d="m33.0577,25.68115l-7.04754,-7.15549l-7.04738,0l0,7.15549l7.04738,7.0322l-7.04738,7.1553l0,7.0322l7.04738,0l7.04754,-7.0322l6.91926,7.0322l7.04754,0l0,-7.0322l-7.04754,-7.1553l7.04754,-7.0322l0,-7.15549l-7.04754,0l-6.91926,7.15549z"
+                clip-rule="evenodd" fill-rule="evenodd" />
+        </g>
+    </g>
+</svg>
