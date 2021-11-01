@@ -58,6 +58,8 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: (to, from, next) => {
       if (!desmosNetworkModule.isTestnet) {
         next('/login');
+      } else {
+        next();
       }
     }
   },
