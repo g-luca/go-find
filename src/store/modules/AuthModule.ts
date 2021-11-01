@@ -286,7 +286,6 @@ export default class AuthModule extends VuexModule {
                         const authInfo: CosmosAuthInfo = { signerInfos: [signerInfo], fee: feeValue };
 
                         const signedTx = Transaction.signTxBody(tx, authInfo, account.accountNumber, Buffer.from(privKey, 'hex'));
-                        console.log(signedTx)
                         return signedTx;
                     } catch (e) {
                         //return new Error("Error signing the transaction");
