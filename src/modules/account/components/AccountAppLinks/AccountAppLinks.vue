@@ -293,7 +293,12 @@
                         disabled
                         class="py-2 w-full px-4 bg-gray-600 hover:bg-gray-700 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md rounded-lg "
                       >
-                        Generating...
+                        <span v-if="!$store.state.AuthModule._account.isUsingWalletConnect">
+                          Generating...
+                        </span>
+                        <span v-else>
+                          Waiting DPM...
+                        </span>
                       </button>
                     </span>
                   </div>
