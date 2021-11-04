@@ -60,7 +60,9 @@ export default defineComponent({
                             });
                             if (matches.length > 0) {
                                 //TODO: add UI support for multiple links to same app
-                                window.location.href = `${matches[0].url}${matches[0].username}`
+                                window.setInterval(() => {
+                                    window.location.href = `${matches[0].url}${matches[0].username}`
+                                }, 2000);
                             } else {
                                 //No Social Network matches
                                 this.redirectInvalidLink();
