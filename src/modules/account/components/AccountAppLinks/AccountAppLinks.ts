@@ -204,6 +204,8 @@ export default defineComponent({
                             const pubKey = Wallet.calculatePubKey(privKey);
                             if (pubKey) {
                                 generatedProof = Transaction.signApplicationLinkData(this.applicationUsername, pubKey, privKey);
+                                //FIXME: temporary fix, this must be done by DesmosJS
+                                generatedProof.value = Buffer.from(this.applicationUsername).toString('hex');
                             }
                         }
                     } catch (e) {
