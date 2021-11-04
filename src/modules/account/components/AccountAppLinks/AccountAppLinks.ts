@@ -9,7 +9,7 @@ import {
     DialogOverlay,
     DialogTitle,
 } from "@headlessui/vue";
-import { CosmosTxBody, DesmosMsgUnlinkApplication, Transaction, Wallet } from "desmosjs";
+import { CosmosAuthInfo, CosmosTxBody, DesmosMsgUnlinkApplication, Transaction, Wallet } from "desmosjs";
 import CryptoUtils from "@/utils/CryptoUtils";
 import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
@@ -59,6 +59,7 @@ export default defineComponent({
 
             generatedProof: null as any | null,
             generateProofError: "",
+            isGeneratingProof: false,
             isUploadingProof: false,
             hasUploadedProof: false,
             proofUrl: '',
@@ -130,85 +131,109 @@ export default defineComponent({
             }
         },
         async generateProof(): Promise<boolean> {
-            this.generateProofError = "";
-            this.hasUploadedProof = false;
-            this.isUploadingProof = false;
-            this.proofUrl = '';
-            let generatedProof = null as any;
-            if (authModule.account?.isUsingKeplr) {
-                const keplrAccount = await window.keplr?.getKey(desmosNetworkModule.chainId);
-                if (keplrAccount) {
-                    try {
-                        // Get Keplr signer
-                        const signer = window.keplr?.getOfflineSigner(desmosNetworkModule.chainId);
-                        const address = new ripemd160().update(CryptoUtils.sha256Buffer(Buffer.from(keplrAccount.pubKey))).digest('hex');
-                        const pub_key = Buffer.from(keplrAccount.pubKey).toString('hex').toLowerCase();
-                        const proofObj = {
-                            account_number: "",
-                            chain_id: desmosNetworkModule.chainId,
-                            fee: {
-                                amount: [{
-                                    amount: "0",
-                                    denom: ""
-                                }],
-                                gas: "1"
-                            },
-                            memo: "",
-                            msgs: [],
-                            sequence: "0"
+            this.isGeneratingProof = true;
+            try {
+                this.generateProofError = "";
+                this.hasUploadedProof = false;
+                this.isUploadingProof = false;
+                this.proofUrl = '';
+                let generatedProof = null as any;
+                if (authModule.account?.isUsingKeplr) {
+                    const keplrAccount = await window.keplr?.getKey(desmosNetworkModule.chainId);
+                    if (keplrAccount) {
+                        try {
+                            // Get Keplr signer
+                            const signer = window.keplr?.getOfflineSigner(desmosNetworkModule.chainId);
+                            const address = new ripemd160().update(CryptoUtils.sha256Buffer(Buffer.from(keplrAccount.pubKey))).digest('hex');
+                            const pub_key = Buffer.from(keplrAccount.pubKey).toString('hex').toLowerCase();
+                            const proofObj = {
+                                account_number: "",
+                                chain_id: desmosNetworkModule.chainId,
+                                fee: {
+                                    amount: [{
+                                        amount: "0",
+                                        denom: ""
+                                    }],
+                                    gas: "1"
+                                },
+                                memo: "",
+                                msgs: [],
+                                sequence: "0"
+                            }
+                            const signedTx = await signer?.signAmino(keplrAccount.bech32Address, proofObj);
+                            if (signedTx) {
+                                generatedProof = {
+                                    address: address,
+                                    pub_key: pub_key,
+                                    signature: Buffer.from(signedTx.signature.signature, 'base64').toString('hex'),
+                                    value: Buffer.from(JSON.stringify(proofObj, null, 0)).toString('hex')
+                                };
+                            }
+                        } catch (e) {
+                            //
                         }
-                        const signedTx = await signer?.signAmino(keplrAccount.bech32Address, proofObj);
-                        if (signedTx) {
-                            generatedProof = {
-                                address: address,
-                                pub_key: pub_key,
-                                signature: Buffer.from(signedTx.signature.signature, 'base64').toString('hex'),
-                                value: Buffer.from(JSON.stringify(proofObj, null, 0)).toString('hex')
-                            };
+                    }
+
+                    // Wallet Connect custom flow
+                    // FIXME: actually not works
+                } else if (authModule.account?.isUsingWalletConnect) {
+                    const tx = { extensionOptions: [], memo: "Proof", messages: [], nonCriticalExtensionOptions: [], timeoutHeight: 0 }
+                    const res = await AuthModule.signAppLinkWithWalletConenct(tx, authModule.account.address);
+                    const signedTxRaw = res.signedTxRaw;
+                    const doc = res.doc;
+                    console.log(signedTxRaw)
+                    const proofAuthInfo = CosmosAuthInfo.decode(Buffer.from(signedTxRaw.authInfoBytes, 'hex'));
+                    if (proofAuthInfo && proofAuthInfo.signerInfos[0].publicKey) {
+                        const pubKeyBytes = proofAuthInfo.signerInfos[0].publicKey.value.slice(2);
+                        const pub_key = Buffer.from(pubKeyBytes).toString('hex').toLowerCase();
+                        const address = new ripemd160().update(CryptoUtils.sha256Buffer(Buffer.from(pubKeyBytes))).digest('hex');
+
+                        generatedProof = {
+                            address: address,
+                            pub_key: pub_key,
+                            signature: signedTxRaw.signature,
+                            value: Buffer.from(JSON.stringify(doc, null, 0)).toString('hex')
+                        };
+                    }
+                } else {
+                    const mPassword = CryptoUtils.sha256(this.mPassword);
+                    try {
+                        const mKey = AuthModule.getMKey(mPassword);
+                        if (mKey) {
+                            const privKey = Buffer.from(CryptoUtils.decryptAes(mPassword, mKey), 'hex');
+                            const pubKey = Wallet.calculatePubKey(privKey);
+                            if (pubKey) {
+                                generatedProof = Transaction.signApplicationLinkData(this.applicationUsername, pubKey, privKey);
+                            }
+                        }
+                    } catch (e) {
+                        this.generateProofError = "Invalid Password";
+                    }
+                }
+
+                if (generatedProof) {
+                    console.log(generatedProof)
+                    this.generatedProof = JSON.stringify(generatedProof);
+                    this.isUploadingProof = true;
+                    try {
+                        const res = await Api.post(`${Api.endpoint}proof`, JSON.stringify({ proof: generatedProof }));
+                        if (res.success) {
+                            this.hasUploadedProof = true;
+                            this.proofUrl = `${Api.endpoint}proof/${res.id}`;
                         }
                     } catch (e) {
                         //
                     }
-                }
-
-
-            } else if (authModule.account?.isUsingWalletConnect) {
-                //
-            } else {
-                const mPassword = CryptoUtils.sha256(this.mPassword);
-                try {
-                    const mKey = AuthModule.getMKey(mPassword);
-                    if (mKey) {
-                        const privKey = Buffer.from(CryptoUtils.decryptAes(mPassword, mKey), 'hex');
-                        const pubKey = Wallet.calculatePubKey(privKey);
-                        if (pubKey) {
-                            generatedProof = Transaction.signApplicationLinkData(this.applicationUsername, pubKey, privKey);
-                        }
+                    if (this.proofUrl === '') {
+                        this.hasUploadedProof = false;
                     }
-                } catch (e) {
-                    this.generateProofError = "Invalid Password";
+                    this.isUploadingProof = false;
                 }
+            } catch (e) {
+                // catch all
             }
 
-            if (generatedProof) {
-                console.log(generatedProof)
-                this.generatedProof = JSON.stringify(generatedProof);
-                this.isUploadingProof = true;
-                try {
-                    const res = await Api.post(`${Api.endpoint}proof`, JSON.stringify({ proof: generatedProof }));
-                    if (res.success) {
-                        this.hasUploadedProof = true;
-                        this.proofUrl = `${Api.endpoint}proof/${res.id}`;
-                    }
-                } catch (e) {
-                    //
-                }
-                if (this.proofUrl === '') {
-                    this.hasUploadedProof = false;
-                }
-                this.isUploadingProof = false;
-            }
-
+            this.isGeneratingProof = false;
             return this.proofUrl !== '';
         },
         selectApplication(applicationName: string | null): void {

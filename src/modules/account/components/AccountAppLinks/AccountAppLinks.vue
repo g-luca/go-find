@@ -218,7 +218,7 @@
                 class="md:flex -mx-4"
               >
                 <div class="px-4 pt-2">
-                  <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 text-blue-600">
+                  <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 dark:bg-gray-700 text-blue-600">
                     2
                   </span>
                 </div>
@@ -249,7 +249,7 @@
                     >
                   </div>
                   <div
-                    v-if="!generatedProof&& $store.state.AuthModule._account.isUsingKeplr===false"
+                    v-if="!generatedProof&& $store.state.AuthModule._account.isUsingKeplr===false && $store.state.AuthModule._account.isUsingWalletConnect === false"
                     class="col-span-2 py-2"
                   >
                     <label
@@ -275,16 +275,27 @@
                     {{ generateProofError }}
                   </span>
                   <div
-                    v-if="($store.state.AuthModule._account.isUsingKeplr===false && applicationUsername.length>0&&mPassword.length>0&&!generatedProof) || $store.state.AuthModule._account.isUsingKeplr===true"
+                    v-if="($store.state.AuthModule._account.isUsingKeplr===false && $store.state.AuthModule._account.isUsingWalletConnect === false && applicationUsername.length>0&&mPassword.length>0&&!generatedProof) || $store.state.AuthModule._account.isUsingKeplr===true || $store.state.AuthModule._account.isUsingWalletConnect === true"
                     class="col-span-2 py-2"
                   >
-                    <button
-                      type="button"
-                      class="py-2 w-full px-4 bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
-                      @click="generateProof()"
-                    >
-                      Generate Proof
-                    </button>
+                    <span v-if="!isGeneratingProof">
+                      <button
+                        type="button"
+                        class="py-2 w-full px-4 bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                        @click="generateProof()"
+                      >
+                        Generate Proof
+                      </button>
+                    </span>
+                    <span v-else>
+                      <button
+                        type="button"
+                        disabled
+                        class="py-2 w-full px-4 bg-gray-600 hover:bg-gray-700 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md rounded-lg "
+                      >
+                        Generating...
+                      </button>
+                    </span>
                   </div>
                 </div>
               </div>
