@@ -11,7 +11,7 @@
             class="h-1/2 mx-auto"
           >
           <div class="pt-10">
-            <h1 class="text-4xl md:text-7xl text-center">
+            <h1 class="text-4xl md:text-7xl text-center dark:text-white ">
               Skyrocketing to
               <span class="text-brand font-semibold"> @{{ $route.params['dtag'] }} </span><br>
               <span class="text-transparent bg-clip-text bg-gradient-to-br from-royalblue-400 via-royalblue-500 to-royalblue-700 font-bold capitalize">{{ link }}
