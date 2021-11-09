@@ -55,10 +55,10 @@ export default class KeplrModule extends VuexModule {
         if (window.keplr) {
             this.isInstalled = true;
             this.isWaitingAuthentication = true;
-            if (!process.env.VUE_APP_IS_TESTNET) {
-                await KeplrModule.setupDesmosMainnet();
-            } else {
+            if (process.env.VUE_APP_IS_TESTNET === "true") {
                 await KeplrModule.setupDesmosTestnet();
+            } else {
+                await KeplrModule.setupDesmosMainnet();
             }
             this.address = await (await window.keplr.getKey(desmosNetworkModule.chainId)).bech32Address;
 
