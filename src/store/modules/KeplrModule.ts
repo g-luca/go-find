@@ -61,7 +61,7 @@ export default class KeplrModule extends VuexModule {
                 await KeplrModule.setupDesmosMainnet();
             }
             const keplrAccount = await window.keplr.getKey(desmosNetworkModule.chainId)
-            if (keplrAccount.isNanoLedger) {
+            if ((await window.keplr.getKey(desmosNetworkModule.chainId) as any).isNanoLedger) {
                 alert('Desmos App on Ledger is not supported by Keplr');
                 this.isWaitingAuthentication = false;
                 this.hasProfile = false;
