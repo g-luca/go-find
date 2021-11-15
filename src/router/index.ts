@@ -89,7 +89,7 @@ router.beforeEach((to, from, next) => {
 
   // check authentication
   authModule.authenticate();
-  //keplrModule.init();
+  keplrModule.init();
 
   if (requiresAuth && authModule.authLevel === AuthLevel.None) {
     next('/login');
