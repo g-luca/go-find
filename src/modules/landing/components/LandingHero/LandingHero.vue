@@ -69,7 +69,7 @@
               class="px-2 pt-3"
               :class="[!$store.state.DesmosNetworkModule.isTestnet?'col-span-8 sm:col-span-8 text-center w-1/2 mx-auto':'col-span-8 sm:col-span-3 text-left']"
             >
-              <!-- <button
+              <button
                 type="button"
                 class="w-full rounded-xl bg-gradient-to-br from-blue-400 to-violet-700 hover:bg-gradient-to-tl"
                 @click="$router.push('/login/keplr')"
@@ -84,7 +84,7 @@
                     Use Keplr
                   </span>
                 </div>
-              </button> -->
+              </button>
             </div>
           </div>
         </div>
