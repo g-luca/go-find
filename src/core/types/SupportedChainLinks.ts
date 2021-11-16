@@ -22,4 +22,6 @@ export const supportedChainLinks: Blockchain[] = [
     new Blockchain("irisnet", "IRIS", "iris", "irishub-1", "m/44'/566'/0'/0/0", "iaa"),
     new Blockchain("persistence", "Persistence", "xprt", "core-1", "m/44'/750'/0'/0/0", "persistence"),
     new Blockchain("ixo", "IXO", "ixo", "impacthub-3", "m/44'/118'/0'/0/0", "ixo"),
+    new Blockchain("terra", "Terra", "LUNA", "columbus-5", "m/44'/330'/0'/0/0", "terra"),
+    new Blockchain("likecoin", "Likecoin", "LIKE", "likecoin-mainnet-2", "m/44'/118'/0'/0/0", "cosmos"),
 ];

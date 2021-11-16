@@ -60,7 +60,15 @@ export default class KeplrModule extends VuexModule {
             } else {
                 await KeplrModule.setupDesmosMainnet();
             }
-            this.address = await (await window.keplr.getKey(desmosNetworkModule.chainId)).bech32Address;
+            const keplrAccount = await window.keplr.getKey(desmosNetworkModule.chainId)
+            if ((await window.keplr.getKey(desmosNetworkModule.chainId) as any).isNanoLedger) {
+                alert('Keplr does not support Desmos when used with a Ledger. Please use a mnemonic instead');
+                this.isWaitingAuthentication = false;
+                this.hasProfile = false;
+                router.push('/')
+                return;
+            }
+            this.address = keplrAccount.bech32Address;
 
             const getProfileQuery = useLazyQuery(
                 ProfileQuery, {
