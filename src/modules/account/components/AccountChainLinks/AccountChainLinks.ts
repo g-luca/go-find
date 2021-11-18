@@ -230,7 +230,7 @@ export default defineComponent({
                             }],
                             gas: "1"
                         },
-                        memo: "Chain Link Proof, DON'T EDIT ANYTHING",
+                        memo: `${authModule.account?.address}`,
                         msgs: [],
                         sequence: "0"
                     }
