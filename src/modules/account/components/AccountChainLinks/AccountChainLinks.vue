@@ -150,7 +150,7 @@
                         </div>
                       </div>
                     </div>
-                    <div
+                    <!-- <div
                       class="flex-initial m-1 rounded-3xl bg-gray-100 dark:bg-denim-900 dark:hover:bg-purple-800 hover:bg-purple-200 cursor-pointer"
                       @click="selectChain(null)"
                     >
@@ -174,7 +174,7 @@
                           />
                         </div>
                       </div>
-                    </div>
+                    </div> -->
                   </div>
 
                   <div v-if="isCustomChain">
