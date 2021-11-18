@@ -169,8 +169,8 @@ export default defineComponent({
                                     key: destWallet.publicKey.value
                                 }).finish()
                             },
-                            signature: Buffer.from(Transaction.signBytes(Buffer.from(CryptoUtils.sha256Buffer(Buffer.from(destWallet.address))), destWallet.privateKey)).toString('hex'),
-                            plainText: Buffer.from(destWallet.address).toString('hex'),
+                            signature: Buffer.from(Transaction.signBytes(Buffer.from(CryptoUtils.sha256Buffer(Buffer.from(authModule.account.address))), destWallet.privateKey)).toString('hex'),
+                            plainText: Buffer.from(authModule.account.address).toString('hex'),
                         }, chainConfig: {
                             name: this.selectedChain?.id.toLowerCase(),
                         },
