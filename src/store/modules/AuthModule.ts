@@ -2,7 +2,7 @@ import store from '@/store';
 import CryptoUtils from '@/utils/CryptoUtils';
 import { getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import AuthAccount from '@/core/types/AuthAccount';
-import { CosmosAuthInfo, CosmosBroadcastMode, CosmosFee, CosmosPubKey, CosmosSignDoc, CosmosSignerInfo, CosmosSignMode, CosmosTxBody, CosmosTxRaw, DesmosJS, Network, Transaction } from 'desmosjs';
+import { CosmosAuthInfo, CosmosBroadcastMode, CosmosFee, CosmosPubKey, CosmosSignDoc, CosmosSignerInfo, CosmosSignMode, CosmosTxBody, CosmosTxRaw, DesmosJS, Network, Transaction, Wallet } from 'desmosjs';
 import AccountModule from './AccountModule';
 import Long from 'long';
 import DesmosNetworkModule from './DesmosNetworkModule';
@@ -270,8 +270,19 @@ export default class AuthModule extends VuexModule {
                 console.log(account)
                 if (account) {
                     try {
+                        let pubKey = undefined;
+                        try {
+                            pubKey = {
+                                typeUrl: "/cosmos.crypto.secp256k1.PubKey",
+                                value: CosmosPubKey.encode({
+                                    key: Wallet.calculatePubKey(Buffer.from(privKey, 'hex'))!,
+                                }).finish(),
+                            };
+                        } catch (e) {
+                            // ignore
+                        }
                         const signerInfo: CosmosSignerInfo = {
-                            /* publicKey: account, */
+                            publicKey: pubKey,
                             modeInfo: { single: { mode: CosmosSignMode.SIGN_MODE_DIRECT } },
                             sequence: account.sequence
                         };
