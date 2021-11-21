@@ -22,7 +22,7 @@ export class Profile {
     ]
 
 
-    static DTAG_REGEX = /^[A-Za-z0-9_]+$/;
+    static DTAG_REGEX = /^[A-Za-z0-9_]{6,30}$/;
     static PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\w\W]{10,}$/;
 
 
