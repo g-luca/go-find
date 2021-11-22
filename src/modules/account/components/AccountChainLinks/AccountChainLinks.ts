@@ -25,6 +25,20 @@ const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
 const transactionModule = getModule(TransactionModule);
 
+class ChainLinkConnectionMethod {
+    public id: string;
+    public name: string;
+    public logo: string;
+
+    constructor(id: string, name: string, logo: string) {
+        this.id = id;
+        this.name = name;
+        this.logo = logo;
+    }
+}
+
+
+
 export default defineComponent({
     components: {
         SkeletonLoader,
@@ -38,6 +52,8 @@ export default defineComponent({
     },
     data() {
         return {
+            supportedChainLinkConnectionMethods: [new ChainLinkConnectionMethod("keplr", "Keplr", "keplr"), new ChainLinkConnectionMethod("ledger", "Ledger", "ledger"),],
+            selectedConnectionMethod: null as ChainLinkConnectionMethod | null,
             supportedChainLinks,
             filteredSupportedChainLinks: supportedChainLinks,
             isCustomChain: false,
@@ -92,7 +108,10 @@ export default defineComponent({
             }
         })
     }, methods: {
-        toggleChainLinkEditor(): void {
+        async toggleChainLinkEditor(): Promise<void> {
+            this.generateProofError = ''
+            this.selectedChain = null;
+            this.selectedConnectionMethod = null;
             this.isChainLinkEditorOpen = !this.isChainLinkEditorOpen;
             //this.inputMnemonic = new Array<string>(24);
             this.selectedChain = null;
@@ -145,7 +164,7 @@ export default defineComponent({
          * Generate Chain Link proof for users with mnemonic input
          * @returns success value
          */
-        generateProof(): boolean {
+        async generateProof(): Promise<boolean> {
             let success = false;
             this.inputMnemonic.forEach((word, i) => {
                 this.inputMnemonic[i] = word.trim();
@@ -192,7 +211,7 @@ export default defineComponent({
                     this.isExecutingTransaction = true;
                     this.newChainLink = new ChainLink(destWallet.address, this.selectedChain.id);
 
-                    this.toggleChainLinkEditor();
+                    await this.toggleChainLinkEditor();
                     transactionModule.start(this.tx);
 
                     success = true;
@@ -271,12 +290,13 @@ export default defineComponent({
                             nonCriticalExtensionOptions: [],
                             timeoutHeight: 0,
                         }
-                        this.tx = txBody;
                         this.isExecutingTransaction = true;
                         this.newChainLink = new ChainLink(keplrWallet.bech32Address, this.selectedChain.id);
 
-                        this.toggleChainLinkEditor();
-                        transactionModule.start(this.tx);
+                        await this.toggleChainLinkEditor();
+                        transactionModule.start(txBody);
+                        this.tx = txBody;
+
 
                         this.generateProofError = "";
                         success = true;
@@ -301,25 +321,33 @@ export default defineComponent({
                 this.customHdPath = chain.hdpath;
                 this.customBechPrefix = chain.bechPrefix;
             }
+            this.selectedConnectionMethod = null;
+        },
 
-            // check if the user has Keplr installed, and if the selected chain is supported (has chainId) 
+        async selectChainConnectionMethod(connectionMethod: ChainLinkConnectionMethod): Promise<void> {
+            this.selectedConnectionMethod = connectionMethod;
+        },
+        async connectWithKeplr(): Promise<void> {
             try {
-
-                if (window.keplr && chain?.chainId) {
+                if (window.keplr && this.selectedChain && this.selectedChain.chainId) {
                     // get the dest chain Keplr wallet
-                    const keplrWallet = await window.keplr?.getKey(chain.chainId);
+                    const keplrWallet = await window.keplr?.getKey(this.selectedChain.chainId);
                     // if the wallet exists & is approved by the user, proceed with the custom chain-link Keplr flow
                     if (keplrWallet.address) {
                         this.isLinkingWithKeplr = true;
                         this.generateProofWithKeplr(keplrWallet);
                         return;
                     }
+                } else {
+                    this.generateProofError = "Keplr not available";
                 }
             } catch (e) {
+                this.generateProofError = "Keplr permission denied";
                 // persmission to use Keplr refused
             }
-            this.isLinkingWithKeplr = false; // otherwise reset to initial value
-        }, getChainLogo(name: string) {
+            this.isLinkingWithKeplr = false;
+        },
+        getChainLogo(name: string) {
             try {
                 return require('@/assets/brands/' + name + '/logo.svg')
             } catch (e) {

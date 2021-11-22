@@ -86,7 +86,7 @@
               <span class="flex">
                 <div class="flex dark:text-purple-700 text-purple-600 text-4xl">Connect a Blockchain</div>
                 <div class="flex-auto text-right">
-                  <button>
+                  <button class="bg-gray-200 dark:bg-gray-800 rounded-full p-1 hover:text-red-500">
                     <i
                       class="bi bi-x h-12 w-12"
                       @click="toggleChainLinkEditor()"
@@ -100,7 +100,7 @@
               <!-- Blockchain Select -->
               <div class="md:flex -mx-4">
                 <div class="px-4">
-                  <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 text-blue-600">
+                  <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 dark:bg-gray-700 text-blue-600">
                     1
                   </span>
                 </div>
@@ -110,7 +110,7 @@
                       Select the Blockchain
                     </h3>
                     <input
-                      class="bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-lg focus:outline-none focus:ring-0 dark:text-white"
+                      class="bg-gray-50 dark:bg-gray-800 px-2 py-1 mt-1 rounded-lg focus:outline-none focus:ring-0 dark:text-white"
                       placeholder="Search..."
                       type="text"
                       @input="searchChainLink"
@@ -150,7 +150,7 @@
                         </div>
                       </div>
                     </div>
-                    <!-- <div
+                    <div
                       class="flex-initial m-1 rounded-3xl bg-gray-100 dark:bg-denim-900 dark:hover:bg-purple-800 hover:bg-purple-200 cursor-pointer"
                       @click="selectChain(null)"
                     >
@@ -174,7 +174,7 @@
                           />
                         </div>
                       </div>
-                    </div> -->
+                    </div>
                   </div>
 
                   <div v-if="isCustomChain">
@@ -195,9 +195,92 @@
                   </div>
                 </div>
               </div>
-              <span v-if="!isLinkingWithKeplr">
 
-                <!-- Mnemonic Input -->
+              <!-- Method Select -->
+              <div
+                v-if="isCustomChain||selectedChain"
+                class="md:flex -mx-4 pt-4"
+              >
+                <div class="px-4">
+                  <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 dark:bg-gray-700 text-blue-600">
+                    2
+                  </span>
+                </div>
+                <div class="w-full pb-4  overflow-y-scroll">
+                  <div class="">
+                    <h3 class="mt-4 text-2xl font-bold dark:text-white ">
+                      Choose a Method
+                    </h3>
+                  </div>
+                  <div class="flex flex-nowrap min-w-full mt-4">
+                    <div
+                      v-for="connectionMethod of supportedChainLinkConnectionMethods"
+                      class="flex-initial m-1 rounded-3xl bg-gray-100 dark:bg-denim-900 dark:hover:bg-purple-800 hover:bg-purple-200 cursor-pointer select-none"
+                      @click="selectChainConnectionMethod(connectionMethod)"
+                    >
+                      <div class="grid grid-cols-12 w-52 md:w-60">
+                        <div class="col-span-4">
+                          <img
+                            class="p-3 pointer-events-none select-none h-16 w-16"
+                            :src="getChainLogo(connectionMethod.logo)"
+                            alt=""
+                          >
+                        </div>
+                        <div class="col-span-5 my-auto">
+                          <h5 class="dark:text-white text-2xl">
+                            {{ connectionMethod.name }}
+                          </h5>
+                        </div>
+                        <div class="col-span-3 text-right my-auto pr-4">
+                          <i
+                            v-if="connectionMethod?.id===selectedConnectionMethod?.id"
+                            class="bi bi-check-circle text-xl text-seagreen-500"
+                          />
+                          <i
+                            v-else
+                            class="bi bi-circle text-xl dark:text-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-if="isCustomChain">
+                    <label
+                      for="chainName"
+                      class="text-gray-700 text-sm"
+                    >
+                      Chain name
+                    </label>
+                    <input
+                      id="chainName"
+                      v-model="customChainName"
+                      type="text"
+                      class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+                      name="chainName"
+                      placeholder="Chain name"
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <span v-if="selectedConnectionMethod">
+                <span v-if="selectedConnectionMethod.id==='keplr'">
+                  <button
+                    type="button"
+                    class="py-2 px-4 w-6/12 bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                    @click="connectWithKeplr"
+                  >
+                    Connect
+                  </button>
+                </span>
+                <span v-if="selectedConnectionMethod.id==='ledger'">
+                  Coming Soon
+                </span>
+              </span>
+
+              <!-- Mnemonic Input -->
+              <!-- <span>
                 <div
                   v-if="selectedChain||isCustomChain"
                   class="md:flex -mx-4"
@@ -288,18 +371,11 @@
                       >
                         Connect
                       </button>
-                      <div class="pt-4">
-                        <span v-if="generateProofError">
-                          <h6 class="text-red-700">
-                            {{ generateProofError }}
-                          </h6>
-                        </span>
-                      </div>
+                      
                     </div>
                   </div>
                 </div>
 
-                <!-- Confirm -->
                 <div
                   v-if="generatedProof"
                   class="md:flex -mx-4 w-full"
@@ -323,7 +399,15 @@
                     </button>
                   </div>
                 </div>
-              </span>
+              </span> -->
+
+              <div class="pt-4">
+                <span v-if="generateProofError">
+                  <h6 class="text-red-700">
+                    {{ generateProofError }}
+                  </h6>
+                </span>
+              </div>
             </section>
           </div>
         </div>

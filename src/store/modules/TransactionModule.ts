@@ -70,9 +70,9 @@ export default class TransactionModule extends VuexModule {
     @Mutation
     start(tx: CosmosTxBody): void {
         this.tx = tx;
-        this.isOpen = true;
         this.transactionStatus = TransactionStatus.Idle;
         this.errorMessage = "";
+        this.isOpen = true;
     }
 
     /**
@@ -80,10 +80,10 @@ export default class TransactionModule extends VuexModule {
      */
     @Mutation
     closeModal(): void {
-        this.isOpen = !this.isOpen;
         this.tx = null;
         this.transactionStatus = TransactionStatus.Idle;
         this.errorMessage = "";
+        this.isOpen = false;
     }
 
 
