@@ -1,8 +1,8 @@
 import Blockchain from "./Blockchain";
 
 export const supportedChainLinks: Blockchain[] = [
-    /*  new Blockchain("desmos", "Desmos", "dsm", "desmos-mainnet", "m/44'/852'/0'/0/0", "desmos"),
-     new Blockchain("cosmos", "Cosmos", "atom", "cosmoshub-4", "m/44'/118'/0'/0/0", "cosmos"), */
+    /* new Blockchain("desmos", "Desmos", "dsm", "desmos-mainnet", "m/44'/852'/0'/0/0", "desmos"),
+    new Blockchain("cosmos", "Cosmos", "atom", "cosmoshub-4", "m/44'/118'/0'/0/0", "cosmos"), */
     /*  new Blockchain("bitcoin", "Bitcoin", "btc", "", "m/44'/0'/0'/0/0", "bc1"),
      new Blockchain("ethereum", "Ethereum", "eth", "", "m/44'/60'/0'/0/0", "0x"),
      new Blockchain("dogecoin", "Dogecoin", "doge", "", "m/44'/3'/0'/0/0", "D"),

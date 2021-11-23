@@ -1,6 +1,7 @@
 import store from '@/store';
-import { Network } from 'desmosjs';
+import { DesmosJS, Network } from 'desmosjs';
 import { Module, VuexModule } from "vuex-module-decorators";
+DesmosJS.chainId = process.env.VUE_APP_CHAIN_ID as string;
 
 @Module({ store, name: 'DesmosNetworkModule', dynamic: true })
 export default class DesmosNetworkModule extends VuexModule {

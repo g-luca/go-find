@@ -80,11 +80,11 @@ export default class AuthModule extends VuexModule {
 
     static async signTx(tx: CosmosTxBody, adddress: string, mPasswordClear = "", isUsingKeplr = false, isUsingWalletConnect = false): Promise<Transaction | false> {
         if (mPasswordClear) {
-            return this.signTxWithPassword(tx, adddress, mPasswordClear);
+            return await this.signTxWithPassword(tx, adddress, mPasswordClear);
         } else if (isUsingKeplr) {
-            return this.signTxWithKeplr(tx, adddress);
+            return await this.signTxWithKeplr(tx, adddress);
         } else if (isUsingWalletConnect) {
-            return this.signWithWalletConenct(tx, adddress);
+            return await this.signWithWalletConenct(tx, adddress);
         }
         return false;
     }
@@ -142,8 +142,51 @@ export default class AuthModule extends VuexModule {
         return false;
     }
 
+    /**
+     * Custom WalletConnect Application Links signing function
+     * @param txBody tx to sign
+     * @param address signer address
+     * @returns {}
+     */
+    public static async signAppLinkWithWalletConenct(txBody: CosmosTxBody, address: string): Promise<any> {
+        const signerInfo: CosmosSignerInfo = { modeInfo: { single: { mode: CosmosSignMode.SIGN_MODE_DIRECT } }, sequence: 0 };
 
-    private static parseSignDocValues(signDoc: any) {
+        const feeValue: CosmosFee = {
+            amount: [], gasLimit: 1, payer: "", granter: ""
+        };
+
+        const authInfo: CosmosAuthInfo = { signerInfos: [signerInfo], fee: feeValue };
+        const bodyBytes = CosmosTxBody.encode(txBody).finish();
+        const authInfoBytes = CosmosAuthInfo.encode(authInfo).finish();
+        const accountNumber = 0;
+        const docValues = {
+            bodyBytes: bodyBytes,
+            accountNumber: accountNumber,
+            authInfoBytes: authInfoBytes,
+            chainId: desmosNetworkModule.chainId
+        }
+        const doc = this.stringifySignDocValues(docValues as SignDoc);
+        const params = [{
+            signerAddress: address,
+            signDoc: doc,
+        }];
+        console.log(params)
+        try {
+            const signedTxRaw = await AuthModule.walletConnectClient.sendCustomRequest({
+                jsonrpc: "2.0",
+                method: "cosmos_signDirect",
+                params: params,
+            });
+            console.log(signedTxRaw);
+            return { signedTxRaw, doc: doc };
+        } catch (e) {
+            // refused by the user
+            return null;
+        }
+    }
+
+
+    public static parseSignDocValues(signDoc: any) {
         return {
             ...signDoc,
             bodyBytes: this.fromHex(signDoc.bodyBytes),
@@ -153,7 +196,7 @@ export default class AuthModule extends VuexModule {
     }
 
 
-    private static fromHex(hexstring: string): Uint8Array {
+    public static fromHex(hexstring: string): Uint8Array {
         if (hexstring.length % 2 !== 0) {
             throw new Error("hex string length must be a multiple of 2");
         }
@@ -168,7 +211,7 @@ export default class AuthModule extends VuexModule {
         }
         return new Uint8Array(listOfInts);
     }
-    private static stringifySignDocValues(signDoc: any) {
+    public static stringifySignDocValues(signDoc: any) {
         return {
             ...signDoc,
             bodyBytes: this.toHex(signDoc.bodyBytes),
@@ -176,7 +219,7 @@ export default class AuthModule extends VuexModule {
             accountNumber: signDoc.accountNumber.toString(16),
         };
     }
-    private static toHex(data: Uint8Array): string {
+    public static toHex(data: Uint8Array): string {
         let out = "";
         for (const byte of data) {
             out += ("0" + byte.toString(16)).slice(-2);
@@ -297,7 +340,6 @@ export default class AuthModule extends VuexModule {
                         const authInfo: CosmosAuthInfo = { signerInfos: [signerInfo], fee: feeValue };
 
                         const signedTx = Transaction.signTxBody(tx, authInfo, account.accountNumber, Buffer.from(privKey, 'hex'));
-                        console.log(signedTx)
                         return signedTx;
                     } catch (e) {
                         //return new Error("Error signing the transaction");

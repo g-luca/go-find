@@ -27,10 +27,22 @@ export default defineComponent({
         AccountProfileEdit,
         AccountAppLinks,
     },
+    data() {
+        return {
+            isAlertDismissed: false,
+        };
+    },
     async mounted() {
         const account = authModule.account;
         if (account) {
             await accountModule.loadAccount();
         }
+        this.isAlertDismissed = window.localStorage.getItem('isAlertDismissed') === 'true';
     },
+    methods: {
+        dismissAlert() {
+            this.isAlertDismissed = true;
+            window.localStorage.setItem('isAlertDismissed', 'true');
+        }
+    }
 });

@@ -1,6 +1,32 @@
 <template>
   <div>
     <AppHeader />
+    <!-- Temporary Alert -->
+    <span v-if="$store.state.AuthModule._account._isUsingKeplr&&!isAlertDismissed">
+      <div class="bg-red-500 bg-opacity-90 text-white p-2">
+        <div class="font-bold text-xl text-center">
+          Manual Keplr action required
+        </div>
+        <div class="">
+          <span>
+            Desmos upgrade has been successful 🎉! This requires a new Keplr configuration, you just have to:
+          </span>
+          <ol class="list-decimal ml-6">
+            <li>Open the Keplr extension</li>
+            <li>Delete "Desmos" from the Network panel, under "Beta support"</li>
+            <li>Refresh the page and approve the new Desmos configuration</li>
+          </ol>
+          <button
+            class="w-40 bg-blue-500 text-white rounded-2xl"
+            @click="dismissAlert()"
+          >
+            Done!
+          </button>
+
+        </div>
+      </div>
+
+    </span>
     <div class="w-full dark:bg-denim-900 bg-gray-50">
       <span>
         <!-- Profile Heading -->
