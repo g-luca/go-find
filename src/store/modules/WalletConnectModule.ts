@@ -36,7 +36,7 @@ export default class WalletConnectModule extends VuexModule {
             }
             // if the address exists, check if has a Desmos Profile
             if (address) {
-                const result = await (await fetch(`${process.env.VUE_APP_LCD_ENDPOINT}cosmos/auth/v1beta1/accounts/${address}`)).json();
+                const result = await (await fetch(`${process.env.VUE_APP_LCD_ENDPOINT}/cosmos/auth/v1beta1/accounts/${address}`)).json();
                 this.connectedAddress = address;
                 if (result.account && result.account.dtag) {
                     const dtag = result.account.dtag;

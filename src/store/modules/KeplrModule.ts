@@ -37,6 +37,15 @@ export default class KeplrModule extends VuexModule {
                 router.push('/')
             });
 
+            // suggest fresh new configuration
+            if (authModule.account?.isUsingKeplr) {
+                if (process.env.VUE_APP_IS_TESTNET === "true") {
+                    await KeplrModule.setupDesmosTestnet();
+                } else {
+                    await KeplrModule.setupDesmosMainnet();
+                }
+            }
+
             (window.keplr as any).defaultOptions = {
                 sign: {
                     preferNoSetFee: true,
@@ -106,9 +115,9 @@ export default class KeplrModule extends VuexModule {
     }
 
 
-    private static async setupDesmosMainnet(): Promise<void> {
-        if (window.keplr) {
-            await window.keplr.experimentalSuggestChain({
+    public static async setupDesmosMainnet(): Promise<void> {
+        if (await window.keplr) {
+            await window.keplr!.experimentalSuggestChain({
                 chainId: desmosNetworkModule.chainId,
                 chainName: "Desmos",
                 rpc: `${process.env.VUE_APP_RPC_ENDPOINT}`,
@@ -152,6 +161,7 @@ export default class KeplrModule extends VuexModule {
                     average: 0.025,
                     high: 0.03,
                 },
+                features: ['no-legacy-stdTx'],
             });
         }
     }
