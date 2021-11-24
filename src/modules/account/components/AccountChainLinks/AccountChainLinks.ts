@@ -228,16 +228,24 @@ export default defineComponent({
         },
         /**
          * Generate Chain Link proof for user with Keplr
-         * @param keplrWallet 
+         * @param extKeplrWallet Keplr wallet of the external chain to link
          * @returns success value
          */
-        async generateProofWithKeplr(keplrWallet: Key): Promise<boolean> {
+        async generateProofWithKeplr(extKeplrWallet: Key): Promise<boolean> {
             let success = false
             if (this.selectedChain) {
                 try {
+
+                    // avoid keplr custom values
+                    (window.keplr as any).defaultOptions = {
+                        sign: {
+                            preferNoSetFee: true,
+                            preferNoSetMemo: true,
+                        }
+                    }
+
                     // get the Keplr signer
                     const signer = window.keplr?.getOfflineSigner(this.selectedChain.chainId);
-
                     // generate a "fake" transaction to be used as proof
                     const proofObj = {
                         account_number: "0",
@@ -253,22 +261,25 @@ export default defineComponent({
                         msgs: [],
                         sequence: "0"
                     }
-                    const signedTx = await signer?.signAmino(keplrWallet.bech32Address, proofObj); // sign with Keplr
+                    // sign the proof
+                    const signedTx = await signer?.signAmino('cro192xlsz5p4v2kahjn823x02ghdgx7xnh4tm927d', proofObj); // sign with Keplr
                     const plainText = JSON.stringify(proofObj, null, 0); // convert to string to be used as plain_text
+
+                    // create the chain link transaction
                     if (signedTx && authModule.account) {
                         const msgLinkChain: DesmosMsgLinkChainAccount = {
                             chainAddress: {
                                 typeUrl: "/desmos.profiles.v1beta1.Bech32Address",
                                 value: DesmosBech32Address.encode({
                                     prefix: this.selectedChain.bechPrefix,
-                                    value: keplrWallet.bech32Address,
+                                    value: extKeplrWallet.bech32Address,
                                 }).finish()
                             },
                             proof: {
                                 pubKey: {
                                     typeUrl: '/cosmos.crypto.secp256k1.PubKey',
                                     value: CosmosPubKey.encode({
-                                        key: keplrWallet.pubKey
+                                        key: extKeplrWallet.pubKey
                                     }).finish()
                                 },
                                 signature: Buffer.from(signedTx.signature.signature, 'base64').toString('hex'), // need to convert the signature from Base64 to Hex
@@ -291,7 +302,7 @@ export default defineComponent({
                             timeoutHeight: 0,
                         }
                         this.isExecutingTransaction = true;
-                        this.newChainLink = new ChainLink(keplrWallet.bech32Address, this.selectedChain.id);
+                        this.newChainLink = new ChainLink(extKeplrWallet.bech32Address, this.selectedChain.id);
 
                         await this.toggleChainLinkEditor();
                         transactionModule.start(txBody);
@@ -304,6 +315,7 @@ export default defineComponent({
                         this.generateProofError = "Authorization failed";
                     }
                 } catch (e) {
+                    console.log(e)
                     this.isLinkingWithKeplr = false;
                     this.generateProofError = "";
                 }
