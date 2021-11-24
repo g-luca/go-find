@@ -119,7 +119,8 @@
                   <div class="flex flex-nowrap min-w-full mt-24">
                     <div
                       v-for="chain of filteredSupportedChainLinks"
-                      class="flex-initial m-1 rounded-3xl bg-gray-100 dark:bg-denim-900 dark:hover:bg-purple-800 hover:bg-purple-200 cursor-pointer select-none"
+                      class="flex-initial m-1 rounded-3xl  cursor-pointer select-none transition ease-in duration-150"
+                      :class="selectedChain&&chain.id===selectedChain.id?'bg-purple-300 dark:bg-purple-800 dark:hover:bg-purple-700 hover:bg-purple-200':'bg-gray-100 dark:bg-denim-900 dark:hover:bg-purple-800 hover:bg-purple-200'"
                       @click="selectChain(chain)"
                     >
                       <div class="grid grid-cols-12 w-44 md:w-60">
@@ -141,7 +142,7 @@
                         <div class="col-span-3 text-right my-auto pr-4">
                           <i
                             v-if="selectedChain&&chain.id===selectedChain.id"
-                            class="bi bi-check-circle text-xl text-seagreen-500"
+                            class="bi bi-check-circle-fill text-xl text-seagreen-500"
                           />
                           <i
                             v-else
@@ -215,7 +216,8 @@
                   <div class="flex flex-nowrap min-w-full mt-4">
                     <div
                       v-for="connectionMethod of supportedChainLinkConnectionMethods"
-                      class="flex-initial m-1 rounded-3xl bg-gray-100 dark:bg-denim-900 dark:hover:bg-purple-800 hover:bg-purple-200 cursor-pointer select-none"
+                      class="flex-initial m-1 rounded-3xl cursor-pointer select-none transition ease-in duration-150"
+                      :class="connectionMethod?.id===selectedConnectionMethod?.id?'bg-purple-300 dark:bg-purple-800 dark:hover:bg-purple-700 hover:bg-purple-200':'bg-gray-100 dark:bg-denim-900 dark:hover:bg-purple-800 hover:bg-purple-200'"
                       @click="selectChainConnectionMethod(connectionMethod)"
                     >
                       <div class="grid grid-cols-12 w-52 md:w-60">
@@ -234,7 +236,7 @@
                         <div class="col-span-3 text-right my-auto pr-4">
                           <i
                             v-if="connectionMethod?.id===selectedConnectionMethod?.id"
-                            class="bi bi-check-circle text-xl text-seagreen-500"
+                            class="bi bi-check-circle-fill text-xl text-seagreen-500"
                           />
                           <i
                             v-else
@@ -264,7 +266,10 @@
                 </div>
               </div>
 
-              <span v-if="selectedConnectionMethod">
+              <div
+                v-if="selectedConnectionMethod"
+                class="md:ml-20 mt-6 md:mt-2"
+              >
                 <span v-if="selectedConnectionMethod.id==='keplr'">
                   <button
                     type="button"
@@ -277,7 +282,7 @@
                 <span v-if="selectedConnectionMethod.id==='ledger'">
                   Coming Soon
                 </span>
-              </span>
+              </div>
 
               <!-- Mnemonic Input -->
               <!-- <span>
