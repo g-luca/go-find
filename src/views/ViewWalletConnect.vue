@@ -203,7 +203,7 @@ export default defineComponent({
           if (this.inputDtag === dtag) {
             // verify if the dtag is not changed while waiting the timeout
             Api.get(
-              `${process.env.VUE_APP_LCD_ENDPOINT}desmos/profiles/v1beta1/profiles/` +
+              `${process.env.VUE_APP_LCD_ENDPOINT}/desmos/profiles/v1beta1/profiles/` +
                 this.inputDtag
             ).then((response) => {
               if (this.inputDtag === dtag && response["profile"]) {
