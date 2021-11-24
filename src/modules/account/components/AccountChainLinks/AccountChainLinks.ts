@@ -262,7 +262,7 @@ export default defineComponent({
                         sequence: "0"
                     }
                     // sign the proof
-                    const signedTx = await signer?.signAmino('cro192xlsz5p4v2kahjn823x02ghdgx7xnh4tm927d', proofObj); // sign with Keplr
+                    const signedTx = await signer?.signAmino(extKeplrWallet.bech32Address, proofObj); // sign with Keplr
                     const plainText = JSON.stringify(proofObj, null, 0); // convert to string to be used as plain_text
 
                     // create the chain link transaction
