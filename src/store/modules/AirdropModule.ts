@@ -47,7 +47,7 @@ class AirdropAllocation {
 
 @Module({ store, name: 'AirdropModule', dynamic: true })
 export default class AirdropModule extends VuexModule {
-    private static airdrop_endpoint = `https://test-api.airdrop.desmos.network`;
+    private static airdrop_endpoint = `https://api.airdrop.desmos.network`;
     public isAirdropModalOpen = false;
     public config: AirdropConfig | null = null;
     public aidropAllocations: Map<ChainLink, AirdropAllocation> = new Map();
