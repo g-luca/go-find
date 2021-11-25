@@ -29,6 +29,22 @@
               </span>
             </div>
 
+            <!-- Airdrop -->
+            <span v-if="isAirdropActive">
+              <button
+                class="mt-3 bg-seagreen-400 py-1 px-3 rounded-xl hover:bg-green-600 transition ease-in duration-200"
+                type="button"
+                @click="toggleAirdropModal()"
+              >
+                <div class="text-sm text-white">
+                  <i class="bi bi-gift-fill text-xl text-red-500" />
+                  <span class="text-xl align-middle">
+                    Airdrop
+                  </span>
+                </div>
+              </button>
+            </span>
+
             <span v-if="$store.state.AccountModule.account._delegations>0">
               <div class="grid grid-cols-2 pt-4">
                 <!-- Delegations -->
@@ -84,6 +100,7 @@
       />
 
     </span>
+    <AccountAirdrop />
   </section>
 </template>
 
