@@ -3,6 +3,7 @@ import ChainLink from '@/core/types/ChainLink';
 import store from '@/store';
 import { getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import AccountModule from './AccountModule';
+import AuthModule from './AuthModule';
 
 const accountModule = getModule(AccountModule);
 
@@ -57,6 +58,12 @@ export default class AirdropModule extends VuexModule {
     public claimResponse = '';
     public isAirdropSuccess = false;
 
+    public hasGrant = false;
+    public hasRequestedGrant = false;
+    public isLoadingGrant = false;
+    public grantResponse = '';
+    public isGrantSuccess = false;
+
 
     /**
      * Toggle Airdrop modal
@@ -68,6 +75,11 @@ export default class AirdropModule extends VuexModule {
         this.isLoadingClaim = false;
         this.isAirdropSuccess = false;
         this.hasRequestedClaim = false;
+
+        this.hasRequestedGrant = false;
+        this.isLoadingGrant = false;
+        this.grantResponse = '';
+        this.isGrantSuccess = false;
     }
 
 
@@ -141,6 +153,39 @@ export default class AirdropModule extends VuexModule {
             }
         } catch (e) {
             this.claimResponse = JSON.stringify(e);
+            //empty
+        }
+    }
+
+
+    @Mutation
+    public async askGrant(user_address: string): Promise<any> {
+        const endpoint = `${AirdropModule.airdrop_endpoint}/airdrop/grants`;
+        try {
+            if (accountModule.account) {
+                this.isLoadingGrant = true;
+                try {
+                    const request = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                        },
+                        body: JSON.stringify({ desmos_address: accountModule.account.address, user_address })
+                    });
+                    this.hasRequestedGrant = true;
+                    this.grantResponse = await request.text();
+                    this.isGrantSuccess = request.status === 200 || (request.status === 500 && this.grantResponse === 'Grant already requested');
+                    if (accountModule.account.balance <= 0) {
+                        this.hasGrant = true;
+                        AuthModule.granterAddress = this.config!.granter;
+                    }
+                } catch (e) {
+                    this.grantResponse = JSON.stringify(e)
+                    this.isGrantSuccess = false;
+                }
+                this.isLoadingGrant = false;
+            }
+        } catch (e) {
+            this.grantResponse = JSON.stringify(e);
             //empty
         }
     }

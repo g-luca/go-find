@@ -32,12 +32,12 @@
                     <h1 class="text-lg pt-3">This is what you need:</h1>
                     <ol class="list-decimal pl-6">
                       <li class="py-1">Saved Desmos Profile <i
-                          v-if="$store.state.AccountModule.profile"
+                          v-if="$store.state.AccountModule.profile&&(!$store.state.AccountModule.isNewProfile||$store.state.AccountModule.account._balance)"
                           class="bi bi-check-lg text-green-500 text-lg align-middle"
                         /></li>
                       <li class="">
                         Connected elegible address <i
-                          v-if="$store.state.AirdropModule.aidropAllocations"
+                          v-if="$store.state.AirdropModule.aidropAllocations.size>0"
                           class="bi bi-check-lg text-green-500 text-lg align-middle"
                         /></li>
                     </ol>
@@ -58,129 +58,177 @@
                 </div>
               </section>
 
-              <!-- Available Airdrops / Claim -->
-              <section v-if="$store.state.AccountModule && $store.state.AirdropModule.aidropAllocations && !$store.state.AirdropModule.hasRequestedClaim">
-                <div class="grid grid-cols-12 md:pl-10">
-                  <div class="col-span-12 my-4">
-                    <h1 class="text-4xl">Your Airdrops <i class="bi bi-gift-fill text-red-400" /> </h1>
-                  </div>
+              <!-- If profile exists on chain, claim! -->
+              <span v-if="$store.state.AccountModule.profile&&(!$store.state.AccountModule.isNewProfile||$store.state.AccountModule.account._balance)">
+                <!-- Available Airdrops / Claim -->
+                <section v-if="$store.state.AccountModule && $store.state.AirdropModule.aidropAllocations && !$store.state.AirdropModule.hasRequestedClaim">
+                  <div class="grid grid-cols-12 md:pl-10">
+                    <div class="col-span-12 my-4">
+                      <h1 class="text-4xl">Your Airdrops <i class="bi bi-gift-fill text-red-400" /> </h1>
+                    </div>
 
-                  <div
-                    v-if="!$store.state.AirdropModule.isLoadingAirdropAllocations"
-                    class="col-span-12"
-                  >
                     <div
-                      v-for="(allocation) in $store.state.AirdropModule.aidropAllocations"
-                      class="col-span-12 md:ml-4"
+                      v-if="!$store.state.AirdropModule.isLoadingAirdropAllocations"
+                      class="col-span-12"
                     >
-                      <div class="grid grid-cols-12">
-                        <!-- Staking -->
-                        <div
-                          v-for="stakingAllocation in allocation[1].staking_infos"
-                          class="col-span-12 md:col-span-6"
-                        >
-                          <div class="grid grid-cols-12 py-1.5">
-                            <div class="col-span-2 mx-auto">
-                              <img
-                                class="pointer-events-none select-none h-8"
-                                :src="getChainLogo(stakingAllocation.chain_name)"
-                                alt=""
-                              >
-                            </div>
-                            <div class="col-span-10 my-auto">
-                              <span class="text-xl">
-                                <span class="capitalize">{{stakingAllocation.chain_name}}</span> staker: <span class="font-bold text-brand">{{stakingAllocation.dsm_allotted}}</span> DSM
-                                <span v-if="stakingAllocation.claimed">
-                                  <span class="bg-green-400 text-black rounded-xl p-1 text-sm">Claimed</span>
+                      <div
+                        v-for="(allocation) in $store.state.AirdropModule.aidropAllocations"
+                        class="col-span-12 md:ml-4"
+                      >
+                        <div class="grid grid-cols-12">
+                          <!-- Staking -->
+                          <div
+                            v-for="stakingAllocation in allocation[1].staking_infos"
+                            class="col-span-12 md:col-span-6"
+                          >
+                            <div class="grid grid-cols-12 py-1.5">
+                              <div class="col-span-2 mx-auto">
+                                <img
+                                  class="pointer-events-none select-none h-8"
+                                  :src="getChainLogo(stakingAllocation.chain_name)"
+                                  alt=""
+                                >
+                              </div>
+                              <div class="col-span-10 my-auto">
+                                <span class="text-xl">
+                                  <span class="capitalize">{{stakingAllocation.chain_name}}</span> staker: <span class="font-bold text-brand">{{stakingAllocation.dsm_allotted}}</span> DSM
+                                  <span v-if="stakingAllocation.claimed">
+                                    <span class="bg-green-400 text-black rounded-xl p-1 text-sm">Claimed</span>
+                                  </span>
                                 </span>
-                              </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
 
-                        <!-- LP -->
-                        <div
-                          v-for="lpAllocation in allocation[1].lp_infos"
-                          class="col-span-12 md:col-span-6"
-                        >
-                          <div class="grid grid-cols-12 py-1.5">
-                            <div class="col-span-2 mx-auto">
-                              <img
-                                class="pointer-events-none select-none h-8"
-                                :src="getChainLogo(lpAllocation.chain_name)"
-                                alt=""
-                              >
-                            </div>
-                            <div class="col-span-10 my-auto">
-                              <span class="text-xl">
-                                <span class="capitalize">{{lpAllocation.chain_name}}</span> LP: <span class="font-bold text-brand">{{lpAllocation.dsm_allotted}}</span> DSM
-                                <span v-if="lpAllocation.claimed">
-                                  <span class="bg-green-400 text-black rounded-xl p-1 text-sm">Claimed</span>
+                          <!-- LP -->
+                          <div
+                            v-for="lpAllocation in allocation[1].lp_infos"
+                            class="col-span-12 md:col-span-6"
+                          >
+                            <div class="grid grid-cols-12 py-1.5">
+                              <div class="col-span-2 mx-auto">
+                                <img
+                                  class="pointer-events-none select-none h-8"
+                                  :src="getChainLogo(lpAllocation.chain_name)"
+                                  alt=""
+                                >
+                              </div>
+                              <div class="col-span-10 my-auto">
+                                <span class="text-xl">
+                                  <span class="capitalize">{{lpAllocation.chain_name}}</span> LP: <span class="font-bold text-brand">{{lpAllocation.dsm_allotted}}</span> DSM
+                                  <span v-if="lpAllocation.claimed">
+                                    <span class="bg-green-400 text-black rounded-xl p-1 text-sm">Claimed</span>
+                                  </span>
                                 </span>
-                              </span>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
+                      <div
+                        v-if="$store.state.AirdropModule.aidropAllocations.size<=0"
+                        class="text-red-500"
+                      >
+                        No claimable address found
+                      </div>
+                      <div class="col-span-12 pt-3">
+                        <span v-if="!$store.state.AirdropModule.isLoadingClaim">
+                          <button
+                            class="rounded-3xl bg-brand hover:brightness-90 w-full py-1 text-xl brightness-100 transition ease-in duration-100"
+                            @click="claimUserAirdrop()"
+                          >Claim!</button>
+                        </span>
+                        <span v-else>
+                          Claiming...
+                        </span>
+                      </div>
                     </div>
                     <div
-                      v-if="$store.state.AirdropModule.aidropAllocations.size<=0"
-                      class="text-red-500"
+                      v-else
+                      class="col-span-12"
                     >
-                      No claimable address found
-                    </div>
-                    <div class="col-span-12 pt-3">
-                      <span v-if="!$store.state.AirdropModule.isLoadingClaim">
-                        <button
-                          class="rounded-3xl bg-brand hover:brightness-90 w-full py-1 text-xl brightness-100 transition ease-in duration-100"
-                          @click="claimUserAirdrop()"
-                        >Claim!</button>
+                      <span v-if="$store.state.AccountModule.profile.chainLinks.length<=0">
+                        Connect an elegible address to get started
                       </span>
                       <span v-else>
-                        Claiming...
+                        Loading...
+                      </span>
+                    </div>
+
+                  </div>
+                </section>
+
+                <!-- Claim Result -->
+                <section v-if="$store.state.AccountModule && $store.state.AirdropModule.aidropAllocations && $store.state.AirdropModule.hasRequestedClaim">
+                  <div class="grid grid-cols-12">
+                    <div class="col-span-12 mx-auto">
+                      <span v-if="$store.state.AirdropModule.isAirdropSuccess">
+                        <img
+                          class="h-52"
+                          src="@/assets/illustrations/airdrop/claim_success.svg"
+                          alt=""
+                        >
+                      </span>
+                      <span v-else>
+                        <img
+                          class="h-52"
+                          src="@/assets/illustrations/airdrop/claim_error.svg"
+                          alt=""
+                        >
+                      </span>
+                    </div>
+                    <div class="col-span-12 dark:text-white text-xl text-center pt-8">
+                      <div>
+                        {{$store.state.AirdropModule.claimResponse}}
+                      </div>
+
+                      <span
+                        v-if="$store.state.AirdropModule.isAirdropSuccess"
+                        class="text-gray-800 dark:text-gray-400 text-sm"
+                      >
+                        Refresh the page in a few seconds to see the updated balance
                       </span>
                     </div>
                   </div>
-                  <div v-else>
-                    Loading...
-                  </div>
+                </section>
+              </span>
 
-                </div>
-              </section>
+              <span v-else>
 
-              <!-- Claim Result -->
-              <section v-if="$store.state.AccountModule && $store.state.AirdropModule.aidropAllocations && $store.state.AirdropModule.hasRequestedClaim">
-                <div class="grid grid-cols-12">
-                  <div class="col-span-12 mx-auto">
-                    <span v-if="$store.state.AirdropModule.isAirdropSuccess">
-                      <img
-                        class="h-52"
-                        src="@/assets/illustrations/airdrop/claim_success.svg"
-                        alt=""
-                      >
+                <div class="md:pl-10">
+                  <div class="relative text-gray-700 dark:text-white">
+                    <span v-if="!$store.state.AirdropModule.isLoadingGrant">
+                      <span v-if="$store.state.AirdropModule.isGrantSuccess">
+                        <h1 class="text-2xl text-center text-brand">Grant received!</h1>
+                        <p class="text-center">You can now setup a free Desmos Profile and connect your elegible address to get your airdrop DSM!</p>
+                      </span>
+                      <span v-else>
+                        <label for="inputElegibleAddress">
+                          Your elegible address:
+                        </label>
+                        <input
+                          id="inputElegibleAddress"
+                          v-model="inputElegibleAddress"
+                          type="text"
+                          class=" rounded-lg border-transparent flex-1 appearance-none border border-gray-300 dark:border-gray-700 w-full py-2 px-4 bg-white dark:bg-denim-900 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+                          name="inputElegibleAddress"
+                          placeholder="Cosmos/Kava/Terra.. address"
+                        >
+                        <button
+                          class="rounded-xl bg-brand hover:brightness-90 w-full py-1 text-xl brightness-100 transition ease-in duration-100 mt-4"
+                          @click="askUserGrant()"
+                        >Ask Grant</button>
+
+                        {{$store.state.AirdropModule.grantResponse}}
+                      </span>
                     </span>
                     <span v-else>
-                      <img
-                        class="h-52"
-                        src="@/assets/illustrations/airdrop/claim_error.svg"
-                        alt=""
-                      >
+                      Loading...
                     </span>
                   </div>
-                  <div class="col-span-12 dark:text-white text-xl text-center pt-8">
-                    <div>
-                      {{$store.state.AirdropModule.claimResponse}}
-                    </div>
 
-                    <span
-                      v-if="$store.state.AirdropModule.isAirdropSuccess"
-                      class="text-gray-800 dark:text-gray-400 text-sm"
-                    >
-                      Refresh the page in a few seconds to see the updated balance
-                    </span>
-                  </div>
                 </div>
-              </section>
+              </span>
             </div>
           </div>
         </div>
@@ -200,7 +248,9 @@ const airdropModule = getModule(AirdropModule);
 export default defineComponent({
   components: { Dialog, DialogOverlay, DialogTitle },
   setup() {
-    return {};
+    return {
+      inputElegibleAddress: "",
+    };
   },
   methods: {
     toggleAirdropModal() {
@@ -215,6 +265,9 @@ export default defineComponent({
     },
     async claimUserAirdrop() {
       airdropModule.claimAirdrop();
+    },
+    async askUserGrant() {
+      airdropModule.askGrant(this.inputElegibleAddress);
     },
   },
 });
