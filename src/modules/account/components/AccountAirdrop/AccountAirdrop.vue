@@ -36,7 +36,7 @@
                           class="bi bi-check-lg text-green-500 text-lg align-middle"
                         /></li>
                       <li class="">
-                        Connected elegible addresses <i
+                        Connected elegible address <i
                           v-if="$store.state.AirdropModule.aidropAllocations"
                           class="bi bi-check-lg text-green-500 text-lg align-middle"
                         /></li>
@@ -123,7 +123,12 @@
                         </div>
                       </div>
                     </div>
-
+                    <div
+                      v-if="$store.state.AirdropModule.aidropAllocations.size<=0"
+                      class="text-red-500"
+                    >
+                      No claimable address found
+                    </div>
                     <div class="col-span-12 pt-3">
                       <span v-if="!$store.state.AirdropModule.isLoadingClaim">
                         <button
