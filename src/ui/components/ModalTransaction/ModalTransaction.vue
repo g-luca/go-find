@@ -60,7 +60,7 @@
                 {{ tx.$tx.$fee.$amount[0].$denom }}
               </span>
             </div> -->
-              <span v-if="$store.state.AccountModule.account._balance>0">
+              <span v-if="$store.state.AccountModule.account._balance>0||$store.state.AirdropModule.hasGrant">
                 <div class="pt-4">
                   <button
                     v-if="(!$store.state.AuthModule._account.isUsingKeplr&&!$store.state.AuthModule._account.isUsingWalletConnect&&inputMPassword.length>0)||$store.state.AuthModule._account.isUsingKeplr||$store.state.AuthModule._account.isUsingWalletConnect"
@@ -109,7 +109,7 @@
                 </div>
               </span>
               <span v-else>
-                <h1 class="text-md"><i class="bi bi-exclamation-triangle text-red-500" /> Your actual balance cannot cover transaction fees.</h1>
+                <h1 class="text-md dark:text-white"><i class="bi bi-exclamation-triangle text-red-500" /> Your actual balance cannot cover transaction fees.</h1>
               </span>
               <div
                 v-if="$store.state.TransactionModule.transactionStatus===-1"

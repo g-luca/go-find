@@ -26,7 +26,7 @@ export default class AuthModule extends VuexModule {
     public static walletConnectClient = new WalletConnect({
         bridge: "https://bridge.walletconnect.org",
     });
-
+    public static granterAddress = '';
 
     @Mutation
     public resetWalletConnectClient(): void {
@@ -104,7 +104,7 @@ export default class AuthModule extends VuexModule {
                 amount: [{ denom: `${process.env.VUE_APP_COIN_FEE_DENOM}`, amount: "200" }],
                 gasLimit: 200000,
                 payer: "",
-                granter: ""
+                granter: this.granterAddress
             };
 
             const authInfo: CosmosAuthInfo = { signerInfos: [signerInfo], fee: feeValue };
@@ -234,14 +234,32 @@ export default class AuthModule extends VuexModule {
      * @returns A signed Traansaction object or the string error
      */
     private static async signTxWithKeplr(txBody: CosmosTxBody, address: string): Promise<Transaction | false> {
-        const account = await desmosNetworkModule.network.getAccount(address);
+
+        let account = null;
+        if (!this.granterAddress) {
+            account = await desmosNetworkModule.network.getAccount(address);
+        }
         const pubKey = await window.keplr?.getKey(desmosNetworkModule.chainId);
-        if (account && pubKey) {
+        if ((account || account === null && this.granterAddress) && pubKey) {
             try {
 
                 // Get Keplr signer
+                // avoid keplr custom values
+                (window.keplr as any).defaultOptions = {
+                    sign: {
+                        preferNoSetFee: true,
+                        preferNoSetMemo: true,
+                    }
+                };
                 const signer = window.keplr?.getOfflineSigner(desmosNetworkModule.chainId);
 
+                // avoid keplr custom values
+                (window.keplr as any).defaultOptions = {
+                    sign: {
+                        preferNoSetFee: true,
+                        preferNoSetMemo: true,
+                    }
+                };
 
                 const signerInfo: CosmosSignerInfo = {
                     publicKey: {
@@ -251,14 +269,15 @@ export default class AuthModule extends VuexModule {
                         }).finish(),
                     },
                     modeInfo: { single: { mode: CosmosSignMode.SIGN_MODE_DIRECT } },
-                    sequence: account.sequence
+                    sequence: account?.sequence || 0
                 };
 
+                const feeAmount = (this.granterAddress) ? "200" : "0";
                 const feeValue: CosmosFee = {
-                    amount: [{ denom: `${process.env.VUE_APP_COIN_FEE_DENOM}`, amount: "200" }],
+                    amount: [{ denom: `${process.env.VUE_APP_COIN_FEE_DENOM}`, amount: feeAmount }],
                     gasLimit: 200000,
-                    payer: "",
-                    granter: "",
+                    payer: '',
+                    granter: this.granterAddress
                 };
 
                 const authInfo: CosmosAuthInfo = { signerInfos: [signerInfo], fee: feeValue };
@@ -269,7 +288,7 @@ export default class AuthModule extends VuexModule {
                 const authInfoBytes = CosmosAuthInfo.encode(authInfo).finish();
 
                 const signedTx = await signer?.signDirect(address, {
-                    accountNumber: Long.fromNumber(account.accountNumber),
+                    accountNumber: Long.fromNumber(account?.accountNumber || 0),
                     authInfoBytes: authInfoBytes,
                     bodyBytes: bodyBytes,
                     chainId: desmosNetworkModule.chainId,
@@ -309,9 +328,13 @@ export default class AuthModule extends VuexModule {
         if (mKey) {
             try {
                 const privKey = CryptoUtils.decryptAes(mPassword, mKey);
-                const account = await desmosNetworkModule.network.getAccount(address);
+
+                let account = null;
+                if (!this.granterAddress) {
+                    account = await desmosNetworkModule.network.getAccount(address);
+                }
                 console.log(account)
-                if (account) {
+                if (account || (account === null && this.granterAddress)) {
                     try {
                         let pubKey = undefined;
                         try {
@@ -327,19 +350,19 @@ export default class AuthModule extends VuexModule {
                         const signerInfo: CosmosSignerInfo = {
                             publicKey: pubKey,
                             modeInfo: { single: { mode: CosmosSignMode.SIGN_MODE_DIRECT } },
-                            sequence: account.sequence
+                            sequence: account?.sequence || 0,
                         };
 
                         const feeValue: CosmosFee = {
                             amount: [{ denom: `${process.env.VUE_APP_COIN_FEE_DENOM}`, amount: "200" }],
                             gasLimit: 200000,
                             payer: "",
-                            granter: ""
+                            granter: this.granterAddress
                         };
 
                         const authInfo: CosmosAuthInfo = { signerInfos: [signerInfo], fee: feeValue };
 
-                        const signedTx = Transaction.signTxBody(tx, authInfo, account.accountNumber, Buffer.from(privKey, 'hex'));
+                        const signedTx = Transaction.signTxBody(tx, authInfo, account?.accountNumber || 0, Buffer.from(privKey, 'hex'));
                         return signedTx;
                     } catch (e) {
                         //return new Error("Error signing the transaction");
