@@ -196,7 +196,7 @@
               <span v-else>
 
                 <div class="md:pl-10">
-                  <div class="relative text-gray-700 dark:text-white">
+                  <!-- <div class="relative text-gray-700 dark:text-white">
                     <span v-if="!$store.state.AirdropModule.isLoadingGrant">
                       <span v-if="$store.state.AirdropModule.isGrantSuccess">
                         <h1 class="text-2xl text-center text-brand">Grant received!</h1>
@@ -225,8 +225,8 @@
                     <span v-else>
                       Loading...
                     </span>
-                  </div>
-
+                  </div> -->
+                  <h1 class="dark:text-white">Claim for users without a profile and without paying fees will be enabled in the next days.</h1>
                 </div>
               </span>
             </div>
