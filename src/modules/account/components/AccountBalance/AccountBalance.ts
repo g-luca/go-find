@@ -31,10 +31,6 @@ export default defineComponent({
         },
         async checkAirdrop() {
             await airdropModule.loadAirdropConfig();
-            this.isAirdropActive = airdropModule.config !== null && airdropModule.config.enabled;
-
-            //FIXME: ONLY FOR TEST
-            //this.isAirdropActive = true;
         }
 
     }

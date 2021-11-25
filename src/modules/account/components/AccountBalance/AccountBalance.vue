@@ -30,7 +30,7 @@
             </div>
 
             <!-- Airdrop -->
-            <span v-if="isAirdropActive">
+            <span v-if="$store.state.AirdropModule.config!==null&&$store.state.AirdropModule.config.airdrop_enabled===true">
               <button
                 class="mt-3 bg-seagreen-400 py-1 px-3 rounded-xl hover:bg-green-600 transition ease-in duration-200"
                 type="button"

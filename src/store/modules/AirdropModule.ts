@@ -9,11 +9,11 @@ const accountModule = getModule(AccountModule);
 
 
 class AirdropConfig {
-    public enabled = false;
+    public airdrop_enabled = false;
     public granter = "";
 
-    constructor(enabled: boolean, granter: string) {
-        this.enabled = enabled;
+    constructor(airdrop_enabled: boolean, granter: string) {
+        this.airdrop_enabled = airdrop_enabled;
         this.granter = granter;
     }
 }
