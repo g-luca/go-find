@@ -41,10 +41,7 @@
                           class="bi bi-check-lg text-green-500 text-lg align-middle"
                         /></li>
                       <li class="pt-1">
-                        Connect <b>ALL</b> your eligible address to claim <b>all</b> the airdrop <i
-                          v-if="$store.state.AirdropModule.aidropAllocations.size>0"
-                          class="bi bi-check-lg text-green-500 text-lg align-middle"
-                        /></li>
+                        Connect <b>ALL</b> your eligible address to claim <b>all</b> the airdrop</li>
                     </ol>
 
                     <div class="pt-2 text-gray-700 dark:text-gray-400 text-md">Verify <a
