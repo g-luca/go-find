@@ -36,7 +36,7 @@
                           class="bi bi-check-lg text-green-500 text-lg align-middle"
                         /></li>
                       <li class="">
-                        Connected eligible address using "Add Blockchain" <i
+                        Connect eligible address using "Connect Blockchain" <i
                           v-if="$store.state.AirdropModule.aidropAllocations.size>0"
                           class="bi bi-check-lg text-green-500 text-lg align-middle"
                         /></li>
