@@ -36,7 +36,12 @@
                           class="bi bi-check-lg text-green-500 text-lg align-middle"
                         /></li>
                       <li class="">
-                        Connected eligible address <i
+                        Connected eligible address using "Add Blockchain" <i
+                          v-if="$store.state.AirdropModule.aidropAllocations.size>0"
+                          class="bi bi-check-lg text-green-500 text-lg align-middle"
+                        /></li>
+                      <li class="pt-1">
+                        Connect <b>ALL</b> your eligible address to claim <b>all</b> the airdrop <i
                           v-if="$store.state.AirdropModule.aidropAllocations.size>0"
                           class="bi bi-check-lg text-green-500 text-lg align-middle"
                         /></li>
