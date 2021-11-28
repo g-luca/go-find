@@ -111,7 +111,7 @@
                     </h3>
                     <input
                       class="bg-gray-50 dark:bg-gray-800 px-2 py-1 mt-1 rounded-lg focus:outline-none focus:ring-0 dark:text-white"
-                      placeholder="Search..."
+                      placeholder="Search blockchain..."
                       type="text"
                       @input="searchChainLink"
                     >
@@ -195,6 +195,9 @@
                     >
                   </div>
                 </div>
+              </div>
+              <div class="text-center text-xs dark:text-gray-400 text-gray-600 mt-1">
+                Scroll right for more Blockchains
               </div>
 
               <!-- Method Select -->
@@ -434,11 +437,12 @@
   height: 6px;
 }
 
-*::-webkit-scrollbar-track {
-  background: transparent;
+*::-webkit-scrollbar-track:horizontal {
+  background: rgb(194, 194, 194);
+  border-radius: 10px;
 }
 
-*::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-thumb:horizontal {
   background-color: rgb(55, 48, 163);
   border-radius: 20px;
   border: 3px solid transparent;

@@ -36,17 +36,19 @@
                           class="bi bi-check-lg text-green-500 text-lg align-middle"
                         /></li>
                       <li class="">
-                        Connected elegible address <i
+                        Connect eligible address using "Connect Blockchain" <i
                           v-if="$store.state.AirdropModule.aidropAllocations.size>0"
                           class="bi bi-check-lg text-green-500 text-lg align-middle"
                         /></li>
+                      <li class="pt-1">
+                        Connect <b>ALL</b> your eligible address to claim <b>all</b> the airdrop</li>
                     </ol>
 
                     <div class="pt-2 text-gray-700 dark:text-gray-400 text-md">Verify <a
                         href="https://airdrop.desmos.network/"
                         target="_blank"
                         class="text-brand"
-                      >here</a> if your address is elegible</div>
+                      >here</a> if your address is eligible</div>
                   </div>
                   <div class="col-span-12 md:col-span-5 mx-auto md:mx-0 md:pt-0 pt-4">
                     <img
@@ -148,7 +150,7 @@
                       class="col-span-12"
                     >
                       <span v-if="$store.state.AccountModule.profile.chainLinks.length<=0">
-                        Connect an elegible address to get started
+                        Connect an eligible address to get started
                       </span>
                       <span v-else>
                         Loading...
@@ -200,11 +202,11 @@
                     <span v-if="!$store.state.AirdropModule.isLoadingGrant">
                       <span v-if="$store.state.AirdropModule.isGrantSuccess">
                         <h1 class="text-2xl text-center text-brand">Grant received!</h1>
-                        <p class="text-center">You can now setup a free Desmos Profile and connect your elegible address to get your airdrop DSM!</p>
+                        <p class="text-center">You can now setup a free Desmos Profile and connect your eligible address to get your airdrop DSM!</p>
                       </span>
                       <span v-else>
                         <label for="inputElegibleAddress">
-                          Your elegible address:
+                          Your eligible address:
                         </label>
                         <input
                           id="inputElegibleAddress"
