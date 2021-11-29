@@ -60,7 +60,7 @@
                 {{ tx.$tx.$fee.$amount[0].$denom }}
               </span>
             </div> -->
-              <span v-if="$store.state.AccountModule.account._balance>0||$store.state.AirdropModule.hasGrant">
+              <span v-if="$store.state.AccountModule.account._balance>0||$store.state.AirdropModule.canGetGrant">
                 <div class="pt-4">
                   <button
                     v-if="(!$store.state.AuthModule._account.isUsingKeplr&&!$store.state.AuthModule._account.isUsingWalletConnect&&inputMPassword.length>0)||$store.state.AuthModule._account.isUsingKeplr||$store.state.AuthModule._account.isUsingWalletConnect"

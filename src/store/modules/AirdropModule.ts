@@ -44,25 +44,53 @@ class AirdropAllocation {
     }
 }
 
+class AirdropGrantStatusResponse {
+    public can_get_grant: boolean;
+    public has_requested_grant: boolean;
+    public has_grant_been_issued: boolean;
+
+    constructor(can_get_grant: boolean, has_requested_grant: boolean, has_grant_been_issued: boolean) {
+        this.can_get_grant = can_get_grant;
+        this.has_requested_grant = has_requested_grant;
+        this.has_grant_been_issued = has_grant_been_issued;
+    }
+}
+
+enum GrantStatus {
+    "None" = "None",
+    "Loading" = "Loading",
+    "GrantRequested" = "GrantRequested",
+    "GrantReceived" = "GrantReceived",
+    "Error" = "Error",
+}
+
+enum ClaimStatus {
+    "None" = "None",
+    "Loading" = "Loading",
+    "ClaimRequested" = "ClaimRequested",
+    "Error" = "Error",
+}
 
 @Module({ store, name: 'AirdropModule', dynamic: true })
 export default class AirdropModule extends VuexModule {
-    private static airdrop_endpoint = `https://api.airdrop.desmos.network`;
+    private static airdrop_endpoint = process.env.VUE_APP_API_AIRDROP_ENDPOINT;
     public isAirdropModalOpen = false;
     public config: AirdropConfig | null = null;
     public aidropAllocations: Map<ChainLink, AirdropAllocation> = new Map();
 
-    public isLoadingAirdropAllocations = false;
-    public hasRequestedClaim = false;
-    public isLoadingClaim = false;
-    public claimResponse = '';
-    public isAirdropSuccess = false;
+    public static checkDelay = 5000; //ms
+    public claimAddress = "";
+    public claimStatus = ClaimStatus.None;
+    public grantStatus = GrantStatus.None;
 
-    public hasGrant = false;
-    public hasRequestedGrant = false;
-    public isLoadingGrant = false;
+    public isLoadingAirdropAllocations = false;
+    public claimResponse = '';
+
+    public canGetGrant = false;
+    //public hasRequestedGrant = false;
+    //public isLoadingGrant = false;
     public grantResponse = '';
-    public isGrantSuccess = false;
+    //public isGrantSuccess = false;
 
 
     /**
@@ -72,14 +100,10 @@ export default class AirdropModule extends VuexModule {
     public async toggleAirdropModal(): Promise<void> {
         this.isAirdropModalOpen = !this.isAirdropModalOpen;
         this.claimResponse = '';
-        this.isLoadingClaim = false;
-        this.isAirdropSuccess = false;
-        this.hasRequestedClaim = false;
-
-        this.hasRequestedGrant = false;
-        this.isLoadingGrant = false;
         this.grantResponse = '';
-        this.isGrantSuccess = false;
+
+        this.claimStatus = ClaimStatus.None;
+        this.grantStatus = GrantStatus.None;
     }
 
 
@@ -128,12 +152,102 @@ export default class AirdropModule extends VuexModule {
         }
     }
 
+
+    /**
+     * Check the grant status of the current user (requested, received, error)
+     */
+    @Mutation
+    public async checkGrantStatus(eligibleAddress = ''): Promise<any> {
+        if (eligibleAddress) {
+            // if sent from claim button use the address, otherwise use the in-memory claim address
+            this.claimAddress = eligibleAddress;
+        }
+        this.grantStatus = GrantStatus.Loading;
+        this.grantResponse = '';
+        if (accountModule.account && this.claimAddress) {
+            const endpoint = `${AirdropModule.airdrop_endpoint}/airdrop/grants/${accountModule.account.address}/${this.claimAddress}`;
+            try {
+                const request = await fetch(endpoint, {
+                    method: 'GET',
+                });
+                const contentType = request.headers.get('Content-Type') || ''; // retrieve the response type
+                if (/text\/plain/i.test(contentType)) {
+                    // if text -> failed
+                    this.grantResponse = await request.text();
+                    this.grantStatus = GrantStatus.Error;
+                } else if (/application\/json/.test(contentType)) {
+                    // if json -> success
+                    const grantStatusResponse = await request.json() as AirdropGrantStatusResponse;
+                    this.canGetGrant = grantStatusResponse.can_get_grant; // assign always if can get the grant
+                    if (grantStatusResponse.has_grant_been_issued) {
+                        // if grant has been issued
+                        this.grantStatus = GrantStatus.GrantReceived;
+                        if (accountModule.account.balance <= 0) {
+                            AuthModule.granterAddress = this.config!.granter;
+                        }
+                    } else if (grantStatusResponse.has_requested_grant) {
+                        // if grant has been requested but not yet issued
+                        this.grantStatus = GrantStatus.GrantRequested;
+                        let exit = false;
+                        do {
+                            //TODO: would be better to wrap all the function inside the loop
+                            await AirdropModule.sleep(AirdropModule.checkDelay);
+                            const responseRaw = await AirdropModule.checkGrant(accountModule.account.address, this.claimAddress);
+                            try {
+                                const response = (await responseRaw.json()) as AirdropGrantStatusResponse;
+                                if (response.has_grant_been_issued) {
+                                    this.grantStatus = GrantStatus.GrantReceived;
+                                    if (accountModule.account.balance <= 0) {
+                                        AuthModule.granterAddress = this.config!.granter;
+                                    }
+                                    exit = true;
+                                }
+                            } catch (e) {
+                                //null
+                            }
+                            // eslint-disable-next-line no-constant-condition
+                        } while (!exit);
+                    } else if (grantStatusResponse.can_get_grant) {
+                        // the grant can be requested
+                        try {
+                            const grantRequestResponse = await AirdropModule.requestGrant(accountModule.account.address, this.claimAddress);
+                            if (grantRequestResponse.status === 200) {
+                                this.grantStatus = GrantStatus.GrantRequested;
+                            } else {
+                                this.grantStatus = GrantStatus.Error;
+                                this.grantResponse = await grantRequestResponse.text();
+                            }
+                            console.log(grantRequestResponse);
+                        } catch (e) {
+                            this.grantStatus = GrantStatus.Error;
+                            this.grantResponse = JSON.stringify(e);
+                        }
+                    }
+                }
+                return;
+            } catch (e) {
+                console.log(e)
+                this.grantStatus = GrantStatus.Error;
+                this.claimResponse = JSON.stringify(e)
+            }
+        } else {
+            this.grantStatus = GrantStatus.None;
+            this.claimResponse = 'Please refresh';
+        }
+    }
+
+
+    /**
+     * Request a claim for a given address
+     * @param address 
+     */
     @Mutation
     public async claimAirdrop(): Promise<any> {
         const endpoint = `${AirdropModule.airdrop_endpoint}/airdrop/claims`;
         try {
+            // ensure that is logged in
             if (accountModule.account) {
-                this.isLoadingClaim = true;
+                this.claimStatus = ClaimStatus.Loading;
                 try {
                     const request = await fetch(endpoint, {
                         method: 'POST',
@@ -141,52 +255,46 @@ export default class AirdropModule extends VuexModule {
                         },
                         body: JSON.stringify({ desmos_address: accountModule.account.address })
                     });
-                    this.hasRequestedClaim = true;
+                    const success = request.status === 200;
+                    success ? this.claimStatus = ClaimStatus.ClaimRequested : this.claimStatus = ClaimStatus.Error;
                     this.claimResponse = await request.text();
-                    this.isAirdropSuccess = request.status === 200;
                     accountModule.loadAccount(true);
                 } catch (e) {
                     this.claimResponse = JSON.stringify(e)
-                    this.isAirdropSuccess = false;
+                    this.claimStatus = ClaimStatus.Error;
                 }
-                this.isLoadingClaim = false;
+            } else {
+                this.claimStatus = ClaimStatus.Error;
+                this.claimResponse = 'Please refresh';
             }
         } catch (e) {
+            this.claimStatus = ClaimStatus.Error;
             this.claimResponse = JSON.stringify(e);
-            //empty
         }
     }
 
 
-    @Mutation
-    public async askGrant(user_address: string): Promise<any> {
+    private static async checkGrant(desmosAddress: string, claimAddress: string): Promise<any> {
+        const endpoint = `${AirdropModule.airdrop_endpoint}/airdrop/grants/${desmosAddress}/${claimAddress}`;
+        return await fetch(endpoint, {
+            method: 'GET',
+        });
+
+    }
+
+
+    private static async requestGrant(desmosAddress: string, claimAddress: string): Promise<Response> {
         const endpoint = `${AirdropModule.airdrop_endpoint}/airdrop/grants`;
-        try {
-            if (accountModule.account) {
-                this.isLoadingGrant = true;
-                try {
-                    const request = await fetch(endpoint, {
-                        method: 'POST',
-                        headers: {
-                        },
-                        body: JSON.stringify({ desmos_address: accountModule.account.address, user_address })
-                    });
-                    this.hasRequestedGrant = true;
-                    this.grantResponse = await request.text();
-                    this.isGrantSuccess = request.status === 200 || (request.status === 500 && this.grantResponse === 'Grant already requested');
-                    if (accountModule.account.balance <= 0) {
-                        this.hasGrant = true;
-                        AuthModule.granterAddress = this.config!.granter;
-                    }
-                } catch (e) {
-                    this.grantResponse = JSON.stringify(e)
-                    this.isGrantSuccess = false;
-                }
-                this.isLoadingGrant = false;
-            }
-        } catch (e) {
-            this.grantResponse = JSON.stringify(e);
-            //empty
-        }
+        return await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+            },
+            body: JSON.stringify({ desmos_address: desmosAddress, user_address: claimAddress })
+        });
+    }
+
+
+    private static async sleep(ms: number): Promise<any> {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
