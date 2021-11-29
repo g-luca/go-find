@@ -110,6 +110,11 @@ export default class AccountModule extends VuexModule {
         this.isNewProfile = false;
     }
 
+    @Mutation
+    setIsNewProfile(): void {
+        this.isNewProfile = true;
+    }
+
     /**
      * Reset the AccountModule state
      */
