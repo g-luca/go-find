@@ -186,7 +186,6 @@ export default class AirdropModule extends VuexModule {
                             exit = true;
                         } else if (grantStatusResponse.has_requested_grant) {
                             // if grant has been requested but not yet issued
-                            console.log(grantStatusResponse.used_desmos_address !== accountModule.account.address)
                             if (grantStatusResponse.used_desmos_address === accountModule.account.address) {
                                 this.grantStatus = GrantStatus.GrantRequested;
                                 exit = false;
