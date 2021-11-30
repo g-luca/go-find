@@ -3,7 +3,6 @@ import ChainLink from '@/core/types/ChainLink';
 import store from '@/store';
 import { getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import AccountModule from './AccountModule';
-import AuthModule from './AuthModule';
 
 const accountModule = getModule(AccountModule);
 
@@ -47,12 +46,16 @@ class AirdropAllocation {
 class AirdropGrantStatusResponse {
     public can_get_grant: boolean;
     public has_requested_grant: boolean;
-    public has_grant_been_issued: boolean;
+    public can_claim_airdrop: boolean;
+    public used_desmos_address: string;
+    public has_enough_dsm: boolean;
 
-    constructor(can_get_grant: boolean, has_requested_grant: boolean, has_grant_been_issued: boolean) {
+    constructor(can_get_grant: boolean, has_requested_grant: boolean, can_claim_airdrop: boolean, used_desmos_address: string, has_enough_dsm: boolean) {
         this.can_get_grant = can_get_grant;
         this.has_requested_grant = has_requested_grant;
-        this.has_grant_been_issued = has_grant_been_issued;
+        this.can_claim_airdrop = can_claim_airdrop;
+        this.used_desmos_address = used_desmos_address;
+        this.has_enough_dsm = has_enough_dsm;
     }
 }
 
@@ -78,19 +81,14 @@ export default class AirdropModule extends VuexModule {
     public config: AirdropConfig | null = null;
     public aidropAllocations: Map<ChainLink, AirdropAllocation> = new Map();
 
-    public static checkDelay = 5000; //ms
+    public static checkDelay = 15000; //ms
     public claimAddress = "";
     public claimStatus = ClaimStatus.None;
     public grantStatus = GrantStatus.None;
 
     public isLoadingAirdropAllocations = false;
     public claimResponse = '';
-
-    public canGetGrant = false;
-    //public hasRequestedGrant = false;
-    //public isLoadingGrant = false;
     public grantResponse = '';
-    //public isGrantSuccess = false;
 
 
     /**
@@ -165,71 +163,75 @@ export default class AirdropModule extends VuexModule {
         this.grantStatus = GrantStatus.Loading;
         this.grantResponse = '';
         if (accountModule.account && this.claimAddress) {
-            const endpoint = `${AirdropModule.airdrop_endpoint}/airdrop/grants/${accountModule.account.address}/${this.claimAddress}`;
-            try {
-                const request = await fetch(endpoint, {
-                    method: 'GET',
-                });
-                const contentType = request.headers.get('Content-Type') || ''; // retrieve the response type
-                if (/text\/plain/i.test(contentType)) {
-                    // if text -> failed
-                    this.grantResponse = await request.text();
-                    this.grantStatus = GrantStatus.Error;
-                } else if (/application\/json/.test(contentType)) {
-                    // if json -> success
-                    const grantStatusResponse = await request.json() as AirdropGrantStatusResponse;
-                    this.canGetGrant = grantStatusResponse.can_get_grant; // assign always if can get the grant
-                    if (grantStatusResponse.has_grant_been_issued) {
-                        // if grant has been issued
-                        this.grantStatus = GrantStatus.GrantReceived;
-                        if (accountModule.account.balance <= 0) {
-                            AuthModule.granterAddress = this.config!.granter;
-                        }
-                    } else if (grantStatusResponse.has_requested_grant) {
-                        // if grant has been requested but not yet issued
-                        this.grantStatus = GrantStatus.GrantRequested;
-                        let exit = false;
-                        do {
-                            //TODO: would be better to wrap all the function inside the loop
-                            await AirdropModule.sleep(AirdropModule.checkDelay);
-                            const responseRaw = await AirdropModule.checkGrant(accountModule.account.address, this.claimAddress);
+            let exit = true;
+            const endpoint = `${AirdropModule.airdrop_endpoint}/airdrop/grants/${accountModule.account.address}/${this.claimAddress}`
+
+            do {
+                try {
+                    const request = await fetch(endpoint, {
+                        method: 'GET',
+                    });
+                    const contentType = request.headers.get('Content-Type') || ''; // retrieve the response type
+                    if (/text\/plain/i.test(contentType)) {
+                        // if text -> failed
+                        this.grantResponse = await request.text();
+                        this.grantStatus = GrantStatus.Error;
+                        exit = true;
+                    } else if (/application\/json/.test(contentType)) {
+                        // if json -> success
+                        const grantStatusResponse = await request.json() as AirdropGrantStatusResponse;
+                        if (grantStatusResponse.can_claim_airdrop) {
+                            // if grant has been issued
+                            this.grantStatus = GrantStatus.GrantReceived;
+                            exit = true;
+                        } else if (grantStatusResponse.has_requested_grant) {
+                            // if grant has been requested but not yet issued
+                            console.log(grantStatusResponse.used_desmos_address !== accountModule.account.address)
+                            if (grantStatusResponse.used_desmos_address === accountModule.account.address) {
+                                this.grantStatus = GrantStatus.GrantRequested;
+                                exit = false;
+                            } else {
+                                this.grantStatus = GrantStatus.Error;
+                                this.grantResponse = `Grant already requested by ${grantStatusResponse.used_desmos_address}`;
+                                exit = true;
+                            }
+                        } else if (grantStatusResponse.can_get_grant) {
+                            // the grant can be requested
                             try {
-                                const response = (await responseRaw.json()) as AirdropGrantStatusResponse;
-                                if (response.has_grant_been_issued) {
-                                    this.grantStatus = GrantStatus.GrantReceived;
-                                    if (accountModule.account.balance <= 0) {
-                                        AuthModule.granterAddress = this.config!.granter;
-                                    }
+                                const grantRequestResponse = await AirdropModule.requestGrant(accountModule.account.address, this.claimAddress);
+                                if (grantRequestResponse.status === 200) {
+                                    this.grantStatus = GrantStatus.GrantRequested;
+                                    exit = false;
+                                } else {
+                                    this.grantStatus = GrantStatus.Error;
+                                    this.grantResponse = await grantRequestResponse.text();
                                     exit = true;
                                 }
                             } catch (e) {
-                                //null
-                            }
-                            // eslint-disable-next-line no-constant-condition
-                        } while (!exit);
-                    } else if (grantStatusResponse.can_get_grant) {
-                        // the grant can be requested
-                        try {
-                            const grantRequestResponse = await AirdropModule.requestGrant(accountModule.account.address, this.claimAddress);
-                            if (grantRequestResponse.status === 200) {
-                                this.grantStatus = GrantStatus.GrantRequested;
-                            } else {
                                 this.grantStatus = GrantStatus.Error;
-                                this.grantResponse = await grantRequestResponse.text();
+                                this.grantResponse = JSON.stringify(e);
+                                exit = true;
                             }
-                            console.log(grantRequestResponse);
-                        } catch (e) {
+                        } else if (grantStatusResponse.has_enough_dsm) {
+                            this.grantStatus = GrantStatus.GrantReceived;
+                            exit = true;
+                        } else {
+                            // Address not eligible, the grant can't be requested
                             this.grantStatus = GrantStatus.Error;
-                            this.grantResponse = JSON.stringify(e);
+                            this.grantResponse = 'Address not eligible';
+                            exit = true;
                         }
                     }
+                } catch (e) {
+                    console.log(e)
+                    this.grantStatus = GrantStatus.Error;
+                    this.claimResponse = JSON.stringify(e)
                 }
-                return;
-            } catch (e) {
-                console.log(e)
-                this.grantStatus = GrantStatus.Error;
-                this.claimResponse = JSON.stringify(e)
-            }
+
+                if (!exit) {
+                    await AirdropModule.sleep(AirdropModule.checkDelay);
+                }
+            } while (!exit);
         } else {
             this.grantStatus = GrantStatus.None;
             this.claimResponse = 'Please refresh';

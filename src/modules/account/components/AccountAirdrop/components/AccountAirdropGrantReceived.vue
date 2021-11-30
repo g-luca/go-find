@@ -8,6 +8,7 @@
     <div class="col-span-12 dark:text-white text-xl text-center pt-8">
       <div>
         Grant received! you can now create a <b>free</b> profile and connect your eligible address to claim you airdrop!
+        Please refresh the page to see your new balance.
       </div>
     </div>
   </span>

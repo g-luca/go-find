@@ -32,7 +32,7 @@
                     <h1 class="text-lg pt-3">This is what you need:</h1>
                     <ol class="list-decimal pl-6">
                       <li class="py-1">Saved Desmos Profile <i
-                          v-if="$store.state.AccountModule.profile&&(!$store.state.AccountModule.isNewProfile||$store.state.AccountModule.account._balance)"
+                          v-if="$store.state.AccountModule.profile&&(!$store.state.AccountModule.isNewProfile)"
                           class="bi bi-check-lg text-green-500 text-lg align-middle"
                         /></li>
                       <li class="">
@@ -150,7 +150,12 @@
                       class="col-span-12"
                     >
                       <span v-if="$store.state.AccountModule.profile.chainLinks.length<=0">
-                        Connect an eligible address to get started
+                        <span v-if="$store.state.AccountModule.isNewProfile">
+                          Create a profile and connect an eligible address to get started
+                        </span>
+                        <span v-else>
+                          Connect an eligible address to get started
+                        </span>
                       </span>
                       <span v-else>
                         Loading...
@@ -161,7 +166,7 @@
                 </section>
 
                 <!-- Claim Status -->
-                <section v-if="$store.state.AirdropModule.claimStatus!=='None'">
+                <section v-if="$store.state.AirdropModule.claimStatus!=='None'||$store.state.AirdropModule.grantStatus==='GrantReceived'">
                   <div class="grid grid-cols-12">
                     <div class="col-span-12 mx-auto">
                       <span v-if="$store.state.AirdropModule.claimStatus==='ClaimRequested'">
@@ -277,7 +282,6 @@ export default defineComponent({
   methods: {
     toggleAirdropModal() {
       airdropModule.toggleAirdropModal();
-      airdropModule.checkGrantStatus();
     },
     getChainLogo(name: string) {
       try {
