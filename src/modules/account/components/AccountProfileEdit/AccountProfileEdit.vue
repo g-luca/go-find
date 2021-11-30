@@ -14,7 +14,7 @@
                 Welcome back, <span class="text-brand">{{ $store.state.AccountModule.profile.dtag }}</span>
               </h2>
             </div>
-            <div class="col-span-1 text-right align-middle">
+            <div class="col-span-1 text-right my-auto">
 
               <div class="relative inline-block text-left">
                 <button type="button">
