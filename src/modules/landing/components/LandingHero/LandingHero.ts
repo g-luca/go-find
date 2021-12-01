@@ -12,7 +12,7 @@ export default {
       "bitcoin", "go-find", "desmos", "dogecoin",
       "akash", "twitch", "instagram", "ethereum",
       "facebook", "tiktok", "youtube", "osmosis",
-      "crypto", "linkedin", "cosmos"];
+      "crypto.org", "linkedin", "cosmos"];
     return {
       squares,
     }
