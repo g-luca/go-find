@@ -8,10 +8,48 @@
     >
       <span v-if="$store.state.AccountModule.profileLoadingStatus">
         <div class="w-full text-center md:text-left dark:text-white">
-          <div class="pb-4 pt-8">
-            <h2 class="dark:text-white font-bold text-5xl">
-              Welcome back, <span class="text-brand">{{ $store.state.AccountModule.profile.dtag }}</span>
-            </h2>
+          <div class="pb-4 pt-8 grid grid-cols-12">
+            <div class="col-span-11">
+              <h2 class="dark:text-white font-bold text-5xl">
+                Welcome back, <span class="text-brand">{{ $store.state.AccountModule.profile.dtag }}</span>
+              </h2>
+            </div>
+            <div class="col-span-1 text-right my-auto">
+
+              <div class="relative inline-block text-left">
+                <button type="button">
+                  <div
+                    class="bg-gray-100 dark:bg-gray-800 rounded-full p-1 hover:bg-gray-200 dark:hover:bg-gray-700  w-8 h-8"
+                    @click="toggleProfileOptionDropdown()"
+                  >
+                    <i class="bi bi-three-dots-vertical " />
+                  </div>
+                </button>
+                <div
+                  v-if="isProfileOptionDropdownVisible"
+                  class="origin-top-right absolute right-0 mt-2 w-56 rounded-xl shadow-2xl bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5"
+                >
+                  <div
+                    class="py-1 "
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="options-menu"
+                  >
+                    <a
+                      href="#"
+                      class="block block px-4 py-2 text-md text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-100 dark:hover:text-white dark:hover:bg-gray-600 rounded-xl mx-1"
+                      role="menuitem"
+                    >
+                      <span class="flex flex-col">
+                        <span @click="deleteProfile()">
+                          <i class="bi bi-trash-fill text-red-500" /> Delete Profile
+                        </span>
+                      </span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="px-4 md:px-0">

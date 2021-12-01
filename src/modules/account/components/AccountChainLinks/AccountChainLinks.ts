@@ -21,6 +21,7 @@ import TransactionModule, { TransactionStatus } from "@/store/modules/Transactio
 import ChainLink from "@/core/types/ChainLink";
 import AccountModule from "@/store/modules/AccountModule";
 import { Key } from "@keplr-wallet/types";
+import KeplrModule from "@/store/modules/KeplrModule";
 const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
 const transactionModule = getModule(TransactionModule);
@@ -115,7 +116,9 @@ export default defineComponent({
             this.isChainLinkEditorOpen = !this.isChainLinkEditorOpen;
             //this.inputMnemonic = new Array<string>(24);
             this.selectedChain = null;
-            this.filteredSupportedChainLinks = this.supportedChainLinks
+            this.filteredSupportedChainLinks = this.supportedChainLinks;
+            await KeplrModule.setupTerraMainnet();
+            await KeplrModule.setupJunoMainnet();
         }, toggleAdvancedOptions(): void {
             this.isAdvancedOptionsOpen = !this.isAdvancedOptionsOpen;
         },

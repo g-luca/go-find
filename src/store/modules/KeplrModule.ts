@@ -215,4 +215,121 @@ export default class KeplrModule extends VuexModule {
             });
         }
     }
+
+
+    public static async setupTerraMainnet(): Promise<void> {
+        if (await window.keplr) {
+            await window.keplr!.experimentalSuggestChain({
+                chainId: 'columbus-5',
+                chainName: "Terra",
+                rpc: 'https://rpc-columbus.keplr.app',
+                rest: 'https://lcd-columbus.keplr.app',
+                bip44: {
+                    coinType: 330,
+                },
+                bech32Config: {
+                    bech32PrefixAccAddr: "terra",
+                    bech32PrefixAccPub: "terra" + "pub",
+                    bech32PrefixValAddr: "terra" + "valoper",
+                    bech32PrefixValPub: "terra" + "valoperpub",
+                    bech32PrefixConsAddr: "terra" + "valcons",
+                    bech32PrefixConsPub: "terra" + "valconspub",
+                },
+                currencies: [
+                    {
+                        coinDenom: 'LUNA',
+                        coinMinimalDenom: 'uluna',
+                        coinDecimals: 6,
+                        coinGeckoId: 'terra-luna',
+                    },
+                    {
+                        coinDenom: 'UST',
+                        coinMinimalDenom: 'uusd',
+                        coinDecimals: 6,
+                        coinGeckoId: 'terrausd',
+                    },
+                    {
+                        coinDenom: 'KRT',
+                        coinMinimalDenom: 'ukrw',
+                        coinDecimals: 6,
+                        coinGeckoId: 'terra-krw',
+                    },
+                ],
+                feeCurrencies: [
+                    {
+                        coinDenom: 'LUNA',
+                        coinMinimalDenom: 'uluna',
+                        coinDecimals: 6,
+                        coinGeckoId: 'terra-luna',
+                    },
+                    {
+                        coinDenom: 'UST',
+                        coinMinimalDenom: 'uusd',
+                        coinDecimals: 6,
+                        coinGeckoId: 'terrausd',
+                    },
+                ],
+                gasPriceStep: {
+                    low: 0.015,
+                    average: 0.015,
+                    high: 0.015,
+                },
+                features: ['stargate', 'ibc-transfer', 'no-legacy-stdTx'],
+                stakeCurrency: {
+                    coinDenom: 'LUNA',
+                    coinMinimalDenom: 'uluna',
+                    coinDecimals: 6,
+                    coinGeckoId: 'terra-luna',
+                },
+                coinType: 330,
+            });
+        }
+    }
+
+
+    public static async setupJunoMainnet(): Promise<void> {
+        if (await window.keplr) {
+            await window.keplr!.experimentalSuggestChain({
+                chainId: 'juno-1',
+                chainName: "Juno",
+                rpc: 'https://rpc-juno.itastakers.com',
+                rest: 'https://lcd-juno.itastakers.com',
+                bip44: {
+                    coinType: 118,
+                },
+                bech32Config: {
+                    bech32PrefixAccAddr: "juno",
+                    bech32PrefixAccPub: "juno" + "pub",
+                    bech32PrefixValAddr: "juno" + "valoper",
+                    bech32PrefixValPub: "juno" + "valoperpub",
+                    bech32PrefixConsAddr: "juno" + "valcons",
+                    bech32PrefixConsPub: "juno" + "valconspub",
+                },
+                currencies: [
+                    {
+                        coinDenom: 'JUNO',
+                        coinMinimalDenom: 'ujuno',
+                        coinDecimals: 6,
+                        coinGeckoId: 'juno-network',
+                    },
+                ],
+                feeCurrencies: [
+                    {
+                        coinDenom: 'JUNO',
+                        coinMinimalDenom: 'ujuno',
+                        coinDecimals: 6,
+                        coinGeckoId: 'juno-network',
+                    },
+                ],
+                stakeCurrency: {
+                    coinDenom: 'JUNO',
+                    coinMinimalDenom: 'ujuno',
+                    coinDecimals: 6,
+                    coinGeckoId: 'juno-network',
+                },
+                features: ['stargate', 'ibc-transfer'],
+                coinType: 118,
+            });
+        }
+    }
 }
