@@ -86,7 +86,7 @@ export default class KeplrModule extends VuexModule {
             });
             getProfileQuery.onResult((result) => {
                 if (result.loading === false) {
-                    if (result.data && result.data.profile[0]) {
+                    if (result.data && result.data.profile[0] && result.data.profile[0].dtag) {
                         const dtag = result.data.profile[0].dtag;
                         this.hasProfile = true;
                         authModule.saveAuthAccount({ account: new AuthAccount(dtag, this.address, true) });
