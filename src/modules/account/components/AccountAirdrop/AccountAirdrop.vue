@@ -94,9 +94,12 @@
                               <div class="col-span-10 my-auto">
                                 <span class="text-xl">
                                   <span class="capitalize">{{stakingAllocation.chain_name}}</span> staker: <span class="font-bold text-brand">{{stakingAllocation.dsm_allotted}}</span> DSM
-                                  <span v-if="stakingAllocation.claimed">
+                                  <div v-if="stakingAllocation.claimed">
                                     <span class="bg-green-400 text-black rounded-xl p-1 text-sm">Claimed</span>
-                                  </span>
+                                  </div>
+                                  <div v-if="!stakingAllocation.claimed&&!stakingAllocation.isConnected">
+                                    <span class="bg-gray-200 text-black dark:bg-gray-800 dark:text-gray-300 rounded-xl p-1 px-2 text-xs">Not&nbsp;Connected</span>
+                                  </div>
                                 </span>
                               </div>
                             </div>
@@ -118,9 +121,12 @@
                               <div class="col-span-10 my-auto">
                                 <span class="text-xl">
                                   <span class="capitalize">{{lpAllocation.chain_name}}</span> LP: <span class="font-bold text-brand">{{lpAllocation.dsm_allotted}}</span> DSM
-                                  <span v-if="lpAllocation.claimed">
+                                  <div v-if="lpAllocation.claimed">
                                     <span class="bg-green-400 text-black rounded-xl p-1 text-sm">Claimed</span>
-                                  </span>
+                                  </div>
+                                  <div v-if="!lpAllocation.claimed&&!lpAllocation.isConnected">
+                                    <span class="bg-gray-200 text-black dark:bg-gray-800 dark:text-gray-300 rounded-xl p-1 px-2 text-xs">Not&nbsp;Connected</span>
+                                  </div>
                                 </span>
                               </div>
                             </div>

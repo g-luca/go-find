@@ -18,16 +18,20 @@ class AirdropConfig {
 }
 
 class AirdropChainAllocation {
+    public address: string;
     public chain_name: string;
     public dsm_allotted: number;
     public claimed: boolean;
     public forbole_delegator: boolean;
+    public isConnected: boolean;
 
-    constructor(chain_name: string, dsm_allotted: number, claimed: boolean, forbole_delegator: boolean) {
+    constructor(address: string, chain_name: string, dsm_allotted: number, claimed: boolean, forbole_delegator: boolean, isConnected = false) {
+        this.address = address;
         this.chain_name = chain_name;
         this.dsm_allotted = dsm_allotted;
         this.claimed = claimed;
         this.forbole_delegator = forbole_delegator;
+        this.isConnected = isConnected;
     }
 }
 
@@ -131,7 +135,26 @@ export default class AirdropModule extends VuexModule {
                 const allocation = (await AirdropModule.checkAddressAirdrop(chainLink.address)) as AirdropAllocation;
                 if (allocation.dsm_allotted > 0) {
                     const found = Array.from(this.aidropAllocations.values()).find(element => JSON.stringify(element) === JSON.stringify(allocation));
-                    if (!found) {
+                    if (!found && accountModule.profile) {
+                        // search if the airdrop address is connected through a chain link
+                        for (let i = 0; i < allocation.staking_infos.length; i++) {
+                            if (accountModule.profile) {
+                                accountModule.profile.chainLinks.forEach((chainLink) => {
+                                    if (allocation.staking_infos[i].address === chainLink.address) {
+                                        allocation.staking_infos[i].isConnected = true;
+                                    }
+                                });
+                            }
+                        }
+                        for (let i = 0; i < allocation.lp_infos.length; i++) {
+                            if (accountModule.profile) {
+                                accountModule.profile.chainLinks.forEach((chainLink) => {
+                                    if (allocation.lp_infos[i].address === chainLink.address) {
+                                        allocation.lp_infos[i].isConnected = true;
+                                    }
+                                });
+                            }
+                        }
                         this.aidropAllocations.set(chainLink, allocation);
                     }
                 }
