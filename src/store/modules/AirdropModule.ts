@@ -183,6 +183,7 @@ export default class AirdropModule extends VuexModule {
                         if (grantStatusResponse.can_claim_airdrop) {
                             // if grant has been issued
                             this.grantStatus = GrantStatus.GrantReceived;
+                            accountModule.loadAccount(true);
                             exit = true;
                         } else if (grantStatusResponse.has_requested_grant) {
                             // if grant has been requested but not yet issued
