@@ -19,7 +19,7 @@ import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.
 import AccountBalance from "@/modules/account/components/AccountBalance/AccountBalance.vue";
 import AccountChainLinks from "@/modules/account/components/AccountChainLinks/AccountChainLinks.vue";
 import AccountModule from "@/store/modules/AccountModule";
-import { CosmosTxBody, DesmosMsgSaveProfile } from "desmosjs";
+import { CosmosTxBody, DesmosMsgDeleteProfile, DesmosMsgSaveProfile } from "desmosjs";
 import TransactionModule, { TransactionStatus } from "@/store/modules/TransactionModule";
 import marked from "marked";
 import { sanitize } from "dompurify";
@@ -84,6 +84,8 @@ export default defineComponent({
             imageUploadFile: null as any,
             imageUploadType: UploadImageType.profilePic,
 
+            isProfileOptionDropdownVisible: false,
+
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             resetForm: (_values?: unknown) => { return; }
@@ -115,14 +117,18 @@ export default defineComponent({
                         // the transaction has an error message, failed
                         console.log('update failure!')
                     } else {
-                        // the tx went well! update the data 
-                        console.log('update success!')
-                        accountModule.profile.nickname = this.inputNickname;
-                        accountModule.profile.profilePic = this.inputProfilePic;
-                        accountModule.profile.profileCover = this.inputProfileCover;
-                        accountModule.profile.bio = this.inputBio;
-                        if (accountModule.isNewProfile) {
-                            accountModule.setNotNewProfile();
+                        if (this.txSent?.messages[0].typeUrl === '/desmos.profiles.v1beta1.MsgDeleteProfile') {
+                            accountModule.setIsNewProfile();
+                        } else {
+                            // the tx went well! update the data 
+                            console.log('update success!')
+                            accountModule.profile.nickname = this.inputNickname;
+                            accountModule.profile.profilePic = this.inputProfilePic;
+                            accountModule.profile.profileCover = this.inputProfileCover;
+                            accountModule.profile.bio = this.inputBio;
+                            if (accountModule.isNewProfile) {
+                                accountModule.setNotNewProfile();
+                            }
                         }
                         this.txSent = null;
                         this.handleResetForm();
@@ -269,6 +275,29 @@ export default defineComponent({
                 // damn, upload failed!
             }
             return false;
+        },
+        async deleteProfile() {
+            const msgDeleteProfile: DesmosMsgDeleteProfile = {
+                creator: authModule.account!.address,
+            }
+            const txBody: CosmosTxBody = {
+                memo: "Profile delete",
+                messages: [
+                    {
+                        typeUrl: "/desmos.profiles.v1beta1.MsgDeleteProfile",
+                        value: DesmosMsgDeleteProfile.encode(msgDeleteProfile).finish(),
+                    }
+                ],
+                extensionOptions: [],
+                nonCriticalExtensionOptions: [],
+                timeoutHeight: 0,
+            }
+            transactionModule.start(txBody);
+            this.txSent = txBody;
+            this.toggleProfileOptionDropdown();
+        },
+        toggleProfileOptionDropdown() {
+            this.isProfileOptionDropdownVisible = !this.isProfileOptionDropdownVisible;
         }
 
 
