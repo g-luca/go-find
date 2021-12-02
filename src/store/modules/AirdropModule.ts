@@ -136,24 +136,28 @@ export default class AirdropModule extends VuexModule {
                 if (allocation.dsm_allotted > 0) {
                     const found = Array.from(this.aidropAllocations.values()).find(element => JSON.stringify(element) === JSON.stringify(allocation));
                     if (!found && accountModule.profile) {
-                        // search if the airdrop address is connected through a chain link
-                        for (let i = 0; i < allocation.staking_infos.length; i++) {
-                            if (accountModule.profile) {
-                                accountModule.profile.chainLinks.forEach((chainLink) => {
-                                    if (allocation.staking_infos[i].address === chainLink.address) {
-                                        allocation.staking_infos[i].isConnected = true;
-                                    }
-                                });
+                        try {
+                            // search if the airdrop address is connected through a chain link
+                            for (let i = 0; i < allocation.staking_infos.length; i++) {
+                                if (accountModule.profile) {
+                                    accountModule.profile.chainLinks.forEach((chainLink) => {
+                                        if (allocation.staking_infos[i].address === chainLink.address) {
+                                            allocation.staking_infos[i].isConnected = true;
+                                        }
+                                    });
+                                }
                             }
-                        }
-                        for (let i = 0; i < allocation.lp_infos.length; i++) {
-                            if (accountModule.profile) {
-                                accountModule.profile.chainLinks.forEach((chainLink) => {
-                                    if (allocation.lp_infos[i].address === chainLink.address) {
-                                        allocation.lp_infos[i].isConnected = true;
-                                    }
-                                });
+                            for (let i = 0; i < allocation.lp_infos.length; i++) {
+                                if (accountModule.profile) {
+                                    accountModule.profile.chainLinks.forEach((chainLink) => {
+                                        if (allocation.lp_infos[i].address === chainLink.address) {
+                                            allocation.lp_infos[i].isConnected = true;
+                                        }
+                                    });
+                                }
                             }
+                        } catch (e) {
+                            console.log(e);
                         }
                         this.aidropAllocations.set(chainLink, allocation);
                     }
