@@ -137,7 +137,7 @@ export default class AirdropModule extends VuexModule {
                     const found = Array.from(this.aidropAllocations.values()).find(element => JSON.stringify(element) === JSON.stringify(allocation));
                     if (!found && accountModule.profile) {
                         try {
-                            // search if the airdrop address is connected through a chain link
+                            // search staking_infos if the airdrop address is connected through a chain link
                             for (let i = 0; i < allocation.staking_infos.length; i++) {
                                 if (accountModule.profile) {
                                     accountModule.profile.chainLinks.forEach((chainLink) => {
@@ -147,6 +147,12 @@ export default class AirdropModule extends VuexModule {
                                     });
                                 }
                             }
+                        }
+                        catch (e) {
+                            console.log(e);
+                        }
+                        try {
+                            // search lp_infos if the airdrop address is connected through a chain link
                             for (let i = 0; i < allocation.lp_infos.length; i++) {
                                 if (accountModule.profile) {
                                     accountModule.profile.chainLinks.forEach((chainLink) => {
