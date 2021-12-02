@@ -25,14 +25,14 @@
             <div class="dark:text-white py-3 px-4">
 
               <!-- Requirements -->
-              <section v-if="!$store.state.AirdropModule.hasRequestedClaim">
+              <section v-if="$store.state.AirdropModule.grantStatus!=='GrantRequested'&&$store.state.AirdropModule.grantStatus!=='GrantReceived'">
                 <div class="grid grid-cols-12 md:pl-10">
                   <div class="col-span-12 md:col-span-7 mx-auto md:mx-0">
                     <h1 class="text-5xl font-bold text-brand">Ready to claim?</h1>
                     <h1 class="text-lg pt-3">This is what you need:</h1>
                     <ol class="list-decimal pl-6">
                       <li class="py-1">Saved Desmos Profile <i
-                          v-if="$store.state.AccountModule.profile&&(!$store.state.AccountModule.isNewProfile||$store.state.AccountModule.account._balance)"
+                          v-if="$store.state.AccountModule.profile&&(!$store.state.AccountModule.isNewProfile)"
                           class="bi bi-check-lg text-green-500 text-lg align-middle"
                         /></li>
                       <li class="">
@@ -60,10 +60,10 @@
                 </div>
               </section>
 
-              <!-- If profile exists on chain, claim! -->
+              <!-- If profile exists on chain, claim flow! -->
               <span v-if="$store.state.AccountModule.profile&&(!$store.state.AccountModule.isNewProfile||$store.state.AccountModule.account._balance)">
                 <!-- Available Airdrops / Claim -->
-                <section v-if="$store.state.AccountModule && $store.state.AirdropModule.aidropAllocations && !$store.state.AirdropModule.hasRequestedClaim">
+                <section v-if="$store.state.AccountModule && $store.state.AirdropModule.aidropAllocations && $store.state.AirdropModule.claimStatus==='None'">
                   <div class="grid grid-cols-12 md:pl-10">
                     <div class="col-span-12 my-4">
                       <h1 class="text-4xl">Your Airdrops <i class="bi bi-gift-fill text-red-400" /> </h1>
@@ -94,9 +94,12 @@
                               <div class="col-span-10 my-auto">
                                 <span class="text-xl">
                                   <span class="capitalize">{{stakingAllocation.chain_name}}</span> staker: <span class="font-bold text-brand">{{stakingAllocation.dsm_allotted}}</span> DSM
-                                  <span v-if="stakingAllocation.claimed">
+                                  <div v-if="stakingAllocation.claimed">
                                     <span class="bg-green-400 text-black rounded-xl p-1 text-sm">Claimed</span>
-                                  </span>
+                                  </div>
+                                  <div v-if="!stakingAllocation.claimed&&!stakingAllocation.isConnected">
+                                    <span class="bg-gray-200 text-black dark:bg-gray-800 dark:text-gray-300 rounded-xl p-1 px-2 text-xs">Not&nbsp;Connected</span>
+                                  </div>
                                 </span>
                               </div>
                             </div>
@@ -118,9 +121,12 @@
                               <div class="col-span-10 my-auto">
                                 <span class="text-xl">
                                   <span class="capitalize">{{lpAllocation.chain_name}}</span> LP: <span class="font-bold text-brand">{{lpAllocation.dsm_allotted}}</span> DSM
-                                  <span v-if="lpAllocation.claimed">
+                                  <div v-if="lpAllocation.claimed">
                                     <span class="bg-green-400 text-black rounded-xl p-1 text-sm">Claimed</span>
-                                  </span>
+                                  </div>
+                                  <div v-if="!lpAllocation.claimed&&!lpAllocation.isConnected">
+                                    <span class="bg-gray-200 text-black dark:bg-gray-800 dark:text-gray-300 rounded-xl p-1 px-2 text-xs">Not&nbsp;Connected</span>
+                                  </div>
                                 </span>
                               </div>
                             </div>
@@ -134,7 +140,7 @@
                         No claimable address found
                       </div>
                       <div class="col-span-12 pt-3">
-                        <span v-if="!$store.state.AirdropModule.isLoadingClaim">
+                        <span v-if="$store.state.AirdropModule.claimStatus!=='Loading'">
                           <button
                             class="rounded-3xl bg-brand hover:brightness-90 w-full py-1 text-xl brightness-100 transition ease-in duration-100"
                             @click="claimUserAirdrop()"
@@ -150,7 +156,12 @@
                       class="col-span-12"
                     >
                       <span v-if="$store.state.AccountModule.profile.chainLinks.length<=0">
-                        Connect an eligible address to get started
+                        <span v-if="$store.state.AccountModule.isNewProfile">
+                          Create a profile and connect an eligible address to get started
+                        </span>
+                        <span v-else>
+                          Connect an eligible address to get started
+                        </span>
                       </span>
                       <span v-else>
                         Loading...
@@ -160,45 +171,28 @@
                   </div>
                 </section>
 
-                <!-- Claim Result -->
-                <section v-if="$store.state.AccountModule && $store.state.AirdropModule.aidropAllocations && $store.state.AirdropModule.hasRequestedClaim">
+                <!-- Claim Status -->
+                <section v-if="$store.state.AirdropModule.claimStatus!=='None'||$store.state.AirdropModule.grantStatus==='GrantReceived'">
                   <div class="grid grid-cols-12">
                     <div class="col-span-12 mx-auto">
-                      <span v-if="$store.state.AirdropModule.isAirdropSuccess">
-                        <img
-                          class="h-52"
-                          src="@/assets/illustrations/airdrop/claim_success.svg"
-                          alt=""
-                        >
+                      <span v-if="$store.state.AirdropModule.claimStatus==='ClaimRequested'">
+                        <AccountAirdropClaimRequested />
                       </span>
-                      <span v-else>
-                        <img
-                          class="h-52"
-                          src="@/assets/illustrations/airdrop/claim_error.svg"
-                          alt=""
-                        >
+                      <span v-if="$store.state.AirdropModule.claimStatus==='Error'">
+                        <AccountAirdropClaimError />
                       </span>
-                    </div>
-                    <div class="col-span-12 dark:text-white text-xl text-center pt-8">
-                      <div>
-                        {{$store.state.AirdropModule.claimResponse}}
-                      </div>
-
-                      <span
-                        v-if="$store.state.AirdropModule.isAirdropSuccess"
-                        class="text-gray-800 dark:text-gray-400 text-sm"
-                      >
-                        Refresh the page in a few seconds to see the updated balance
+                      <span v-if="$store.state.AirdropModule.claimStatus==='Loading'">
+                        <AccountAirdropClaimLoading />
                       </span>
                     </div>
                   </div>
                 </section>
               </span>
 
-              <span v-else>
-
+              <!-- If profile does not exist on chain, grant flow! -->
+              <span v-else-if="$store.state.AirdropModule.grantStatus==='None'">
                 <div class="md:pl-10">
-                  <!-- <div class="relative text-gray-700 dark:text-white">
+                  <div class="relative text-gray-700 dark:text-white">
                     <span v-if="!$store.state.AirdropModule.isLoadingGrant">
                       <span v-if="$store.state.AirdropModule.isGrantSuccess">
                         <h1 class="text-2xl text-center text-brand">Grant received!</h1>
@@ -217,9 +211,9 @@
                           placeholder="Cosmos/Kava/Terra.. address"
                         >
                         <button
-                          class="rounded-xl bg-brand hover:brightness-90 w-full py-1 text-xl brightness-100 transition ease-in duration-100 mt-4"
-                          @click="askUserGrant()"
-                        >Ask Grant</button>
+                          class="rounded-xl text-white bg-brand hover:brightness-90 w-full py-1 text-xl brightness-100 transition ease-in duration-100 mt-4"
+                          @click="checkGrantUserStatus()"
+                        >Continue</button>
 
                         {{$store.state.AirdropModule.grantResponse}}
                       </span>
@@ -227,10 +221,29 @@
                     <span v-else>
                       Loading...
                     </span>
-                  </div> -->
-                  <h1 class="dark:text-white">Claim for users without a profile and without paying fees will be enabled in the next days.</h1>
+                  </div>
                 </div>
               </span>
+
+              <!-- Grant Status -->
+              <section v-if="$store.state.AirdropModule.grantStatus!=='None'">
+                <div class="grid grid-cols-12">
+                  <div class="col-span-12 mx-auto">
+                    <span v-if="$store.state.AirdropModule.grantStatus==='GrantRequested'">
+                      <AccountAirdropGrantRequested />
+                    </span>
+                    <span v-if="$store.state.AirdropModule.grantStatus==='GrantReceived'">
+                      <AccountAirdropGrantReceived />
+                    </span>
+                    <span v-if="$store.state.AirdropModule.grantStatus==='Error'">
+                      <AccountAirdropGrantError />
+                    </span>
+                    <span v-if="$store.state.AirdropModule.grantStatus==='Loading'">
+                      <AccountAirdropGrantLoading />
+                    </span>
+                  </div>
+                </div>
+              </section>
             </div>
           </div>
         </div>
@@ -245,10 +258,28 @@ import { defineComponent } from "vue";
 import { getModule } from "vuex-module-decorators";
 import { Dialog, DialogOverlay, DialogTitle } from "@headlessui/vue";
 import AirdropModule from "@/store/modules/AirdropModule";
+import AccountAirdropClaimRequested from "@/modules/account/components/AccountAirdrop/components/AccountAirdropClaimRequested.vue";
+import AccountAirdropClaimError from "@/modules/account/components/AccountAirdrop/components/AccountAirdropClaimError.vue";
+import AccountAirdropClaimLoading from "@/modules/account/components/AccountAirdrop/components/AccountAirdropClaimLoading.vue";
+import AccountAirdropGrantRequested from "@/modules/account/components/AccountAirdrop/components/AccountAirdropGrantRequested.vue";
+import AccountAirdropGrantReceived from "@/modules/account/components/AccountAirdrop/components/AccountAirdropGrantReceived.vue";
+import AccountAirdropGrantError from "@/modules/account/components/AccountAirdrop/components/AccountAirdropGrantError.vue";
+import AccountAirdropGrantLoading from "@/modules/account/components/AccountAirdrop/components/AccountAirdropGrantLoading.vue";
 const airdropModule = getModule(AirdropModule);
 
 export default defineComponent({
-  components: { Dialog, DialogOverlay, DialogTitle },
+  components: {
+    Dialog,
+    DialogOverlay,
+    DialogTitle,
+    AccountAirdropClaimRequested,
+    AccountAirdropClaimError,
+    AccountAirdropClaimLoading,
+    AccountAirdropGrantRequested,
+    AccountAirdropGrantReceived,
+    AccountAirdropGrantError,
+    AccountAirdropGrantLoading,
+  },
   setup() {
     return {
       inputElegibleAddress: "",
@@ -269,7 +300,10 @@ export default defineComponent({
       airdropModule.claimAirdrop();
     },
     async askUserGrant() {
-      airdropModule.askGrant(this.inputElegibleAddress);
+      //airdropModule.askGrant(this.inputElegibleAddress);
+    },
+    async checkGrantUserStatus() {
+      airdropModule.checkGrantStatus(this.inputElegibleAddress);
     },
   },
 });
