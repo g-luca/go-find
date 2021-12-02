@@ -57,6 +57,12 @@ export default class AuthModule extends VuexModule {
             this._authLevel = AuthLevel.AuthAccount;
             this._account = AuthModule.getAccount();
 
+            // enforce auth check to avoid blank dtags
+            if (this._account?.dtag === '') {
+                AuthModule.cleanAuthStorage();
+                this._authLevel = AuthLevel.None;
+            }
+
             // check if there is a mPassword stored in memory for Wallet authentication
             if (this.mPassword) {
                 const mKey = AuthModule.getMKey(this.mPassword);
