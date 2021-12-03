@@ -73,7 +73,7 @@
               <span
                 v-if="errors.nickname"
                 class="text-red-700 text-sm"
-              >Invalid Nickname</span>
+              >Invalid Nickname (at least 2 characters, max 1000)</span>
             </div>
             <div class="py-2">
               <label

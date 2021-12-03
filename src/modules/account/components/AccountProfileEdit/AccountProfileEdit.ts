@@ -51,7 +51,7 @@ export default defineComponent({
     },
     data() {
         const formSchema = {
-            nickname: { max: 1000 },
+            nickname: { min: 2, max: 1000 },
             profilePic: { regex: /^(http)s?:?(\/\/[^"']*$)/ },
             profileCover: { regex: /^(http)s?:?(\/\/[^"']*$)/ },
             bio: { max: 1000 }
