@@ -71,7 +71,7 @@ export default class KeplrModule extends VuexModule {
             }
             const keplrAccount = await window.keplr.getKey(desmosNetworkModule.chainId)
             if ((await window.keplr.getKey(desmosNetworkModule.chainId) as any).isNanoLedger) {
-                alert('Keplr does not support Desmos when used with a Ledger. Please use a mnemonic instead');
+                alert('Keplr does not support Desmos when used with a Ledger. You can either use your mnemonic, or if you want to use the Ledger use Forbole X instead (https://x.forbole.com/)');
                 this.isWaitingAuthentication = false;
                 this.hasProfile = false;
                 router.push('/')
@@ -86,7 +86,7 @@ export default class KeplrModule extends VuexModule {
             });
             getProfileQuery.onResult((result) => {
                 if (result.loading === false) {
-                    if (result.data && result.data.profile[0]) {
+                    if (result.data && result.data.profile[0] && result.data.profile[0].dtag) {
                         const dtag = result.data.profile[0].dtag;
                         this.hasProfile = true;
                         authModule.saveAuthAccount({ account: new AuthAccount(dtag, this.address, true) });
