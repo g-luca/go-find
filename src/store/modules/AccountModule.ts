@@ -10,6 +10,8 @@ import ChainLink from '@/core/types/ChainLink';
 import { apolloClient } from '@/gql/Apollo';
 import { ApplicationLinkSubscription } from '@/gql/ApplicationLinkSubscription';
 import ApplicationLinkModule from './ApplicationLinkModule';
+import { AccountSubscription } from '@/gql/AccountSubscription';
+import { ProfileSubscription } from '@/gql/ProfileSubscription';
 const authModule = getModule(AuthModule);
 
 @Module({ store, name: 'AccountModule', dynamic: true })
@@ -38,6 +40,19 @@ export default class AccountModule extends VuexModule {
                     dtag: authModule.account?.dtag,
                     address: authModule.account?.address,
                 });
+                const accountSubscription = apolloClient.subscribe({
+                    query: AccountSubscription,
+                    variables: {
+                        address: authModule.account?.address,
+                    }
+                });
+                const profileSubscription = apolloClient.subscribe({
+                    query: ProfileSubscription,
+                    variables: {
+                        dtag: authModule.account?.dtag,
+                    }
+                });
+
 
                 const applicationLinkObserver = apolloClient.subscribe({
                     query: ApplicationLinkSubscription,
@@ -52,6 +67,7 @@ export default class AccountModule extends VuexModule {
                     }
                 })
 
+                // parse account result query/subscription
                 getAccountQuery.onResult((result) => {
                     if (result.loading) {
                         this.profileLoadingStatus = LoadingStatus.Loading;
@@ -60,15 +76,7 @@ export default class AccountModule extends VuexModule {
                         // Manage Acccount info
                         if (result.data.profile[0]) {
                             // The profile exists
-                            const profileRaw = result.data.profile[0];
-                            const applicationLinks = ApplicationLinkModule.parseApplicationLinks(profileRaw);
-                            const chainLinks: ChainLink[] = [];
-                            if (profileRaw.chain_links && profileRaw.chain_links.length > 0) {
-                                profileRaw.chain_links.forEach((chainLink: any) => {
-                                    chainLinks.push(new ChainLink(chainLink.external_address, chainLink.chain_config.name));
-                                })
-                            }
-                            this.profile = new Profile(profileRaw.dtag, profileRaw.address, profileRaw.nickname, profileRaw.bio, profileRaw.profile_pic, profileRaw.cover_pic, applicationLinks, chainLinks);
+                            this.profile = AccountModule.parseGqlProfileResult(result.data.profile[0]);
                         } else {
                             // The profile doesn't exists
                             this.isNewProfile = true;
@@ -77,17 +85,7 @@ export default class AccountModule extends VuexModule {
 
                         // Manage acccount data
                         if (result.data.account[0]) {
-                            // Even if the profile hasn't been created on chain, has a balance > 0 or had transactions in the past
-                            const accountRaw = result.data.account[0];
-
-                            // calculate the total of the delegations (if they exists)
-                            let delegationsTot = 0;
-                            try {
-                                accountRaw.delegations?.forEach((delegation: any) => {
-                                    delegationsTot += Number(delegation.amount?.amount);
-                                });
-                            } catch { null }
-                            this.account = new Account(authModule.account.address, Number(accountRaw.account_balances[0]?.coins[0]?.amount) / 1000000, delegationsTot / 1000000);
+                            this.account = AccountModule.parseGqlAccountResult(result.data.account[0]);
                         } else {
                             // The user hasn't done any transaction on chain, completelly new account
                             this.account = new Account(authModule.account.address, 0, 0);
@@ -101,6 +99,20 @@ export default class AccountModule extends VuexModule {
                     }
                 })
                 getAccountQuery.load();
+
+                // subscribe to balance changes
+                accountSubscription.subscribe((response) => {
+                    if (response && response.data.account[0]) {
+                        this.account = AccountModule.parseGqlAccountResult(response.data.account[0]);
+                    }
+                });
+
+                // subscribe to profile changes
+                profileSubscription.subscribe((response) => {
+                    if (response && response.data.profile[0]) {
+                        this.profile = AccountModule.parseGqlProfileResult(response.data.profile[0]);
+                    }
+                });
             }
         }
     }
@@ -125,5 +137,42 @@ export default class AccountModule extends VuexModule {
         this.profileLoadingStatus = LoadingStatus.Loading;
     }
 
+
+    /**
+     * Parse account result from GQL query/subscription
+     * @param raw response raw from GQL query/subscription
+     * @returns parsed account
+     */
+    private static parseGqlAccountResult(accountRaw: any): Account {
+        // calculate the total of the delegations (if they exists)
+        let delegationsTot = 0;
+        try {
+            accountRaw.delegations?.forEach((delegation: any) => {
+                delegationsTot += Number(delegation.amount?.amount);
+            });
+        } catch { null }
+        return new Account(accountRaw.address, Number(accountRaw.account_balances[0]?.coins[0]?.amount) / 1000000, delegationsTot / 1000000);
+    }
+
+
+
+
+    /**
+     * Parse profile result from GQL query/subscription
+     * @param raw response raw from GQL query/subscription
+     * @returns parsed profile
+     */
+    private static parseGqlProfileResult(profileRaw: any): Profile {
+        // calculate the total of the delegations (if they exists)
+        const applicationLinks = ApplicationLinkModule.parseApplicationLinks(profileRaw);
+        const chainLinks: ChainLink[] = [];
+        if (profileRaw.chain_links && profileRaw.chain_links.length > 0) {
+            profileRaw.chain_links.forEach((chainLink: any) => {
+                chainLinks.push(new ChainLink(chainLink.external_address, chainLink.chain_config.name));
+            })
+        }
+        return new Profile(profileRaw.dtag, profileRaw.address, profileRaw.nickname, profileRaw.bio, profileRaw.profile_pic, profileRaw.cover_pic, applicationLinks, chainLinks);
+
+    }
 
 }

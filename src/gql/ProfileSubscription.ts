@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client/core";
 
-export const AccountQuery = gql`
-    query profile($dtag: String!, $address:String!) {
+export const ProfileSubscription = gql`
+    subscription profile($dtag: String!) {
         profile(where: {dtag: {_ilike: $dtag}}){
             dtag
             nickname
@@ -19,20 +19,6 @@ export const AccountQuery = gql`
                 chain_config {
                     name
                 }
-            }
-        }account(where:{address:{_eq: $address}}){
-            address
-            account_balances{
-                coins
-            }
-            delegations{
-                amount
-            }
-            unbonding_delegations{
-                amount
-            }
-            redelegations{
-                amount
             }
         }
     }
