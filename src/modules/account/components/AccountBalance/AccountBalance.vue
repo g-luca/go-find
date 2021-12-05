@@ -15,6 +15,9 @@
             <div class="font-mono text-md truncate py-2 dark:text-gray-400 text-gray-700">
               {{ $store.state.AccountModule.account._address }}
             </div>
+            <div class="mb-6">
+              <ModalSend />
+            </div>
 
             <!-- Balance value -->
             <div>
