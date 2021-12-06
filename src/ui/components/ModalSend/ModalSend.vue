@@ -6,10 +6,13 @@
     >
       <button
         type="button"
-        class="px-4 py-2 text-sm font-medium bg-blue-300 rounded-2xl bg-opacity-80 hover:bg-opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+        class="text-white dark:text-white hover:text-green-400 dark:hover:text-green-400"
         @click="toggleModal"
       >
-        <i class="bi bi-send-fill" /> Send
+        <div class="py-1.5 px-3 text-lg font-medium bg-blue-900 rounded-full focus:outline-none focus-visible:ring-2">
+          <i class="bi bi-arrow-left-right" />
+        </div>
+        <div class="dark:text-gray-200 text-black text-sm font-thin">Send</div>
       </button>
     </div>
     <span>
@@ -73,14 +76,14 @@
 
                     <!-- To -->
                     <div class="col-span-12 md:text-left">
-                      <div class="flex relative">
-                        <span class="rounded-l-3xl inline-flex items-center px-3 text-sm bg-gray-100 dark:bg-gray-800 text-gray-500">
+                      <div class="flex relative text-sm lg:text-base">
+                        <span class="rounded-l-3xl inline-flex items-center px-3 bg-gray-100 dark:bg-gray-800 text-gray-500">
                           To:
                         </span>
                         <div class="rounded-r-3xl pt-2 pb-2 flex-1 bg-gray-100 dark:bg-gray-800">
                           <input
                             v-model="addressTo"
-                            class="font-bold bg-gray-100 dark:bg-gray-800 appearance-none outline-none w-11/12 font-mono text-xs md:test-sm"
+                            class="font-bold bg-gray-100 dark:bg-gray-800 appearance-none outline-none w-11/12 font-mono"
                             placeholder="Desmos address"
                             type="text"
                             @keyup="validateAddress()"
@@ -92,10 +95,10 @@
                     <!-- Send -->
                     <div
                       v-if="isValidAddress&&isValidAmount"
-                      class="col-span-12 mt-10 mx-auto w-2/3"
+                      class="col-span-12 mt-5 mx-auto w-full"
                     >
                       <button
-                        class="bg-brand rounded-xl p-2 w-full"
+                        class="bg-brand rounded-xl p-2 w-full text-white"
                         @click="send"
                       >
                         Send
@@ -146,11 +149,13 @@ export default defineComponent({
       this.amount = 1;
       this.isValidAddress = false;
       this.isValidAmount = false;
+      this.validateAmount();
     },
     setMaxAmount() {
       if (accountModule.account) {
         this.amount = accountModule.account.balance;
         this.amountRaw = String(accountModule.account.balance);
+        this.isValidAmount = true;
       }
     },
     validateAddress() {
