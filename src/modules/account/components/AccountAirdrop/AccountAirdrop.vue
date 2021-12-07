@@ -201,6 +201,7 @@
                       <span v-else>
                         <label for="inputElegibleAddress">
                           Your eligible address:
+                          <p class="mb-1">Please make sure to input the eligible address <b>with the same wallet you will be connecting later</b> to avoid any problem!</p>
                         </label>
                         <input
                           id="inputElegibleAddress"
