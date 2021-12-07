@@ -113,7 +113,6 @@ export default class TransactionModule extends VuexModule {
      */
     private static async handleBroadcast(signedTx: Transaction, broadcastMode = CosmosBroadcastMode.BROADCAST_MODE_ASYNC): Promise<boolean> {
         try {
-            console.log(broadcastMode)
             const broadcastRawResult = await desmosNetworkModule.network.broadcast(signedTx, broadcastMode);
             const broadcastResult = CosmosTxResponse.fromJSON(broadcastRawResult.tx_response);
             console.log(`tx hash: ${broadcastResult.txhash}`);
