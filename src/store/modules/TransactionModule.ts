@@ -19,6 +19,7 @@ export default class TransactionModule extends VuexModule {
     public tx: CosmosTxBody | null = null;
     public transactionStatus: TransactionStatus = TransactionStatus.Idle; // default status
     public errorMessage = "";
+    public broadcastMode = CosmosBroadcastMode.BROADCAST_MODE_ASYNC;
 
 
     /**
@@ -35,7 +36,7 @@ export default class TransactionModule extends VuexModule {
             if (this.tx) {
                 const signedTx = await TransactionModule.handleSign(this.tx, payload.mPassword);
                 if (signedTx) {
-                    const broadcastSuccess = await TransactionModule.handleBroadcast(signedTx);
+                    const broadcastSuccess = await TransactionModule.handleBroadcast(signedTx, this.broadcastMode);
                     //const broadcastSuccess = true; // only for development test
                     if (broadcastSuccess) {
                         this.transactionStatus = TransactionStatus.Success;
@@ -68,8 +69,9 @@ export default class TransactionModule extends VuexModule {
      * @param tx the transaction that is going to be signed and broadcasted
      */
     @Mutation
-    start(tx: CosmosTxBody): void {
-        this.tx = tx;
+    start(payload: { tx: CosmosTxBody, mode: CosmosBroadcastMode }): void {
+        this.broadcastMode = payload.mode;
+        this.tx = payload.tx;
         this.transactionStatus = TransactionStatus.Idle;
         this.errorMessage = "";
         this.isOpen = true;
@@ -109,9 +111,10 @@ export default class TransactionModule extends VuexModule {
      * @param signedTx the signed tx to broadcast
      * @returns true if succeeded, false otherwise
      */
-    private static async handleBroadcast(signedTx: Transaction): Promise<boolean> {
+    private static async handleBroadcast(signedTx: Transaction, broadcastMode = CosmosBroadcastMode.BROADCAST_MODE_ASYNC): Promise<boolean> {
         try {
-            const broadcastRawResult = await desmosNetworkModule.network.broadcast(signedTx, CosmosBroadcastMode.BROADCAST_MODE_SYNC);
+            console.log(broadcastMode)
+            const broadcastRawResult = await desmosNetworkModule.network.broadcast(signedTx, broadcastMode);
             const broadcastResult = CosmosTxResponse.fromJSON(broadcastRawResult.tx_response);
             console.log(`tx hash: ${broadcastResult.txhash}`);
             //TODO: is this check enough?

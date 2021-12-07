@@ -122,7 +122,12 @@ import { ref } from "vue";
 import { Dialog, DialogOverlay, DialogTitle } from "@headlessui/vue";
 import { getModule } from "vuex-module-decorators";
 import AccountModule from "@/store/modules/AccountModule";
-import { CosmosMsgSend, CosmosTxBody, DesmosJS } from "desmosjs";
+import {
+  CosmosBroadcastMode,
+  CosmosMsgSend,
+  CosmosTxBody,
+  DesmosJS,
+} from "desmosjs";
 import TransactionModule from "@/store/modules/TransactionModule";
 const accountModule = getModule(AccountModule);
 const transactionModule = getModule(TransactionModule);
@@ -213,7 +218,10 @@ export default defineComponent({
           timeoutHeight: 0,
         };
         await this.toggleModal();
-        transactionModule.start(txBody);
+        transactionModule.start({
+          tx: txBody,
+          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+        });
       }
     },
   },

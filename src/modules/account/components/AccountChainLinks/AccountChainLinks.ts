@@ -1,7 +1,7 @@
 import { defineComponent, ref, watchEffect } from "vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
-import { CosmosPubKey, CosmosTxBody, DesmosBech32Address, DesmosMsgLinkChainAccount, DesmosMsgUnlinkChainAccount, DesmosProof, Transaction } from "desmosjs";
+import { CosmosBroadcastMode, CosmosPubKey, CosmosTxBody, DesmosBech32Address, DesmosMsgLinkChainAccount, DesmosMsgUnlinkChainAccount, DesmosProof, Transaction } from "desmosjs";
 
 import {
     TransitionRoot,
@@ -160,7 +160,10 @@ export default defineComponent({
                 this.tx = txBody;
                 this.newChainLink = null;
                 this.deletedChainLink = chainLink;
-                transactionModule.start(txBody);
+                transactionModule.start({
+                    tx: txBody,
+                    mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+                });
             }
         },
         /**
@@ -215,7 +218,10 @@ export default defineComponent({
                     this.newChainLink = new ChainLink(destWallet.address, this.selectedChain.id);
 
                     await this.toggleChainLinkEditor();
-                    transactionModule.start(this.tx);
+                    transactionModule.start({
+                        tx: this.tx,
+                        mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+                    });
 
                     success = true;
                     this.generateProofError = "";
@@ -308,7 +314,10 @@ export default defineComponent({
                         this.newChainLink = new ChainLink(extKeplrWallet.bech32Address, this.selectedChain.id);
 
                         await this.toggleChainLinkEditor();
-                        transactionModule.start(txBody);
+                        transactionModule.start({
+                            tx: txBody,
+                            mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+                        });
                         this.tx = txBody;
 
 
