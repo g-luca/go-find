@@ -19,7 +19,7 @@ import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.
 import AccountBalance from "@/modules/account/components/AccountBalance/AccountBalance.vue";
 import AccountChainLinks from "@/modules/account/components/AccountChainLinks/AccountChainLinks.vue";
 import AccountModule from "@/store/modules/AccountModule";
-import { CosmosTxBody, DesmosMsgDeleteProfile, DesmosMsgSaveProfile } from "desmosjs";
+import { CosmosBroadcastMode, CosmosTxBody, DesmosMsgDeleteProfile, DesmosMsgSaveProfile } from "desmosjs";
 import TransactionModule, { TransactionStatus } from "@/store/modules/TransactionModule";
 import marked from "marked";
 import { sanitize } from "dompurify";
@@ -161,7 +161,10 @@ export default defineComponent({
                     nonCriticalExtensionOptions: [],
                     timeoutHeight: 0,
                 }
-                transactionModule.start(txBody);
+                transactionModule.start({
+                    tx: txBody,
+                    mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+                });
                 this.txSent = txBody;
 
                 // Vee Validate send as parameter the reset function, i need to save it to use for the reset after an update
@@ -292,7 +295,10 @@ export default defineComponent({
                 nonCriticalExtensionOptions: [],
                 timeoutHeight: 0,
             }
-            transactionModule.start(txBody);
+            transactionModule.start({
+                tx: txBody,
+                mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+            });
             this.txSent = txBody;
             this.toggleProfileOptionDropdown();
         },

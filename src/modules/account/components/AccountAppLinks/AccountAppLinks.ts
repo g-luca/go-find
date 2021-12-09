@@ -9,7 +9,7 @@ import {
     DialogOverlay,
     DialogTitle,
 } from "@headlessui/vue";
-import { CosmosAuthInfo, CosmosTxBody, DesmosMsgUnlinkApplication, Transaction, Wallet } from "desmosjs";
+import { CosmosAuthInfo, CosmosBroadcastMode, CosmosTxBody, DesmosMsgUnlinkApplication, Transaction, Wallet } from "desmosjs";
 import CryptoUtils from "@/utils/CryptoUtils";
 import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
@@ -127,7 +127,10 @@ export default defineComponent({
                 this.tx = txBody;
                 this.newApplicationLink = null;
                 this.deletedApplicationLink = applicationLink;
-                transactionModule.start(txBody);
+                transactionModule.start({
+                    tx: txBody,
+                    mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+                });
             }
         },
         async generateProof(): Promise<boolean> {
@@ -262,7 +265,10 @@ export default defineComponent({
                 this.newApplicationLink = payload.applicationLink;
                 console.log(this.newApplicationLink.state)
                 this.isExecutingTransaction = true;
-                transactionModule.start(payload.txBody);
+                transactionModule.start({
+                    tx: payload.txBody,
+                    mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+                });
             } else {
                 //TODO: replace
                 alert('error')

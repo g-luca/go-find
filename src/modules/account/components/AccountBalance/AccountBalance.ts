@@ -2,6 +2,7 @@ import { defineComponent } from "vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import AccountAirdrop from "@/modules/account/components/AccountAirdrop/AccountAirdrop.vue";
 import AirdropModule from "@/store/modules/AirdropModule";
+import ModalSend from "@/ui/components/ModalSend/ModalSend.vue";
 import { getModule } from "vuex-module-decorators";
 
 const airdropModule = getModule(AirdropModule);
@@ -10,6 +11,7 @@ export default defineComponent({
     components: {
         SkeletonLoader,
         AccountAirdrop,
+        ModalSend
     },
     data() {
         this.checkAirdrop()
