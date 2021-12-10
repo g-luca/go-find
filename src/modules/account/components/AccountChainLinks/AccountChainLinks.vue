@@ -223,15 +223,21 @@
                       :class="connectionMethod?.id===selectedConnectionMethod?.id?'bg-purple-300 dark:bg-purple-800 dark:hover:bg-purple-700 hover:bg-purple-200':'bg-gray-100 dark:bg-denim-900 dark:hover:bg-purple-800 hover:bg-purple-200'"
                       @click="selectChainConnectionMethod(connectionMethod)"
                     >
-                      <div class="grid grid-cols-12 w-52 md:w-60">
-                        <div class="col-span-4">
+                      <div class="grid grid-cols-12 w-52 md:w-60 h-16">
+                        <div
+                          v-if="connectionMethod.logo"
+                          class="col-span-4"
+                        >
                           <img
                             class="p-3 pointer-events-none select-none h-16 w-16"
                             :src="getChainLogo(connectionMethod.logo)"
                             alt=""
                           >
                         </div>
-                        <div class="col-span-5 my-auto">
+                        <div
+                          class="my-auto"
+                          :class="connectionMethod.logo?'col-span-5':'col-span-9 pl-2 md:pl-4'"
+                        >
                           <h5 class="dark:text-white text-2xl">
                             {{ connectionMethod.name }}
                           </h5>
@@ -282,8 +288,50 @@
                     Connect
                   </button>
                 </span>
+
                 <span v-if="selectedConnectionMethod.id==='ledger'">
                   Coming Soon
+                </span>
+
+                <span v-if="selectedConnectionMethod.id==='import'">
+                  <div class="pt-3 pb-1">
+                    <p>
+                      Important: Use this method only if instructed to do so.
+                    </p>
+                  </div>
+                  <div>
+                    <div class="py-1">
+                      <label
+                        for="inputImportAddress"
+                        class="text-gray-700 dark:text-gray-200"
+                      >Address</label>
+                      <input
+                        id="inputImportAddress"
+                        v-model="inputImportAddress"
+                        class="appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-sm"
+                      >
+                    </div>
+                    <div class="py-1">
+                      <label
+                        for="inputImportProof"
+                        class="text-gray-700 dark:text-gray-200"
+                      >Proof</label>
+                      <textarea
+                        id="inputImportProof"
+                        v-model="inputImportProof"
+                        rows="8"
+                        class="appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-sm"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    v-if="inputImportAddress&&inputImportProof"
+                    type="button"
+                    class="py-2 px-4 w-6/12 bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                    @click="connectWithImportedProof"
+                  >
+                    Connect
+                  </button>
                 </span>
               </div>
 
