@@ -436,6 +436,11 @@ export default defineComponent({
         async connectWithImportedProof(): Promise<void> {
             // create the chain link transaction
             if (this.inputImportProof && authModule.account && this.selectedChain) {
+                const canCreateChainLink = await this.verifyChainLinkRequirements(this.inputImportAddress, this.selectedChain?.id);
+                if (!canCreateChainLink) {
+                    this.generateProofError = "Connection already exists or profile not found";
+                    return;
+                }
                 let proof = null;
                 try {
                     const parsedProof = JSON.parse(this.inputImportProof);
