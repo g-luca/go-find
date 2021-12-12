@@ -53,7 +53,7 @@ export default defineComponent({
     },
     data() {
         return {
-            supportedChainLinkConnectionMethods: [new ChainLinkConnectionMethod("keplr", "Keplr", "keplr"), new ChainLinkConnectionMethod("ledger", "Ledger", "ledger"),],
+            supportedChainLinkConnectionMethods: [new ChainLinkConnectionMethod("keplr", "Keplr", "keplr"), new ChainLinkConnectionMethod("ledger", "Ledger", "ledger"), new ChainLinkConnectionMethod("import", "Import Proof", "")],
             selectedConnectionMethod: null as ChainLinkConnectionMethod | null,
             supportedChainLinks,
             filteredSupportedChainLinks: supportedChainLinks,
@@ -69,6 +69,10 @@ export default defineComponent({
             tx: null as CosmosTxBody | null,
             newChainLink: null as ChainLink | null,
             deletedChainLink: null as ChainLink | null,
+
+
+            inputImportProof: "",
+            inputImportAddress: "",
 
             generatedProof: null as DesmosProof | null,
             generateProofError: "",
@@ -115,6 +119,8 @@ export default defineComponent({
             this.selectedConnectionMethod = null;
             this.isChainLinkEditorOpen = !this.isChainLinkEditorOpen;
             //this.inputMnemonic = new Array<string>(24);
+            this.inputImportProof = "";
+            this.inputImportAddress = "";
             this.selectedChain = null;
             this.filteredSupportedChainLinks = this.supportedChainLinks;
             await KeplrModule.setupTerraMainnet();
@@ -333,7 +339,8 @@ export default defineComponent({
                 }
             }
             return success;
-        }, async selectChain(chain: Blockchain | null): Promise<void> {
+        },
+        async selectChain(chain: Blockchain | null): Promise<void> {
             if (chain === null) {
                 this.isCustomChain = true;
                 this.selectedChain = null;
@@ -346,6 +353,8 @@ export default defineComponent({
                 this.customBechPrefix = chain.bechPrefix;
             }
             this.selectedConnectionMethod = null;
+            this.inputImportProof = "";
+            this.inputImportAddress = "";
         },
 
         async selectChainConnectionMethod(connectionMethod: ChainLinkConnectionMethod): Promise<void> {
@@ -370,6 +379,70 @@ export default defineComponent({
                 // persmission to use Keplr refused
             }
             this.isLinkingWithKeplr = false;
+        },
+        async connectWithImportedProof(): Promise<void> {
+            // create the chain link transaction
+            if (this.inputImportProof && authModule.account && this.selectedChain) {
+                let proof = null;
+                try {
+                    const parsedProof = JSON.parse(this.inputImportProof);
+                    proof = {
+                        plainText: parsedProof.plainText,
+                        signature: parsedProof.signature,
+                        pubKey: {
+                            typeUrl: parsedProof.pubKey.typeUrl,
+                            value: CosmosPubKey.encode({
+                                key: Object.values(parsedProof.pubKey.value).slice(2) as any,
+                            }).finish(),
+                        },
+                    } as DesmosProof;
+                } catch (e) {
+                    this.generateProofError = "Invalid proof";
+                    console.log(e)
+                    return;
+                }
+                const msgLinkChain: DesmosMsgLinkChainAccount = {
+                    chainAddress: {
+                        typeUrl: "/desmos.profiles.v1beta1.Bech32Address",
+                        value: DesmosBech32Address.encode({
+                            prefix: this.selectedChain.bechPrefix,
+                            value: this.inputImportAddress,
+                        }).finish()
+                    },
+                    proof: proof,
+                    chainConfig: {
+                        name: this.selectedChain?.id.toLowerCase(),
+                    },
+                    signer: authModule.account?.address,
+                }
+                const txBody: CosmosTxBody = {
+                    memo: "Chain link",
+                    messages: [
+                        {
+                            typeUrl: "/desmos.profiles.v1beta1.MsgLinkChainAccount",
+                            value: DesmosMsgLinkChainAccount.encode(msgLinkChain).finish(),
+                        }
+                    ],
+                    extensionOptions: [],
+                    nonCriticalExtensionOptions: [],
+                    timeoutHeight: 0,
+                }
+                this.isExecutingTransaction = true;
+                this.newChainLink = new ChainLink(this.inputImportAddress, this.selectedChain.id);
+
+                await this.toggleChainLinkEditor();
+                transactionModule.start({
+                    tx: txBody,
+                    mode: CosmosBroadcastMode.BROADCAST_MODE_SYNC,
+                });
+                this.tx = txBody;
+
+
+                this.generateProofError = "";
+            } else {
+                this.generateProofError = "Invalid data";
+            }
+
         },
         getChainLogo(name: string) {
             try {
