@@ -281,11 +281,18 @@
               >
                 <span v-if="selectedConnectionMethod.id==='keplr'">
                   <button
+                    :disabled="isSigningProof"
                     type="button"
-                    class="py-2 px-4 w-6/12 bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                    class="py-2 px-4 w-6/12  text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                    :class="isSigningProof?'bg-gray-500 cursor-pointer':'bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200'"
                     @click="connectWithKeplr"
                   >
-                    Connect
+                    <span v-if="!isSigningProof">
+                      Connect
+                    </span>
+                    <span v-else>
+                      Loading...
+                    </span>
                   </button>
                 </span>
 

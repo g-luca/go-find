@@ -64,6 +64,7 @@ export default defineComponent({
             customHdPath: '',
             isChainLinkEditorOpen: false,
             isAdvancedOptionsOpen: false,
+            isSigningProof: false,
             isLinkingWithKeplr: false,
             isExecutingTransaction: false,
             tx: null as CosmosTxBody | null,
@@ -123,6 +124,7 @@ export default defineComponent({
             this.inputImportAddress = "";
             this.selectedChain = null;
             this.filteredSupportedChainLinks = this.supportedChainLinks;
+            this.isSigningProof = false;
             await KeplrModule.setupTerraMainnet();
             await KeplrModule.setupJunoMainnet();
         }, toggleAdvancedOptions(): void {
@@ -185,6 +187,15 @@ export default defineComponent({
             if (mnemonic.trimEnd().split(' ').length >= 12 && authModule.account && this.selectedChain) {
                 try {
                     const destWallet = new Wallet(mnemonic, this.customHdPath, this.customBechPrefix);
+
+
+                    const canCreateChainLink = await this.verifyChainLinkRequirements(destWallet.address, this.selectedChain?.id);
+                    if (!canCreateChainLink) {
+                        this.generateProofError = "Connection already exists or profile not found";
+                        return false;
+                    }
+
+
                     const msgLinkChain: DesmosMsgLinkChainAccount = {
                         chainAddress: {
                             typeUrl: "/desmos.profiles.v1beta1.Bech32Address",
@@ -250,6 +261,11 @@ export default defineComponent({
             let success = false
             if (this.selectedChain) {
                 try {
+                    const canCreateChainLink = await this.verifyChainLinkRequirements(extKeplrWallet.bech32Address, this.selectedChain?.id);
+                    if (!canCreateChainLink) {
+                        this.generateProofError = "Connection already exists or profile not found";
+                        return false;
+                    }
 
                     // avoid keplr custom values
                     (window.keplr as any).defaultOptions = {
@@ -355,12 +371,49 @@ export default defineComponent({
             this.selectedConnectionMethod = null;
             this.inputImportProof = "";
             this.inputImportAddress = "";
+            this.isSigningProof = false;
+            this.generateProofError = "";
         },
 
         async selectChainConnectionMethod(connectionMethod: ChainLinkConnectionMethod): Promise<void> {
             this.selectedConnectionMethod = connectionMethod;
+            this.isSigningProof = false;
+            this.generateProofError = "";
+        },
+        async verifyChainLinkRequirements(extAddress: string, chain: string): Promise<boolean> {
+            let profileExists = false;
+            let chainLinkExists = false;
+            if (authModule.account) {
+
+                // parse new data to ensure that the profile exists
+                const profile = await AccountModule.getProfile(authModule.account.dtag);
+                if (profile) {
+                    profileExists = true;
+                    try {
+                        // check if the chain link with the same address-chainId already exists
+
+                        if (accountModule.profile) {
+                            // parse local chain links first
+                            const localChainLink = accountModule.profile.chainLinks.find(c => (c.address === extAddress && c.chain.toLowerCase() === chain.toLowerCase()));
+                            if (localChainLink) {
+                                chainLinkExists = true;
+                            }
+                        }
+
+                        // parse remote then
+                        const chainLink = profile.chainLinks.find(c => (c.address === extAddress && c.chain.toLowerCase() === chain.toLowerCase()));
+                        if (chainLink) {
+                            chainLinkExists = true;
+                        }
+                    } catch (e) {
+                        // do nothing
+                    }
+                }
+            }
+            return profileExists && !chainLinkExists;
         },
         async connectWithKeplr(): Promise<void> {
+            this.isSigningProof = true;
             try {
                 if (window.keplr && this.selectedChain && this.selectedChain.chainId) {
                     // get the dest chain Keplr wallet
@@ -368,8 +421,7 @@ export default defineComponent({
                     // if the wallet exists & is approved by the user, proceed with the custom chain-link Keplr flow
                     if (keplrWallet.address) {
                         this.isLinkingWithKeplr = true;
-                        this.generateProofWithKeplr(keplrWallet);
-                        return;
+                        await this.generateProofWithKeplr(keplrWallet);
                     }
                 } else {
                     this.generateProofError = "Keplr not available";
@@ -379,6 +431,7 @@ export default defineComponent({
                 // persmission to use Keplr refused
             }
             this.isLinkingWithKeplr = false;
+            this.isSigningProof = false;
         },
         async connectWithImportedProof(): Promise<void> {
             // create the chain link transaction

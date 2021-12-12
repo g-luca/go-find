@@ -3,7 +3,7 @@ import store from '@/store';
 import { getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { LoadingStatus } from '@/core/types/LoadingStatus';
 import AuthModule, { AuthLevel } from './AuthModule';
-import { useLazyQuery } from '@vue/apollo-composable';
+import { useLazyQuery, useApolloClient } from '@vue/apollo-composable';
 import { AccountQuery } from '@/gql/AccountQuery';
 import Account from '@/core/types/Account';
 import ChainLink from '@/core/types/ChainLink';
@@ -135,6 +135,28 @@ export default class AccountModule extends VuexModule {
         this.profile = false;
         this.account = false;
         this.profileLoadingStatus = LoadingStatus.Loading;
+    }
+
+
+    /**
+     * Retrieve a profile from the DTag
+     * @param dtag DTag of the profile to retrieve
+     * @returns the profile if found, null otherwise
+     */
+    public static async getProfile(dtag: string): Promise<Profile | null> {
+        const apollo = useApolloClient();
+        let profile: Profile | null = null;
+        try {
+            const profileRaw = await apollo.client.query({
+                query: AccountQuery, variables: { dtag, address: "" }, fetchPolicy: "no-cache"
+            });
+            if (profileRaw.data && profileRaw.data.profile[0]) {
+                profile = AccountModule.parseGqlProfileResult(profileRaw.data.profile[0]);
+            }
+        } catch (e) {
+            // continue
+        }
+        return profile;
     }
 
 
