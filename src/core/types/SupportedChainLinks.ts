@@ -9,7 +9,7 @@ export const supportedChainLinks: Blockchain[] = [
     new Blockchain("terra", "Terra", "LUNA", "columbus-5", "m/44'/330'/0'/0/0", "terra"),
     new Blockchain("osmosis", "Osmosis", "osmo", "osmosis-1", "m/44'/118'/0'/0/0", "osmo"),
     new Blockchain("akash", "Akash", "akt", "akashnet-2", "m/44'/118'/0'/0/0", "akash"),
-    new Blockchain("band", "Band Protocol", "band", "band-guanyu-mainnet", "m/44'/494'/0'/0/0", "band"),
+    new Blockchain("band", "Band Protocol", "band", "laozi-mainnet", "m/44'/494'/0'/0/0", "band"),
     new Blockchain("regen", "Regen", "regen", "regen-1", "m/44'/118'/0'/0/0", "regen"),
     new Blockchain("crypto.org", "Crypto.org", "cro", "crypto-org-chain-mainnet-1", "m/44'/118'/0'/0/0", "cro"),
     new Blockchain("sentinel", "Sentinel", "dvpn", "sentinelhub-2", "m/44'/118'/0'/0/0", "sent"),

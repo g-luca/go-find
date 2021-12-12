@@ -121,6 +121,7 @@ export default defineComponent({
             this.isSigningProof = false;
             await KeplrModule.setupTerraMainnet();
             await KeplrModule.setupJunoMainnet();
+            await KeplrModule.setupBandMainnet();
         }, toggleAdvancedOptions(): void {
             this.isAdvancedOptionsOpen = !this.isAdvancedOptionsOpen;
         },

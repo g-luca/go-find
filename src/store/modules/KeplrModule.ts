@@ -216,7 +216,6 @@ export default class KeplrModule extends VuexModule {
         }
     }
 
-
     public static async setupTerraMainnet(): Promise<void> {
         if (await window.keplr) {
             await window.keplr!.experimentalSuggestChain({
@@ -286,7 +285,6 @@ export default class KeplrModule extends VuexModule {
         }
     }
 
-
     public static async setupJunoMainnet(): Promise<void> {
         if (await window.keplr) {
             await window.keplr!.experimentalSuggestChain({
@@ -329,6 +327,53 @@ export default class KeplrModule extends VuexModule {
                 },
                 features: ['stargate', 'ibc-transfer'],
                 coinType: 118,
+            });
+        }
+    }
+
+    public static async setupBandMainnet(): Promise<void> {
+        if (await window.keplr) {
+            await window.keplr!.experimentalSuggestChain({
+                chainId: 'laozi-mainnet',
+                chainName: "Band",
+                rpc: 'https://rpc.band.forbole.com/',
+                rest: 'https://lcd.band.forbole.com/',
+                bip44: {
+                    coinType: 494,
+                },
+                bech32Config: {
+                    bech32PrefixAccAddr: "band",
+                    bech32PrefixAccPub: "band" + "pub",
+                    bech32PrefixValAddr: "band" + "valoper",
+                    bech32PrefixValPub: "band" + "valoperpub",
+                    bech32PrefixConsAddr: "band" + "valcons",
+                    bech32PrefixConsPub: "band" + "valconspub",
+                },
+                currencies: [
+                    {
+                        coinDenom: 'BAND',
+                        coinMinimalDenom: 'uband',
+                        coinDecimals: 6,
+                    },
+                ],
+                feeCurrencies: [
+                    {
+                        coinDenom: 'BAND',
+                        coinMinimalDenom: 'uband',
+                        coinDecimals: 6,
+                    },
+                ],
+                gasPriceStep: {
+                    low: 0.015,
+                    average: 0.030,
+                    high: 0.050,
+                },
+                stakeCurrency: {
+                    coinDenom: 'BAND',
+                    coinMinimalDenom: 'uband',
+                    coinDecimals: 6,
+                },
+                coinType: 494,
             });
         }
     }
