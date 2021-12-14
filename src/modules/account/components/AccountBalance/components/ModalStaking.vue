@@ -226,12 +226,14 @@
                                     {{toDigitsFormat(userUnbonding/1000000,6)}} {{coinDenom}}
                                   </span>
                                 </h6>
-                                <!-- <button
+                                <button
+                                  v-if="validator.delegations[0]?.amount.amount>0"
                                   class="px-4 py-1 bg-seagreen-400 hover:bg-green-600 rounded-lg text-white"
                                   type="button"
+                                  @click="onUnbond(validator)"
                                 >
                                   Unbond
-                                </button> -->
+                                </button>
                               </div>
 
                               <!-- Rewards -->
@@ -264,14 +266,6 @@
                       </div>
                     </div>
                   </div>
-                  <!-- <div class="grid grid-cols-12">
-                    <div
-                      v-for="validator in validators"
-                      class="col-span-12"
-                    >
-                      {{validator.validator_descriptions[0].moniker}}
-                    </div>
-                  </div> -->
                 </section>
               </div>
             </div>
@@ -315,6 +309,12 @@
                       <p class="font-light">You will need to <b>undelegate</b> in order for your staked assets to be liquid again. This process will take 14 days to complete.</p>
                     </div>
                   </span>
+                  <!-- Unbond -->
+                  <span v-if="stakingOperation==='unbond'">
+                    <div class="mb-6 text-sm border-l border-brand pl-2">
+                      <h6 class="text-lg">Asset will be liquid after 14 days</h6>
+                    </div>
+                  </span>
 
                   <!-- Amount -->
                   <div class="col-span-12 mx-auto mb-6 w-full md:w-2/3">
@@ -339,11 +339,12 @@
                     </div>
                     <div
                       class="text-sm text-gray-500 text-center pt-1"
-                      :class="{'text-red-500':stakingOperationAmount>$store.state.AccountModule.account._balance}"
+                      :class="{'text-red-500':stakingOperationAmount>stakingOperationMaxAmount}"
                     >
-                      Available: {{$store.state.AccountModule.account._balance}} {{coinDenom}}
+                      Available: {{stakingOperationMaxAmount}} {{coinDenom}}
                     </div>
                   </div>
+
                   <!-- To -->
                   <div
                     v-if="stakingOperationValidatorTo!==null"
@@ -371,7 +372,34 @@
                     </div>
                   </div>
 
-                  <!-- Send -->
+                  <!-- From -->
+                  <div
+                    v-if="stakingOperationValidatorFrom!==null"
+                    class="col-span-12 md:text-left"
+                  >
+                    <div class="flex relative text-sm lg:text-base">
+                      <span class="rounded-l-3xl inline-flex items-center px-3 bg-gray-100 dark:bg-gray-800 text-gray-500">
+                        From:
+                      </span>
+                      <div class="rounded-r-3xl flex-1 bg-gray-100 dark:bg-gray-800">
+                        <div class="grid grid-cols-12">
+                          <div class="col-span-12 flex py-2">
+                            <img
+                              alt="profile"
+                              :src="stakingOperationValidatorFrom.validator_descriptions[0].avatar_url || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
+                              class="object-cover rounded-full h-10 w-10 "
+                            >
+                            <h6 class="my-auto pl-3 text-2xl">{{stakingOperationValidatorFrom.validator_descriptions[0].moniker}}</h6>
+                          </div>
+                          <!-- <div class="font-mono">
+                          {{stakingOperationValidatorFrom.validator_info.operator_address}}
+                        </div> -->
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Delegate Button -->
                   <div
                     v-if="stakingOperation==='delegate'&&stakingOperationIsValidAmount&&stakingOperationValidatorTo"
                     class="col-span-12 mt-5 mx-auto w-full"
@@ -381,6 +409,19 @@
                       @click="delegate"
                     >
                       Delegate
+                    </button>
+                  </div>
+
+                  <!-- Unbond Button -->
+                  <div
+                    v-if="stakingOperation==='unbond'&&stakingOperationIsValidAmount&&stakingOperationValidatorFrom"
+                    class="col-span-12 mt-5 mx-auto w-full"
+                  >
+                    <button
+                      class="bg-brand rounded-xl p-2 w-full text-white"
+                      @click="unbond"
+                    >
+                      Unbond
                     </button>
                   </div>
                 </div>
@@ -410,6 +451,7 @@ import AccountModule from "@/store/modules/AccountModule";
 import {
   CosmosBroadcastMode,
   CosmosMsgDelegate,
+  CosmosMsgUndelegate,
   CosmosMsgWithdrawDelegatorReward,
   CosmosTxBody,
 } from "desmosjs";
@@ -440,6 +482,7 @@ export default defineComponent({
       stakingOperationAmount: ref(0),
       stakingOperationAmountRaw: ref("0"),
       stakingOperationIsValidAmount: ref(false),
+      stakingOperationMaxAmount: ref(0),
       stakingOperationValidatorFrom: ref(null) as any,
       stakingOperationValidatorTo: ref(null) as any,
       stakingOperationValidatorError: ref(""),
@@ -458,11 +501,13 @@ export default defineComponent({
     async toggleStakingOperationModal() {
       this.isStakingOperationOpen = !this.isStakingOperationOpen;
       this.stakingOperationAmount = 0;
+      this.stakingOperationMaxAmount = 0;
       this.stakingOperationAmountRaw = "0";
       this.stakingOperationIsValidAmount = false;
       this.stakingOperationValidatorFrom = null;
       this.stakingOperationValidatorTo = null;
       this.stakingOperationValidatorError = "";
+      this.updateMaxAmount();
     },
     async loadValidators() {
       this.isLoadingValidators = true;
@@ -537,11 +582,11 @@ export default defineComponent({
     toVotingPower(amount: number) {
       return Number((amount / this.totalVotingPower) * 100).toFixed(2);
     },
-    onDelegate(validator: any) {
+    async onDelegate(validator: any) {
       this.stakingOperationValidatorError = "";
       this.stakingOperation = StakingOperations.Delegate;
-      this.toggleModal();
-      this.toggleStakingOperationModal();
+      await this.toggleModal();
+      await this.toggleStakingOperationModal();
 
       // ensure that all the needed data is available
       if (
@@ -554,6 +599,26 @@ export default defineComponent({
         this.stakingOperationValidatorError =
           "Ops, an error occured while loading validator info";
       }
+      await this.updateMaxAmount();
+    },
+    async onUnbond(validator: any) {
+      this.stakingOperationValidatorError = "";
+      this.stakingOperation = StakingOperations.Unbond;
+      await this.toggleModal();
+      await this.toggleStakingOperationModal();
+
+      // ensure that all the needed data is available
+      if (
+        validator &&
+        validator.validator_info &&
+        validator.validator_info.operator_address
+      ) {
+        this.stakingOperationValidatorFrom = validator;
+      } else {
+        this.stakingOperationValidatorError =
+          "Ops, an error occured while loading validator info";
+      }
+      await this.updateMaxAmount();
     },
     async onWithdrawRewards(validator: any) {
       this.stakingOperationValidatorError = "";
@@ -561,17 +626,36 @@ export default defineComponent({
       await this.toggleModal();
       this.withdrawRewards(validator.validator_info.operator_address);
     },
-    setMaxAmount() {
+    async updateMaxAmount() {
+      let maxAmount = 0;
+      try {
+        if (this.stakingOperation === StakingOperations.Unbond) {
+          maxAmount =
+            this.stakingOperationValidatorFrom.delegations[0]?.amount.amount /
+              1000000 || 0;
+        } else {
+          if (accountModule.account) {
+            maxAmount = accountModule.account.balance;
+          }
+        }
+      } catch (e) {
+        // skip
+      }
+      this.stakingOperationMaxAmount = maxAmount;
+    },
+    async setMaxAmount() {
+      await this.updateMaxAmount();
       /* FIXME: subtract commissions */
       if (accountModule.account) {
-        this.stakingOperationAmount = accountModule.account.balance;
-        this.stakingOperationAmountRaw = String(accountModule.account.balance);
+        this.stakingOperationAmount = this.stakingOperationMaxAmount;
+        this.stakingOperationAmountRaw = String(this.stakingOperationMaxAmount);
         this.stakingOperationIsValidAmount = true;
       }
     },
     validateAmount() {
       let isValidNumber = false;
       if (accountModule.account) {
+        //this.updateMaxAmount();
         // check regex
         const amountRegex = /^[0-9.,]{1,}$/;
         const validAmountRaw = amountRegex.exec(this.stakingOperationAmountRaw);
@@ -585,7 +669,7 @@ export default defineComponent({
           }
           this.stakingOperationIsValidAmount =
             this.stakingOperationAmount >= 0.000001 &&
-            this.stakingOperationAmount <= accountModule.account.balance;
+            this.stakingOperationAmount <= this.stakingOperationMaxAmount;
         }
       }
 
@@ -616,6 +700,38 @@ export default defineComponent({
             {
               typeUrl: "/cosmos.staking.v1beta1.MsgDelegate",
               value: CosmosMsgDelegate.encode(msgDelegate).finish(),
+            },
+          ],
+          extensionOptions: [],
+          nonCriticalExtensionOptions: [],
+          timeoutHeight: 0,
+        };
+        await this.toggleStakingOperationModal();
+        transactionModule.start({
+          tx: txBody,
+          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+        });
+      }
+    },
+    async unbond() {
+      const amount = this.stakingOperationAmount * 1000000;
+      const fromValidatorAddress =
+        this.stakingOperationValidatorFrom.validator_info.operator_address;
+      if (accountModule.profile) {
+        const msgUnbond: CosmosMsgUndelegate = {
+          delegatorAddress: accountModule.profile.address,
+          validatorAddress: fromValidatorAddress,
+          amount: {
+            denom: this.ucoinDenom!,
+            amount: amount.toString(),
+          },
+        };
+        const txBody: CosmosTxBody = {
+          memo: "Unbond | Go-find",
+          messages: [
+            {
+              typeUrl: "/cosmos.staking.v1beta1.MsgUndelegate",
+              value: CosmosMsgUndelegate.encode(msgUnbond).finish(),
             },
           ],
           extensionOptions: [],
