@@ -204,12 +204,14 @@
                                 >
                                   Delegate
                                 </button>
-                                <!-- <button
+                                <button
+                                  v-if="validator.delegations[0]?.amount.amount>0"
                                   class="px-4 py-1 bg-purple-500 hover:bg-purple-600 rounded-lg text-white ml-1"
                                   type="button"
+                                  @click="onRedelegate(validator)"
                                 >
                                   Redelegate
-                                </button> -->
+                                </button>
                               </div>
 
                               <!-- Unbonding -->
@@ -344,38 +346,10 @@
                       Available: {{stakingOperationMaxAmount}} {{coinDenom}}
                     </div>
                   </div>
-
-                  <!-- To -->
-                  <div
-                    v-if="stakingOperationValidatorTo!==null"
-                    class="col-span-12 md:text-left"
-                  >
-                    <div class="flex relative text-sm lg:text-base">
-                      <span class="rounded-l-3xl inline-flex items-center px-3 bg-gray-100 dark:bg-gray-800 text-gray-500">
-                        To:
-                      </span>
-                      <div class="rounded-r-3xl flex-1 bg-gray-100 dark:bg-gray-800">
-                        <div class="grid grid-cols-12">
-                          <div class="col-span-12 flex py-2">
-                            <img
-                              alt="profile"
-                              :src="stakingOperationValidatorTo.validator_descriptions[0].avatar_url || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
-                              class="object-cover rounded-full h-10 w-10 "
-                            >
-                            <h6 class="my-auto pl-3 text-2xl">{{stakingOperationValidatorTo.validator_descriptions[0].moniker}}</h6>
-                          </div>
-                          <!-- <div class="font-mono">
-                          {{stakingOperationValidatorTo.validator_info.operator_address}}
-                        </div> -->
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                   <!-- From -->
                   <div
                     v-if="stakingOperationValidatorFrom!==null"
-                    class="col-span-12 md:text-left"
+                    class="col-span-12 md:text-left py-1"
                   >
                     <div class="flex relative text-sm lg:text-base">
                       <span class="rounded-l-3xl inline-flex items-center px-3 bg-gray-100 dark:bg-gray-800 text-gray-500">
@@ -396,6 +370,104 @@
                         </div> -->
                         </div>
                       </div>
+                    </div>
+                  </div>
+
+                  <!-- To -->
+                  <div
+                    v-if="stakingOperation==='redelegate'||stakingOperationValidatorTo"
+                    class="col-span-12 md:text-left py-1"
+                  >
+                    <div class="flex relative text-sm lg:text-base">
+                      <span class="rounded-l-3xl inline-flex items-center px-3 bg-gray-100 dark:bg-gray-800 text-gray-500">
+                        To:
+                      </span>
+                      <div class="rounded-r-3xl flex-1 bg-gray-100 dark:bg-gray-800">
+
+                        <!-- Can Select Validator To -->
+                        <span v-if="stakingOperation==='redelegate'">
+                          <button
+                            type="button"
+                            class="relative w-full rounded-3xl py-2 text-left cursor-default hover:cursor-pointer sm:text-sm"
+                            @click="toggleSelectStakingOperationValidatorTo"
+                          >
+                            <div
+                              v-if="stakingOperationValidatorTo"
+                              class="flex pl-3"
+                            >
+                              <img
+                                alt="profile"
+                                :src="stakingOperationValidatorTo.validator_descriptions[0].avatar_url || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
+                                class="object-cover rounded-full h-10 w-10 "
+                              >
+                              <h6 class="my-auto pl-3 text-2xl">{{stakingOperationValidatorTo.validator_descriptions[0].moniker}}</h6>
+                            </div>
+                            <div
+                              v-else
+                              class="text-xl pl-3"
+                            >
+                              <p>Select new validator</p>
+                            </div>
+                            <span class="ml-3 absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                              <svg
+                                class="h-5 w-5 text-gray-400"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  fill-rule="evenodd"
+                                  d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                                  clip-rule="evenodd"
+                                >
+                                </path>
+                              </svg>
+                            </span>
+                          </button>
+                        </span>
+
+                        <!-- Already has Validator To -->
+                        <span v-else>
+                          <div class="col-span-12 flex py-2">
+                            <img
+                              alt="profile"
+                              :src="stakingOperationValidatorTo.validator_descriptions[0].avatar_url || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
+                              class="object-cover rounded-full h-10 w-10 "
+                            >
+                            <h6 class="my-auto pl-3 text-2xl">{{stakingOperationValidatorTo.validator_descriptions[0].moniker}}</h6>
+                          </div>
+                        </span>
+                      </div>
+                    </div>
+                    <div
+                      v-if="isOpenSelectStakingOperationValidatorTo"
+                      class="mt-1 z-50 rounded-2xl bg-white shadow-lg transition duration-300 ease-in-out"
+                    >
+                      <ul
+                        tabindex="-1"
+                        role="listbox"
+                        aria-labelledby="listbox-label"
+                        aria-activedescendant="listbox-item-3"
+                        class="max-h-56 rounded-2xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm"
+                      >
+                        <li
+                          v-for="selectValidator in validators"
+                          id="listbox-item-0"
+                          role="option"
+                          class="text-gray-900 hover:bg-indigo-500 hover:text-white select-none relative py-2 pl-3 pr-9 cursor-pointer"
+                          @click="onSelectStakingOperationValidatorTo(selectValidator)"
+                        >
+                          <div class="flex pl-3">
+                            <img
+                              alt="profile"
+                              :src="selectValidator.validator_descriptions[0].avatar_url || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
+                              class="object-cover rounded-full h-7 w-7 "
+                            >
+                            <h6 class="my-auto pl-3 text-lg">{{selectValidator.validator_descriptions[0].moniker}}</h6>
+                          </div>
+                        </li>
+                      </ul>
                     </div>
                   </div>
 
@@ -424,6 +496,19 @@
                       Unbond
                     </button>
                   </div>
+
+                  <!-- Redelegate Button -->
+                  <div
+                    v-if="stakingOperation==='redelegate'&&stakingOperationIsValidAmount&&stakingOperationValidatorFrom&&stakingOperationValidatorTo"
+                    class="col-span-12 mx-auto w-full mt-5"
+                  >
+                    <button
+                      class="bg-brand rounded-xl p-2 w-full text-white"
+                      @click="redelegate"
+                    >
+                      Redelegate
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -450,6 +535,7 @@ import marked from "marked";
 import AccountModule from "@/store/modules/AccountModule";
 import {
   CosmosBroadcastMode,
+  CosmosMsgBeginRedelegate,
   CosmosMsgDelegate,
   CosmosMsgUndelegate,
   CosmosMsgWithdrawDelegatorReward,
@@ -487,6 +573,8 @@ export default defineComponent({
       stakingOperationValidatorTo: ref(null) as any,
       stakingOperationValidatorError: ref(""),
 
+      isOpenSelectStakingOperationValidatorTo: ref(false),
+
       coinDenom: process.env.VUE_APP_COIN_DENOM,
       ucoinDenom: process.env.VUE_APP_COIN_FEE_DENOM,
     };
@@ -507,6 +595,7 @@ export default defineComponent({
       this.stakingOperationValidatorFrom = null;
       this.stakingOperationValidatorTo = null;
       this.stakingOperationValidatorError = "";
+      this.isOpenSelectStakingOperationValidatorTo = false;
       this.updateMaxAmount();
     },
     async loadValidators() {
@@ -620,6 +709,33 @@ export default defineComponent({
       }
       await this.updateMaxAmount();
     },
+    async onRedelegate(validator: any) {
+      this.stakingOperationValidatorError = "";
+      this.stakingOperation = StakingOperations.Redelegate;
+      await this.toggleModal();
+      await this.toggleStakingOperationModal();
+
+      // ensure that all the needed data is available
+      if (
+        validator &&
+        validator.validator_info &&
+        validator.validator_info.operator_address
+      ) {
+        this.stakingOperationValidatorFrom = validator;
+      } else {
+        this.stakingOperationValidatorError =
+          "Ops, an error occured while loading validator info";
+      }
+      await this.updateMaxAmount();
+    },
+    async toggleSelectStakingOperationValidatorTo() {
+      this.isOpenSelectStakingOperationValidatorTo =
+        !this.isOpenSelectStakingOperationValidatorTo;
+    },
+    async onSelectStakingOperationValidatorTo(validator: any) {
+      this.stakingOperationValidatorTo = validator;
+      this.isOpenSelectStakingOperationValidatorTo = false;
+    },
     async onWithdrawRewards(validator: any) {
       this.stakingOperationValidatorError = "";
       this.stakingOperation = StakingOperations.Withdraw;
@@ -629,7 +745,10 @@ export default defineComponent({
     async updateMaxAmount() {
       let maxAmount = 0;
       try {
-        if (this.stakingOperation === StakingOperations.Unbond) {
+        if (
+          this.stakingOperation === StakingOperations.Unbond ||
+          this.stakingOperation === StakingOperations.Redelegate
+        ) {
           maxAmount =
             this.stakingOperationValidatorFrom.delegations[0]?.amount.amount /
               1000000 || 0;
@@ -700,6 +819,42 @@ export default defineComponent({
             {
               typeUrl: "/cosmos.staking.v1beta1.MsgDelegate",
               value: CosmosMsgDelegate.encode(msgDelegate).finish(),
+            },
+          ],
+          extensionOptions: [],
+          nonCriticalExtensionOptions: [],
+          timeoutHeight: 0,
+        };
+        await this.toggleStakingOperationModal();
+        transactionModule.start({
+          tx: txBody,
+          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+        });
+      }
+    },
+    async redelegate() {
+      const amount = this.stakingOperationAmount * 1000000;
+      this.isOpenSelectStakingOperationValidatorTo = false;
+      const toValidatorAddress =
+        this.stakingOperationValidatorTo.validator_info.operator_address;
+      const fromValidatorAddress =
+        this.stakingOperationValidatorFrom.validator_info.operator_address;
+      if (accountModule.profile) {
+        const msgRedelegate: CosmosMsgBeginRedelegate = {
+          delegatorAddress: accountModule.profile.address,
+          validatorSrcAddress: fromValidatorAddress,
+          validatorDstAddress: toValidatorAddress,
+          amount: {
+            denom: this.ucoinDenom!,
+            amount: amount.toString(),
+          },
+        };
+        const txBody: CosmosTxBody = {
+          memo: "Redelegate | Go-find",
+          messages: [
+            {
+              typeUrl: "/cosmos.staking.v1beta1.MsgBeginRedelegate",
+              value: CosmosMsgBeginRedelegate.encode(msgRedelegate).finish(),
             },
           ],
           extensionOptions: [],
