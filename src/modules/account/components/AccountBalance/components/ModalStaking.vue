@@ -440,9 +440,11 @@
                         </span>
                       </div>
                     </div>
+
+                    <!-- Select Validator To -->
                     <div
                       v-if="isOpenSelectStakingOperationValidatorTo"
-                      class="mt-1 z-50 rounded-2xl bg-white shadow-lg transition duration-300 ease-in-out"
+                      class="mt-1 z-50 rounded-2xl bg-white dark:bg-denim-900 dark:text-white shadow-lg transition duration-300 ease-in-out"
                     >
                       <ul
                         tabindex="-1"
@@ -455,7 +457,7 @@
                           v-for="selectValidator in validators"
                           id="listbox-item-0"
                           role="option"
-                          class="text-gray-900 hover:bg-indigo-500 hover:text-white select-none relative py-2 pl-3 pr-9 cursor-pointer"
+                          class="hover:bg-indigo-500 select-none relative py-2 pl-3 pr-9 cursor-pointer"
                           @click="onSelectStakingOperationValidatorTo(selectValidator)"
                         >
                           <div class="flex pl-3">
@@ -477,7 +479,7 @@
                     class="col-span-12 mt-5 mx-auto w-full"
                   >
                     <button
-                      class="bg-brand rounded-xl p-2 w-full text-white"
+                      class="bg-yellow-600 rounded-xl p-2 w-full text-white"
                       @click="delegate"
                     >
                       Delegate
@@ -490,7 +492,7 @@
                     class="col-span-12 mt-5 mx-auto w-full"
                   >
                     <button
-                      class="bg-brand rounded-xl p-2 w-full text-white"
+                      class="bg-green-600 rounded-xl p-2 w-full text-white"
                       @click="unbond"
                     >
                       Unbond
@@ -503,7 +505,7 @@
                     class="col-span-12 mx-auto w-full mt-5"
                   >
                     <button
-                      class="bg-brand rounded-xl p-2 w-full text-white"
+                      class="bg-purple-600 rounded-xl p-2 w-full text-white"
                       @click="redelegate"
                     >
                       Redelegate
