@@ -23,6 +23,8 @@ export default class AuthModule extends VuexModule {
     private mPassword: string | null = null;
     private _account: AuthAccount | null = null;
     private _authLevel: AuthLevel = AuthLevel.None;
+    public static DEFAULT_GAS_LIMIT = 350000;
+    public static DEFAULT_FEE_AMOUNT = "350";
     public static walletConnectClient = new WalletConnect({
         bridge: "https://bridge.walletconnect.org",
     });
@@ -107,8 +109,8 @@ export default class AuthModule extends VuexModule {
             };
 
             const feeValue: CosmosFee = {
-                amount: [{ denom: `${process.env.VUE_APP_COIN_FEE_DENOM}`, amount: "200" }],
-                gasLimit: 200000,
+                amount: [{ denom: `${process.env.VUE_APP_COIN_FEE_DENOM}`, amount: AuthModule.DEFAULT_FEE_AMOUNT }],
+                gasLimit: AuthModule.DEFAULT_GAS_LIMIT,
                 payer: "",
                 granter: this.granterAddress
             };
@@ -269,8 +271,8 @@ export default class AuthModule extends VuexModule {
                     sequence: account?.sequence || 0
                 };
                 const feeValue: CosmosFee = {
-                    amount: [{ denom: `${process.env.VUE_APP_COIN_FEE_DENOM}`, amount: "200" }],
-                    gasLimit: 200000,
+                    amount: [{ denom: `${process.env.VUE_APP_COIN_FEE_DENOM}`, amount: AuthModule.DEFAULT_FEE_AMOUNT }],
+                    gasLimit: AuthModule.DEFAULT_GAS_LIMIT,
                     payer: '',
                     granter: this.granterAddress
                 };
@@ -350,8 +352,8 @@ export default class AuthModule extends VuexModule {
                         };
 
                         const feeValue: CosmosFee = {
-                            amount: [{ denom: `${process.env.VUE_APP_COIN_FEE_DENOM}`, amount: "200" }],
-                            gasLimit: 200000,
+                            amount: [{ denom: `${process.env.VUE_APP_COIN_FEE_DENOM}`, amount: AuthModule.DEFAULT_FEE_AMOUNT }],
+                            gasLimit: AuthModule.DEFAULT_GAS_LIMIT,
                             payer: "",
                             granter: this.granterAddress
                         };
