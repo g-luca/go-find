@@ -248,6 +248,14 @@
                                     {{toDigitsFormat(userRewards/1000000,6)}} {{coinDenom}}
                                   </span>
                                 </h6>
+                                <button
+                                  v-if="userRewards > 0"
+                                  class="px-4 py-1 bg-blue-300 hover:bg-blue-700 rounded-lg text-white"
+                                  type="button"
+                                  @click="onWithdrawRewards(validator)"
+                                >
+                                  Withdraw Rewards
+                                </button>
                               </div>
                             </div>
 
@@ -399,7 +407,12 @@ import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import { sanitize } from "dompurify";
 import marked from "marked";
 import AccountModule from "@/store/modules/AccountModule";
-import { CosmosBroadcastMode, CosmosMsgDelegate, CosmosTxBody } from "desmosjs";
+import {
+  CosmosBroadcastMode,
+  CosmosMsgDelegate,
+  CosmosMsgWithdrawDelegatorReward,
+  CosmosTxBody,
+} from "desmosjs";
 import TransactionModule from "@/store/modules/TransactionModule";
 const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
@@ -542,6 +555,12 @@ export default defineComponent({
           "Ops, an error occured while loading validator info";
       }
     },
+    async onWithdrawRewards(validator: any) {
+      this.stakingOperationValidatorError = "";
+      this.stakingOperation = StakingOperations.Withdraw;
+      await this.toggleModal();
+      this.withdrawRewards(validator.validator_info.operator_address);
+    },
     setMaxAmount() {
       /* FIXME: subtract commissions */
       if (accountModule.account) {
@@ -604,6 +623,34 @@ export default defineComponent({
           timeoutHeight: 0,
         };
         await this.toggleStakingOperationModal();
+        transactionModule.start({
+          tx: txBody,
+          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+        });
+      }
+    },
+    async withdrawRewards(validatorAddress: string) {
+      if (accountModule.profile) {
+        const msgWithdrawRewards: CosmosMsgWithdrawDelegatorReward = {
+          delegatorAddress: accountModule.profile.address,
+          validatorAddress: validatorAddress,
+        };
+        const txBody: CosmosTxBody = {
+          memo: "Withdraw Rewards | Go-find",
+          messages: [
+            {
+              typeUrl:
+                "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+              value:
+                CosmosMsgWithdrawDelegatorReward.encode(
+                  msgWithdrawRewards
+                ).finish(),
+            },
+          ],
+          extensionOptions: [],
+          nonCriticalExtensionOptions: [],
+          timeoutHeight: 0,
+        };
         transactionModule.start({
           tx: txBody,
           mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
