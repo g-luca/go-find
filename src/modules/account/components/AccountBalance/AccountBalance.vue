@@ -16,7 +16,24 @@
               {{ $store.state.AccountModule.account._address }}
             </div>
             <div class="mb-6">
-              <ModalSend />
+              <div class="grid grid-cols-12">
+
+                <!-- Send -->
+                <div class="col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-1">
+                  <ModalSend />
+                </div>
+
+                <!-- Staking -->
+                <div class="col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-1">
+                  <ModalStaking />
+                </div>
+
+                <!-- Withdraw -->
+                <div class="col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-1">
+                  <ModalSend />
+                </div>
+
+              </div>
             </div>
 
             <!-- Balance value -->
