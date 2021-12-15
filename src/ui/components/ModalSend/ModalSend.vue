@@ -1,9 +1,6 @@
 <template>
   <span>
-    <div
-      v-if="$store.state.AccountModule.account._balance>0"
-      class="inline"
-    >
+    <div class="inline">
       <button
         type="button"
         class="text-white dark:text-white hover:text-green-400 dark:hover:text-green-400"
@@ -157,6 +154,7 @@ export default defineComponent({
       this.validateAmount();
     },
     setMaxAmount() {
+      /* FIXME: subtract commissions */
       if (accountModule.account) {
         this.amount = accountModule.account.balance;
         this.amountRaw = String(accountModule.account.balance);
