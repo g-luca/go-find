@@ -34,6 +34,9 @@ export const AccountQuery = gql`
             redelegations{
                 amount
             }
+            delegation_rewards{
+                amount
+            }
         }
     }
 `;

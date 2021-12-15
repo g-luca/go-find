@@ -1,9 +1,6 @@
 <template>
   <span>
-    <div
-      v-if="$store.state.AccountModule.account._balance>0"
-      class="inline"
-    >
+    <div class="inline">
       <button
         type="button"
         class="text-white dark:text-white hover:text-green-400 dark:hover:text-green-400"
@@ -28,7 +25,7 @@
               <DialogTitle class="text-3xl font-bold leading-6 text-gray-900 dark:text-white">
                 <span class="flex">
                   <div class="text-left my-auto">
-                    <h1 class="text-brand text-4xl">Stake</h1>
+                    <h1 class="text-purple-800 text-4xl">Stake</h1>
                   </div>
                   <div class="flex-auto text-right">
                     <button class="bg-gray-200 dark:bg-gray-800 rounded-full p-1 hover:text-red-500">
@@ -42,7 +39,93 @@
               </DialogTitle>
               <DialogOverlay />
               <div class="dark:text-white pt-3 pb-1 md:px-4">
+                <section class="pb-4">
 
+                  <span v-if="$store.state.AccountModule.account._delegations>0">
+                    <div class="grid grid-cols-12 pt-4 text-xl">
+                      <!-- Delegations -->
+                      <div class="col-span-4">
+                        <div class="m-2 p-4 shadow-lg rounded-2xl bg-white dark:bg-gray-800">
+                          <div class="flex items-center">
+                            <span class="rounded-full relative px-3 py-2 bg-yellow-500 bg-opacity-50 text-yellow-700 dark:text-yellow-300">
+                              <i class="bi bi-bank2 w-10 h-10" />
+                            </span>
+                            <p class="text-xl text-black dark:text-white ml-2">
+                              Delegated
+                            </p>
+                          </div>
+                          <div class="flex flex-col justify-start">
+                            <p class="text-gray-700 dark:text-gray-100 text-4xl text-left font-bold my-4">
+                              <span class="text-yellow-600 font-bold py-1">
+                                {{ splitNumberLeft($store.state.AccountModule.account._delegations,".") }}
+                                <span class="text-lg">
+                                  .{{ splitNumberRight($store.state.AccountModule.account._delegations,".") }}
+                                </span>
+                                <span class="text-gray-700 dark:text-gray-300 pl-2 text-sm">
+                                  {{coinDenom}}
+                                </span>
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Unbonding -->
+                      <div class="col-span-4">
+                        <div class="m-2 p-4 shadow-lg rounded-2xl bg-white dark:bg-gray-800">
+                          <div class="flex items-center">
+                            <span class="rounded-full relative px-3 py-2 bg-seagreen-400 bg-opacity-50 text-seagreen-800 dark:text-seagreen-300">
+                              <i class="bi bi-hourglass-split w-10 h-10" />
+                            </span>
+                            <p class="text-xl text-black dark:text-white ml-2">
+                              Unbonding
+                            </p>
+                          </div>
+                          <div class="flex flex-col justify-start">
+                            <p class="text-gray-700 dark:text-gray-100 text-4xl text-left font-bold my-4">
+                              <span class="text-seagreen-600 font-bold py-1">
+                                {{ splitNumberLeft($store.state.AccountModule.account._unbonding,".") }}
+                                <span class="text-lg">
+                                  .{{ splitNumberRight($store.state.AccountModule.account._unbonding,".") }}
+                                </span>
+                                <span class="text-gray-700 dark:text-gray-300 pl-2 text-sm">
+                                  {{coinDenom}}
+                                </span>
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Rewards -->
+                      <div class="col-span-4">
+                        <div class="m-2 p-4 shadow-lg rounded-2xl bg-white dark:bg-gray-800">
+                          <div class="flex items-center">
+                            <span class="rounded-full relative px-3 py-2 bg-blue-200 text-blue-600">
+                              <i class="bi bi-stars w-10 h-10" />
+                            </span>
+                            <p class="text-xl text-black dark:text-white ml-2">
+                              Rewards
+                            </p>
+                          </div>
+                          <div class="flex flex-col justify-start">
+                            <p class="text-gray-700 dark:text-gray-100 text-4xl text-left font-bold my-4">
+                              <span class="text-blue-600 font-bold py-1">
+                                {{ splitNumberLeft($store.state.AccountModule.account._rewards,".") }}
+                                <span class="text-lg">
+                                  .{{ splitNumberRight($store.state.AccountModule.account._rewards,".") }}
+                                </span>
+                                <span class="text-gray-700 dark:text-gray-300 pl-2 text-sm">
+                                  {{coinDenom}}
+                                </span>
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </span>
+                </section>
                 <section>
                   <div v-if="isLoadingValidators">
                     <SkeletonLoader
@@ -166,7 +249,7 @@
                           >
                             <span
                               class="relative inline-block px-3 py-1 font-semibold leading-tight"
-                              :class="uptime >= 95 ? 'text-green-800' : (uptime >= 60 ? 'text-yellow-900':'text-red-900')"
+                              :class="uptime >= 95 ? 'text-green-100' : (uptime >= 60 ? 'text-yellow-900':'text-red-900')"
                             >
                               <span
                                 aria-hidden="true"
@@ -198,6 +281,7 @@
                                   {{toDigitsFormat(userDelegation/1000000,6)}} {{coinDenom}}
                                 </h6>
                                 <button
+                                  v-if="$store.state.AccountModule.account._balance>0"
                                   class="px-4 py-1 bg-yellow-500 hover:bg-yellow-600 rounded-lg text-white mr-1"
                                   type="button"
                                   @click="onDelegate(validator)"
@@ -929,6 +1013,12 @@ export default defineComponent({
           mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
         });
       }
+    },
+    splitNumberLeft(value: number, separator: string) {
+      return String(value).split(separator)[0];
+    },
+    splitNumberRight(value: number, separator: string) {
+      return String(value).split(separator)[1];
     },
   },
 });
