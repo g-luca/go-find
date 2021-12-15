@@ -848,11 +848,14 @@ export default defineComponent({
       } catch (e) {
         // skip
       }
+      //subtract fees
+      if (maxAmount > 0) {
+        maxAmount -= Number(AuthModule.DEFAULT_FEE_AMOUNT) / 1000000;
+      }
       this.stakingOperationMaxAmount = maxAmount;
     },
     async setMaxAmount() {
       await this.updateMaxAmount();
-      /* FIXME: subtract commissions */
       if (accountModule.account) {
         this.stakingOperationAmount = this.stakingOperationMaxAmount;
         this.stakingOperationAmountRaw = String(this.stakingOperationMaxAmount);

@@ -67,7 +67,7 @@
                         class="text-sm text-gray-500 text-center pt-1"
                         :class="{'text-red-500':amount>$store.state.AccountModule.account._balance}"
                       >
-                        Available: {{$store.state.AccountModule.account._balance}} {{coinDenom}}
+                        Available: {{$store.state.AccountModule.account._balance - feeAmount}} {{coinDenom}}
                       </div>
                     </div>
 
@@ -126,6 +126,7 @@ import {
   DesmosJS,
 } from "desmosjs";
 import TransactionModule from "@/store/modules/TransactionModule";
+import AuthModule from "@/store/modules/AuthModule";
 const accountModule = getModule(AccountModule);
 const transactionModule = getModule(TransactionModule);
 
@@ -141,6 +142,7 @@ export default defineComponent({
       amount: ref(1),
       isValidAddress: ref(false),
       isValidAmount: ref(true),
+      feeAmount: ref(Number(AuthModule.DEFAULT_FEE_AMOUNT) / 1000000),
     };
   },
   methods: {
@@ -154,10 +156,10 @@ export default defineComponent({
       this.validateAmount();
     },
     setMaxAmount() {
-      /* FIXME: subtract commissions */
       if (accountModule.account) {
-        this.amount = accountModule.account.balance;
-        this.amountRaw = String(accountModule.account.balance);
+        const max = accountModule.account.balance - this.feeAmount;
+        this.amount = max;
+        this.amountRaw = String(max);
         this.isValidAmount = true;
       }
     },
@@ -178,7 +180,7 @@ export default defineComponent({
           }
           this.isValidAmount =
             this.amount >= 0.000001 &&
-            this.amount <= accountModule.account.balance;
+            this.amount <= accountModule.account.balance - this.feeAmount;
         }
       }
 
