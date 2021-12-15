@@ -41,10 +41,11 @@
               <div class="dark:text-white pt-3 pb-1 md:px-4">
                 <section class="pb-4">
 
+                  <!-- Totals -->
                   <span v-if="$store.state.AccountModule.account._delegations>0">
                     <div class="grid grid-cols-12 pt-4 text-xl">
                       <!-- Delegations -->
-                      <div class="col-span-4">
+                      <div class="col-span-12 md:col-span-4">
                         <div class="m-2 p-4 shadow-lg rounded-2xl bg-white dark:bg-gray-800">
                           <div class="flex items-center">
                             <span class="rounded-full relative px-3 py-2 bg-yellow-500 bg-opacity-50 text-yellow-700 dark:text-yellow-300">
@@ -71,7 +72,7 @@
                       </div>
 
                       <!-- Unbonding -->
-                      <div class="col-span-4">
+                      <div class="col-span-12 md:col-span-4">
                         <div class="m-2 p-4 shadow-lg rounded-2xl bg-white dark:bg-gray-800">
                           <div class="flex items-center">
                             <span class="rounded-full relative px-3 py-2 bg-seagreen-400 bg-opacity-50 text-seagreen-800 dark:text-seagreen-300">
@@ -98,7 +99,7 @@
                       </div>
 
                       <!-- Rewards -->
-                      <div class="col-span-4">
+                      <div class="col-span-12 md:col-span-4">
                         <div class="m-2 p-4 shadow-lg rounded-2xl bg-white dark:bg-gray-800">
                           <div class="flex items-center">
                             <span class="rounded-full relative px-3 py-2 bg-blue-200 text-blue-600">
@@ -140,21 +141,21 @@
                   >
                     <div class="hidden w-1/12 w-2/12 w-3/12 w-4/12 w-5/12 w-6/12 w-7/12 w-8/12 w-9/12 w-10/12 w-12/12 " />
                     <div class="min-w-full leading-normal bg-white dark:bg-gray-900">
-                      <div class=" hidden md:block">
+                      <div class="hidden md:block">
                         <div class="grid grid-cols-12">
-                          <div class="col-span-5 py-3 border-b border-gray-700 dark:text-white text-gray-800  text-left text-sm uppercase font-normal my-auto pl-2">
+                          <div class="col-span-5 py-3 border-b border-indigo-700 dark:text-white text-gray-800  text-left text-sm uppercase font-normal my-auto pl-2">
                             Validator
                           </div>
-                          <div class="col-span-2 py-3 border-b border-gray-700 dark:text-white text-gray-800  text-center text-sm uppercase font-normal my-auto">
+                          <div class="col-span-2 py-3 border-b border-indigo-700 dark:text-white text-gray-800  text-center text-sm uppercase font-normal my-auto">
                             Voting Power
                           </div>
-                          <div class="col-span-2 py-3 border-b border-gray-700 dark:text-white text-gray-800  text-center text-sm uppercase font-normal my-auto">
+                          <div class="col-span-2 py-3 border-b border-indigo-700 dark:text-white text-gray-800  text-center text-sm uppercase font-normal my-auto">
                             Commission
                           </div>
-                          <div class="col-span-1 py-3 border-b border-gray-700 dark:text-white text-gray-800  text-center text-sm uppercase font-normal my-auto">
+                          <div class="col-span-1 py-3 border-b border-indigo-700 dark:text-white text-gray-800  text-center text-sm uppercase font-normal my-auto">
                             Delegators
                           </div>
-                          <div class="col-span-2 py-3 border-b border-gray-700 dark:text-white text-gray-800  text-center text-sm uppercase font-normal my-auto">
+                          <div class="col-span-2 py-3 border-b border-indigo-700 dark:text-white text-gray-800  text-center text-sm uppercase font-normal my-auto">
                             Uptime
                           </div>
                         </div>
@@ -163,6 +164,7 @@
                         <div
                           v-for="(validator) in validators"
                           class="text-black dark:bg-gray-800 bg-gray-100 hover:bg-white dark:hover:bg-denim-900 hover:scale-x-105 duration-500 group grid grid-cols-12 hover:rounded-3xl rounded-sm mb-0.5 hover:shadow-xl py-3"
+                          :class="{'border-l-2 border-brand ': validator.delegations.length>0}"
                         >
                           <!-- Moniker & icon -->
                           <div class="col-span-12 md:col-span-5 border-gray-300 dark:border-gray-700 text-sm text-center my-auto pl-3">
