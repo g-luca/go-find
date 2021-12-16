@@ -686,6 +686,9 @@ export default defineComponent({
       this.isOpenSelectStakingOperationValidatorTo = false;
       this.updateMaxAmount();
     },
+    /**
+     * Load active validators list and their profiles
+     */
     async loadValidators() {
       this.isLoadingValidators = true;
       const apollo = useApolloClient();
@@ -737,6 +740,17 @@ export default defineComponent({
                         (this.validators[i]["validator_descriptions"][0][
                           "details"
                         ] as any) = sanitize(marked(validatorProfile["bio"]));
+                      } catch (e) {
+                        // skip
+                      }
+                    }
+
+                    /* eplace validator moniker with dtag */
+                    if (validatorProfile["dtag"]) {
+                      try {
+                        (this.validators[i]["validator_descriptions"][0][
+                          "moniker"
+                        ] as any) = validatorProfile["dtag"];
                       } catch (e) {
                         // skip
                       }
