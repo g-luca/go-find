@@ -16,7 +16,40 @@
               {{ $store.state.AccountModule.account._address }}
             </div>
             <div class="mb-6">
-              <ModalSend />
+              <div class="grid grid-cols-12">
+
+                <!-- Send -->
+                <div
+                  v-if="$store.state.AccountModule.account._balance>0"
+                  class="col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-1"
+                >
+                  <ModalSend />
+                </div>
+
+                <!-- Staking -->
+                <div class="col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-1">
+                  <ModalStaking />
+                </div>
+
+                <!-- Airdrop -->
+                <span
+                  v-if="$store.state.AirdropModule.config!==null&&$store.state.AirdropModule.config.airdrop_enabled===true"
+                  class="col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-1"
+                >
+
+                  <button
+                    type="button"
+                    class="text-white dark:text-white hover:text-red-500 dark:hover:text-red-500"
+                    @click="toggleAirdropModal()"
+                  >
+                    <div class="py-1.5 px-2 text-lg font-medium bg-seagreen-500 rounded-full focus:outline-none focus-visible:ring-2">
+                      <i class="bi bi-gift text-xl" />
+                    </div>
+                    <div class="dark:text-gray-200 text-black text-sm font-thin">Airdrop</div>
+                  </button>
+                </span>
+
+              </div>
             </div>
 
             <!-- Balance value -->
@@ -32,65 +65,6 @@
               </span>
             </div>
 
-            <!-- Airdrop -->
-            <span v-if="$store.state.AirdropModule.config!==null&&$store.state.AirdropModule.config.airdrop_enabled===true">
-              <button
-                class="mt-3 bg-seagreen-400 py-1 px-3 rounded-xl hover:bg-green-600 transition ease-in duration-200"
-                type="button"
-                @click="toggleAirdropModal()"
-              >
-                <div class="text-sm text-white">
-                  <i class="bi bi-gift-fill text-xl text-red-500" />
-                  <span class="text-xl align-middle">
-                    Airdrop
-                  </span>
-                </div>
-              </button>
-            </span>
-
-            <span v-if="$store.state.AccountModule.account._delegations>0">
-              <div class="grid grid-cols-2 pt-4">
-                <!-- Delegations -->
-                <div class="col-span-1">
-                  <div class="pt-2 text-left">
-                    <p class="font-semibold dark:text-white">
-                      Delegated
-                    </p>
-                    <span class="text-indigo-600 font-bold py-1 text-2xl">
-                      {{ splitNumberLeft($store.state.AccountModule.account._delegations,".") }}
-                      <span class="text-sm">
-                        .{{ splitNumberRight($store.state.AccountModule.account._delegations,".") }}
-                      </span>
-                      <span class="text-gray-700 dark:text-gray-300 pl-2 text-lg">
-                        {{coinDenom}}
-                      </span>
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Total -->
-                <div class="col-span-1">
-                  <div class="pt-2 text-right">
-                    <p class="font-semibold dark:text-white">
-                      Total
-                    </p>
-                    <span class="text-pink-600 font-bold py-1 text-2xl">
-                      {{ splitNumberLeft($store.state.AccountModule.account._delegations + $store.state.AccountModule.account._balance,".") }}
-                      <span class="text-sm">
-                        .{{ splitNumberRight($store.state.AccountModule.account._delegations+ $store.state.AccountModule.account._balance,".") }}
-                      </span>
-                      <span class="text-gray-700 dark:text-gray-300 pl-2 text-lg">
-                        {{coinDenom}}
-                      </span>
-                    </span>
-                  </div>
-                </div>
-
-              </div>
-              <p class="font-extralight text-xs text-right pt-2 dark:text-white">
-                <i class="bi bi-question-circle" /> To use your delegated balance, you have to unbond first.
-              </p>
-            </span>
           </dl>
         </div>
       </div>

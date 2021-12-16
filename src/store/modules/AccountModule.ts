@@ -88,7 +88,7 @@ export default class AccountModule extends VuexModule {
                             this.account = AccountModule.parseGqlAccountResult(result.data.account[0]);
                         } else {
                             // The user hasn't done any transaction on chain, completelly new account
-                            this.account = new Account(authModule.account.address, 0, 0);
+                            this.account = new Account(authModule.account.address, 0, 0, 0, 0);
                         }
                         this.profileLoadingStatus = LoadingStatus.Loaded;
                     } else {
@@ -166,14 +166,29 @@ export default class AccountModule extends VuexModule {
      * @returns parsed account
      */
     private static parseGqlAccountResult(accountRaw: any): Account {
-        // calculate the total of the delegations (if they exists)
+        // calculate the total of the delegations/rewards/unbonding (if they exists)
         let delegationsTot = 0;
+        let rewardsTot = 0;
+        let unbondingTot = 0;
         try {
             accountRaw.delegations?.forEach((delegation: any) => {
                 delegationsTot += Number(delegation.amount?.amount);
             });
         } catch { null }
-        return new Account(accountRaw.address, Number(accountRaw.account_balances[0]?.coins[0]?.amount) / 1000000, delegationsTot / 1000000);
+
+        try {
+            accountRaw.delegation_rewards?.forEach((reward: any) => {
+                rewardsTot += Number(reward.amount[0].amount);
+            });
+        } catch { null }
+
+        try {
+            accountRaw.unbonding_delegations?.forEach((unbond: any) => {
+                unbondingTot += Number(unbond.amount[0].amount);
+            });
+        } catch { null }
+
+        return new Account(accountRaw.address, Number(accountRaw.account_balances[0]?.coins[0]?.amount) / 1000000, delegationsTot / 1000000, rewardsTot / 1000000, unbondingTot / 1000000);
     }
 
 

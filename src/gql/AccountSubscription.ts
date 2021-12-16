@@ -16,6 +16,9 @@ export const AccountSubscription = gql`
             redelegations{
                 amount
             }
+            delegation_rewards{
+                amount
+            }
         }
     }
 `;
