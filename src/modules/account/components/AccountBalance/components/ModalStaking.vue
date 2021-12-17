@@ -864,7 +864,12 @@ export default defineComponent({
       }
       //subtract fees
       if (maxAmount > 0) {
-        maxAmount -= Number(AuthModule.DEFAULT_FEE_AMOUNT) / 1000000;
+        if (
+          this.stakingOperation !== StakingOperations.Unbond &&
+          this.stakingOperation !== StakingOperations.Redelegate
+        ) {
+          maxAmount -= Number(AuthModule.DEFAULT_FEE_AMOUNT) / 1000000;
+        }
       }
       this.stakingOperationMaxAmount = maxAmount;
     },
