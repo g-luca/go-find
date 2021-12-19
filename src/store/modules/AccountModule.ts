@@ -187,8 +187,7 @@ export default class AccountModule extends VuexModule {
                 unbondingTot += Number(unbond.amount[0].amount);
             });
         } catch { null }
-
-        return new Account(accountRaw.address, Number(accountRaw.account_balances[0]?.coins[0]?.amount) / 1000000, delegationsTot / 1000000, rewardsTot / 1000000, unbondingTot / 1000000);
+        return new Account(accountRaw.address, Number(accountRaw.account_balances[0]?.coins[0]?.amount || 0) / 1000000, delegationsTot / 1000000, rewardsTot / 1000000, unbondingTot / 1000000);
     }
 
 
