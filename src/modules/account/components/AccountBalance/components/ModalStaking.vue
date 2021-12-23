@@ -247,19 +247,35 @@
                           <!-- Uptime -->
                           <div
                             class="col-span-12 md:col-span-2 border-gray-300 dark:border-gray-700 text-sm text-center my-auto"
-                            :set="uptime=toDigitsFormat((15000-validator.validator_signing_infos[0].missed_blocks_counter) / 15000 * 100,0)"
+                            :set="uptime=toDigitsFormat((15000-(validator.validator_signing_infos[0]?.missed_blocks_counter || 0)) / 15000 * 100,0)"
                           >
                             <span
                               class="relative inline-block px-3 py-1 font-semibold leading-tight"
                               :class="uptime >= 95 ? 'text-green-100' : (uptime >= 60 ? 'text-yellow-900':'text-red-900')"
+                              :set="isInactive=validator.validator_statuses[0].jailed||validator.validator_statuses[0].status!==3"
                             >
                               <span
                                 aria-hidden="true"
                                 class="absolute inset-0  rounded-full"
-                                :class="uptime >= 95 ? 'bg-green-500' : (uptime >= 60 ? 'bg-yellow-400':'bg-red-400')"
+                                :class="(!isInactive)?(uptime >= 95 ? 'bg-green-500' : (uptime >= 60 ? 'bg-yellow-400':'bg-red-400')):'bg-red-500'"
                               />
                               <span class="relative text-xs">
-                                {{uptime}}%
+                                <span v-if="!isInactive">
+                                  {{ uptime }}%
+                                </span>
+                                <span v-else>
+                                  <span v-if="validator.validator_statuses[0].jailed">
+                                    Jailed
+                                  </span>
+                                  <span v-else>
+                                    <span v-if="validator.validator_statuses[0].status===2">
+                                      Unbonding
+                                    </span>
+                                    <span v-if="validator.validator_statuses[0].status===1">
+                                      Unbonded
+                                    </span>
+                                  </span>
+                                </span>
                               </span>
                             </span>
                           </div>

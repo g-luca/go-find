@@ -2,7 +2,7 @@ import { gql } from "@apollo/client/core";
 
 export const ValidatorsQuery = gql`
     query validators($address: String!){
-        validator_aggregate(where:{validator_info:{operator_address:{_is_null:false}} _and:{validator_statuses:{status:{_eq:3}}}},order_by:{validator_voting_powers_aggregate:{min:{voting_power:desc}}}){
+        validator_aggregate(where: {validator_info: {operator_address: {_is_null: false}}}, order_by: [{validator_statuses_aggregate:{max:{status:desc_nulls_last}}},{validator_voting_powers_aggregate:{min:{voting_power:desc}}}]) {
             nodes{
                 validator_commission_amounts{
                 amount
