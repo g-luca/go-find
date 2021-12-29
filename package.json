@@ -3,12 +3,12 @@
   "version": "0.2.0",
   "private": true,
   "scripts": {
-    "serve-testnet": "TAILWIND_MODE=watch vue-cli-service serve --mode testnet",
-    "build-testnet": "vue-cli-service build --mode testnet --prod",
-    "serve-mainnet": "TAILWIND_MODE=watch vue-cli-service serve --mode mainnet",
+    "lint": "vue-cli-service lint",
     "build-mainnet": "vue-cli-service build --mode mainnet --prod",
+    "build-testnet": "vue-cli-service build --mode testnet --prod",
     "serve-dist": "serve -s dist",
-    "lint": "vue-cli-service lint"
+    "serve-mainnet": "TAILWIND_MODE=watch vue-cli-service serve --mode mainnet",
+    "serve-testnet": "TAILWIND_MODE=watch vue-cli-service serve --mode testnet"
   },
   "dependencies": {
     "@apollo/client": "^3.3.21",
@@ -47,12 +47,12 @@
     "@types/marked": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^4.28.2",
     "@typescript-eslint/parser": "^4.28.2",
-    "@vue/cli-plugin-babel": "^4.5.13",
-    "@vue/cli-plugin-eslint": "^4.5.13",
-    "@vue/cli-plugin-router": "^4.5.13",
-    "@vue/cli-plugin-typescript": "^4.5.13",
-    "@vue/cli-plugin-vuex": "^4.5.13",
-    "@vue/cli-service": "^4.5.13",
+    "@vue/cli-plugin-babel": "^4.5.15",
+    "@vue/cli-plugin-eslint": "^4.5.15",
+    "@vue/cli-plugin-router": "^4.5.15",
+    "@vue/cli-plugin-typescript": "^4.5.15",
+    "@vue/cli-plugin-vuex": "^4.5.15",
+    "@vue/cli-service": "^4.5.15",
     "@vue/compiler-sfc": "^3.1.4",
     "@vue/eslint-config-prettier": "^6.0.0",
     "@vue/eslint-config-typescript": "^7.0.0",
@@ -66,7 +66,7 @@
     "protobufjs": "^6.11.2",
     "sass-loader": "^8.0.2",
     "typescript": "^4.3.5",
-    "vue-cli-plugin-tailwind": "~2.0.6",
+    "vue-cli-plugin-tailwind": "^2.2.18",
     "vuex-module-decorators": "^1.0.1"
   }
 }
