@@ -8,11 +8,11 @@ export default {
   components: { LinkBlockSample },
   data() {
     const squares: string[] = [
-      "github", "twitter", "band", "discord",
+      "github", "facebook", "band", "discord",
       "bitcoin", "go-find", "desmos", "dogecoin",
-      "akash", "twitch", "instagram", "ethereum",
-      "facebook", "tiktok", "youtube", "osmosis",
-      "crypto.org", "linkedin", "cosmos"];
+      "cosmos", "twitter", "instagram", "ethereum",
+      "twitch", "tiktok", "youtube", "osmosis",
+      "crypto.org", "linkedin", "akash"];
     return {
       squares,
     }
