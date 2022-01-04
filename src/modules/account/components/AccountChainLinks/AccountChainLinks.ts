@@ -232,7 +232,7 @@ export default defineComponent({
                     await this.toggleChainLinkEditor();
                     transactionModule.start({
                         tx: this.tx,
-                        mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+                        mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
                     });
 
                     success = true;
@@ -333,7 +333,7 @@ export default defineComponent({
                         await this.toggleChainLinkEditor();
                         transactionModule.start({
                             tx: txBody,
-                            mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+                            mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
                         });
                         this.tx = txBody;
 
