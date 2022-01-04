@@ -15,9 +15,11 @@
               </h2>
             </div>
             <div class="col-span-1 text-right my-auto">
-
               <div class="relative inline-block text-left">
-                <button type="button">
+                <button
+                  v-if="!$store.state.AccountModule.isNewProfile"
+                  type="button"
+                >
                   <div
                     class="bg-gray-100 dark:bg-gray-800 rounded-full p-1 hover:bg-gray-200 dark:hover:bg-gray-700  w-8 h-8"
                     @click="toggleProfileOptionDropdown()"
