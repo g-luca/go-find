@@ -19,6 +19,7 @@ export default class TransactionModule extends VuexModule {
     public tx: CosmosTxBody | null = null;
     public transactionStatus: TransactionStatus = TransactionStatus.Idle; // default status
     public errorMessage = "";
+    public detailedErrorMessage = "";
     public broadcastMode = CosmosBroadcastMode.BROADCAST_MODE_ASYNC;
 
 
@@ -36,9 +37,9 @@ export default class TransactionModule extends VuexModule {
             if (this.tx) {
                 const signedTx = await TransactionModule.handleSign(this.tx, payload.mPassword);
                 if (signedTx) {
-                    const broadcastSuccess = await TransactionModule.handleBroadcast(signedTx, this.broadcastMode);
+                    const broadcastResult = await TransactionModule.handleBroadcast(signedTx, this.broadcastMode);
                     //const broadcastSuccess = true; // only for development test
-                    if (broadcastSuccess) {
+                    if (broadcastResult.success) {
                         this.transactionStatus = TransactionStatus.Success;
                         this.errorMessage = "";
                         setTimeout(() => {
@@ -46,7 +47,8 @@ export default class TransactionModule extends VuexModule {
                         }, 500)
                     } else {
                         this.transactionStatus = TransactionStatus.Error;
-                        this.errorMessage = "Ops, the chain refused the message, retry later."
+                        this.errorMessage = "Ops, the chain refused the message, retry."
+                        this.detailedErrorMessage = broadcastResult.error;
                     }
                 } else {
                     if (authModule.account?.isUsingKeplr) {
@@ -74,6 +76,7 @@ export default class TransactionModule extends VuexModule {
         this.tx = payload.tx;
         this.transactionStatus = TransactionStatus.Idle;
         this.errorMessage = "";
+        this.detailedErrorMessage = "";
         this.isOpen = true;
     }
 
@@ -85,6 +88,7 @@ export default class TransactionModule extends VuexModule {
         this.tx = null;
         this.transactionStatus = TransactionStatus.Idle;
         this.errorMessage = "";
+        this.detailedErrorMessage = "";
         this.isOpen = false;
     }
 
@@ -111,19 +115,18 @@ export default class TransactionModule extends VuexModule {
      * @param signedTx the signed tx to broadcast
      * @returns true if succeeded, false otherwise
      */
-    private static async handleBroadcast(signedTx: Transaction, broadcastMode = CosmosBroadcastMode.BROADCAST_MODE_ASYNC): Promise<boolean> {
+    private static async handleBroadcast(signedTx: Transaction, broadcastMode = CosmosBroadcastMode.BROADCAST_MODE_ASYNC): Promise<{ success: boolean, error: string }> {
         try {
             const broadcastRawResult = await desmosNetworkModule.network.broadcast(signedTx, broadcastMode);
             const broadcastResult = CosmosTxResponse.fromJSON(broadcastRawResult.tx_response);
             console.log(`tx hash: ${broadcastResult.txhash}`);
-            //TODO: is this check enough?
             if (broadcastResult.txhash && broadcastResult.code === 0) {
-                return true;
+                return { success: true, error: "" };
             } else {
-                return false;
+                return { success: false, error: broadcastRawResult.tx_response?.raw_log || "" };
             }
-        } catch (e) {
-            return false;
+        } catch (e: any) {
+            return { success: false, error: e.message || "" };
         }
     }
 }

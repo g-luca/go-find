@@ -118,6 +118,9 @@
                 <p class="text-red-700">
                   {{ $store.state.TransactionModule.errorMessage }}
                 </p>
+                <p class="text-red-700 text-xs">
+                  {{ $store.state.TransactionModule.detailedErrorMessage }}
+                </p>
               </div>
               <div
                 v-if="!$store.state.AuthModule._account.isUsingKeplr&&!$store.state.AuthModule._account.isUsingWalletConnect"
