@@ -106,15 +106,25 @@
                         />
 
                         <div class="flex-0 mt-auto pb-1">
-
                           <BarChart
                             class="min-w-full h-6 md:h-7 mt-4"
                             :chartData="proposal.tally_chart"
                             :options="chartOptions"
                           />
                           <div class="grid grid-cols-12 text-xs ">
-                            <div class="col-span-12 pt-1 pb-2">
+                            <div
+                              class="pt-1 pb-2"
+                              :class="proposal.status==='PROPOSAL_STATUS_VOTING_PERIOD'?'col-span-7':'col-span-12'"
+                            >
                               Quorum: {{proposal.proposal_tally_percentage.total_votes}}% / {{Number(governanceParams.tally_params.quorum*100).toFixed(1)}}%
+                            </div>
+                            <div
+                              class="col-span-5 pt-1 pb-2"
+                              v-if="proposal.status==='PROPOSAL_STATUS_VOTING_PERIOD'"
+                            >
+                              <div class="text-right">
+                                End: {{new Date(proposal.voting_end_time).toLocaleString()}}
+                              </div>
                             </div>
                             <div class="col-span-6 md:col-span-4 py-0.5">
                               <span
