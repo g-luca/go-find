@@ -4,6 +4,7 @@ import AccountAirdrop from "@/modules/account/components/AccountAirdrop/AccountA
 import AirdropModule from "@/store/modules/AirdropModule";
 import ModalSend from "@/ui/components/ModalSend/ModalSend.vue";
 import ModalStaking from "@/modules/account/components/AccountBalance/components/ModalStaking.vue";
+import ModalGovernance from "@/modules/account/components/AccountBalance/components/ModalGovernance.vue";
 import { getModule } from "vuex-module-decorators";
 
 const airdropModule = getModule(AirdropModule);
@@ -14,6 +15,7 @@ export default defineComponent({
         AccountAirdrop,
         ModalSend,
         ModalStaking,
+        ModalGovernance,
     },
     data() {
         this.checkAirdrop()

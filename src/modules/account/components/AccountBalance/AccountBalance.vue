@@ -21,20 +21,25 @@
                 <!-- Send -->
                 <div
                   v-if="$store.state.AccountModule.account._balance>0"
-                  class="col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-1"
+                  class="col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-1 mx-auto"
                 >
                   <ModalSend />
                 </div>
 
                 <!-- Staking -->
-                <div class="col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-1">
+                <div class="col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-1 mx-auto">
                   <ModalStaking />
+                </div>
+
+                <!-- Governance -->
+                <div class="col-span-3 sm:col-span-1 lg:col-span-2 xl:col-span-1 mx-auto">
+                  <ModalGovernance />
                 </div>
 
                 <!-- Airdrop -->
                 <span
                   v-if="$store.state.AirdropModule.config!==null&&$store.state.AirdropModule.config.airdrop_enabled===true"
-                  class="col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-1"
+                  class="col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-1 mx-auto"
                 >
 
                   <button

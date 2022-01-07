@@ -26,6 +26,7 @@
     "autoprefixer": "^9",
     "bip39": "^3.0.4",
     "bootstrap-icons": "^1.7.2",
+    "chart.js": "^3.7.0",
     "desmosjs": "^0.1.19",
     "dompurify": "^2.3.4",
     "graphql": "^15.8.0",
@@ -37,6 +38,7 @@
     "vee-validate": "^4.5.7",
     "vue": "^3.2.26",
     "vue-apollo": "^3.1.0",
+    "vue-chart-3": "^3.0.4",
     "vue-class-component": "^8.0.0-0",
     "vue-router": "^4.0.12",
     "vuex": "^4.0.1"
