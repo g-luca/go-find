@@ -57,7 +57,7 @@
                       v-for="proposal in proposals"
                       class="col-span-12 md:col-span-6 lg:col-span-4 m-4"
                     >
-                      <div class="flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 pb-1 h-96">
+                      <div class="flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 md:p-6 pb-1 h-96">
                         <div class="flex-none">
                           <div class="flex">
                             <div class="flex-grow">
