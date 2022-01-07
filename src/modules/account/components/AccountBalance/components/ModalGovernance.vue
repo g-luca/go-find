@@ -166,16 +166,6 @@
                                 Abstained
                               </span>
                             </div>
-                            <div class="col-span-12 md:col-span-8 py-0.5">
-                              <span
-                                class="relative inline-flex rounded-full h-2 w-2"
-                                style="background:#FFFFFF"
-                              />
-                              {{proposal.proposal_tally_percentage['did_not_vote']}}%
-                              <span class="text-xs">
-                                Did not vote
-                              </span>
-                            </div>
                           </div>
 
                           <!-- Vote -->
@@ -352,18 +342,18 @@ export default defineComponent({
               const tallyNoWithVeto = Number(
                 proposalsRaw[i].proposal_tally_result["no_with_veto"]
               );
-              const tallyDidNotVote =
-                maxVotes - tallyYes - tallyNo - tallyAbstain - tallyNoWithVeto;
 
               const tallyTotalVotes =
                 tallyYes + tallyNo + tallyAbstain + tallyNoWithVeto;
 
               proposalsRaw[i].proposal_tally_percentage = {
-                yes: ((tallyYes / maxVotes) * 100).toFixed(1),
-                no: ((tallyNo / maxVotes) * 100).toFixed(1),
-                abstain: ((tallyAbstain / maxVotes) * 100).toFixed(1),
-                no_with_veto: ((tallyNoWithVeto / maxVotes) * 100).toFixed(1),
-                did_not_vote: ((tallyDidNotVote / maxVotes) * 100).toFixed(1),
+                yes: ((tallyYes / tallyTotalVotes) * 100).toFixed(1),
+                no: ((tallyNo / tallyTotalVotes) * 100).toFixed(1),
+                abstain: ((tallyAbstain / tallyTotalVotes) * 100).toFixed(1),
+                no_with_veto: (
+                  (tallyNoWithVeto / tallyTotalVotes) *
+                  100
+                ).toFixed(1),
                 total_votes: ((tallyTotalVotes / maxVotes) * 100).toFixed(1),
               };
 
@@ -373,32 +363,28 @@ export default defineComponent({
                 datasets: [
                   {
                     label: "Yes",
-                    data: [this.parseTallyValue(tallyYes, maxVotes)],
+                    data: [this.parseTallyValue(tallyYes, tallyTotalVotes)],
                     backgroundColor: "#42f56f",
                     borderWidth: 1,
                   },
                   {
                     label: "No",
-                    data: [this.parseTallyValue(tallyNo, maxVotes)],
+                    data: [this.parseTallyValue(tallyNo, tallyTotalVotes)],
                     backgroundColor: "#f55742",
                     borderWidth: 1,
                   },
                   {
                     label: "No with Veto",
-                    data: [this.parseTallyValue(tallyNoWithVeto, maxVotes)],
+                    data: [
+                      this.parseTallyValue(tallyNoWithVeto, tallyTotalVotes),
+                    ],
                     backgroundColor: "#000000",
                     borderWidth: 1,
                   },
                   {
                     label: "Abstain",
-                    data: [this.parseTallyValue(tallyAbstain, maxVotes)],
+                    data: [this.parseTallyValue(tallyAbstain, tallyTotalVotes)],
                     backgroundColor: "#949494",
-                    borderWidth: 1,
-                  },
-                  {
-                    label: "Did not vote",
-                    data: [this.parseTallyValue(tallyDidNotVote, maxVotes)],
-                    backgroundColor: "#FFFFFF",
                     borderWidth: 1,
                   },
                 ],
