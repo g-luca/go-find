@@ -123,7 +123,7 @@
                               v-if="proposal.status==='PROPOSAL_STATUS_VOTING_PERIOD'"
                             >
                               <div class="text-right">
-                                End: {{new Date(proposal.voting_end_time).toLocaleString()}}
+                                End: {{new Date(proposal.voting_end_time + 'z').toLocaleString()}}
                               </div>
                             </div>
                             <div class="col-span-6 md:col-span-4 py-0.5">
