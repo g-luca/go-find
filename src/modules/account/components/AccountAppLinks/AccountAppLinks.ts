@@ -129,7 +129,7 @@ export default defineComponent({
                 this.deletedApplicationLink = applicationLink;
                 transactionModule.start({
                     tx: txBody,
-                    mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+                    mode: CosmosBroadcastMode.BROADCAST_MODE_SYNC,
                 });
             }
         },
@@ -267,7 +267,7 @@ export default defineComponent({
                 this.isExecutingTransaction = true;
                 transactionModule.start({
                     tx: payload.txBody,
-                    mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+                    mode: CosmosBroadcastMode.BROADCAST_MODE_SYNC,
                 });
             } else {
                 //TODO: replace
