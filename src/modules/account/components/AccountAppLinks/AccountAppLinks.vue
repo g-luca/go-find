@@ -100,17 +100,7 @@
           </span>
           <span v-else>
             <div class="px-2 w-full ">
-              <span v-if="!$store.state.DesmosNetworkModule.isTestnet">
-                <h4 class="text-3xl text-center dark:text-white">
-                  <!-- Wow, such empty -->
-                  This feature will be enabled soon.
-                </h4>
-                <h5 class="text-lg text-gray-700 dark:text-gray-300 text-center">
-                  Waiting IBC!
-                  <!-- You don't have any Social Network connected to your profile -->
-                </h5>
-              </span>
-              <span v-else>
+              <span>
                 <h4 class="text-3xl text-center dark:text-white">
                   Wow, such empty
                 </h4>
@@ -119,10 +109,7 @@
                 </h5>
               </span>
             </div>
-            <div
-              v-if="$store.state.DesmosNetworkModule.isTestnet"
-              class="w-full pt-5 px-2"
-            >
+            <div class="w-full pt-5 px-2">
               <button
                 class="bg-brand hover:bg-yellow-600 w-full rounded-xl py-3 text-xl font-bold text-white"
                 @click="toggleApplicationLinkEditor()"
@@ -215,14 +202,14 @@
               <!-- Wallet Input for tx signin -->
               <div
                 v-if="selectedApplication!==''&&!hasUploadedProof"
-                class="md:flex -mx-4"
+                class="md:flex"
               >
                 <div class="px-4 pt-2">
                   <span class="flex w-16 h-16 mx-auto items-center justify-center text-2xl font-bold font-heading rounded-full bg-blue-50 dark:bg-gray-700 text-blue-600">
                     2
                   </span>
                 </div>
-                <div class="grid gird-cols-2 w-full">
+                <div class="grid gird-cols-2 w-full px-3 lg:px-5">
                   <h3 class="mt-2 text-2xl font-bold dark:text-white">
                     Social Ownership proof
                   </h3>
@@ -242,7 +229,7 @@
                       id="applicationUsername"
                       v-model="applicationUsername"
                       type="text"
-                      class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
+                      class="rounded-lg border w-full py-3 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 dark:border-gray-700 shadow-sm text-base focus:outline-none"
                       name="applicationUsername"
                       placeholder="Username"
                       @input="resetGeneratedProof()"

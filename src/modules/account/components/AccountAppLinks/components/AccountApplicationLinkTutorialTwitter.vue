@@ -10,7 +10,7 @@
         </div>
         <div class="col-span-12 md:col-span-11 dark:text-white text-lg md:pl-8">
           <h1 class="text-xl font-bold">
-            Choose a Verification method
+            Choose the verification method
           </h1>
           <div class="grid grid-cols-12">
             <div
