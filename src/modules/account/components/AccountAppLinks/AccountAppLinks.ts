@@ -15,7 +15,7 @@ import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
 import TransactionModule, { TransactionStatus } from "@/store/modules/TransactionModule";
 import AccountModule from "@/store/modules/AccountModule";
-
+import Clipboard from '@/ui/components/Clipboard.vue';
 import AccountApplicationLinkTutorialDiscord from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialDiscord.vue";
 import AccountApplicationLinkTutorialGithub from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialGithub.vue";
 import AccountApplicationLinkTutorialTwitch from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialTwitch.vue";
@@ -42,6 +42,7 @@ export default defineComponent({
         AccountApplicationLinkTutorialGithub,
         AccountApplicationLinkTutorialTwitch,
         AccountApplicationLinkTutorialTwitter,
+        Clipboard
     },
     data() {
         return {

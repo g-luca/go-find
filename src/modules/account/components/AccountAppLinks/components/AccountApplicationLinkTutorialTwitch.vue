@@ -9,11 +9,22 @@
       </div>
       <div class="col-span-12 md:col-span-11 dark:text-white text-lg md:pl-8">
         <div class="col-span-2 py-2">
-          <p class="dark:text-white text-xl font-bold">Now add this link to your Twitch account description.</p>
-          <div class="my-2 p-3 bg-black rounded-xl text-sm">
-            <div class="p-3 overflow-x-auto text-white">
+          <p class="dark:text-white text-xl font-bold">Add this link to your Twitch account biography <a
+              :href="'https://dashboard.twitch.tv/u/'+username+'/settings/channel'"
+              class="text-indigo-400"
+              target="_blank"
+            >here</a>.</p>
+          <div class="my-2 p-3 bg-gray-600 dark:bg-black rounded-xl text-sm">
+            <div class="p-3 overflow-x-auto text-white font-mono">
               {{ proofUrl }}
             </div>
+            <button
+              class="px-4 py-1 text-sm font-light text-white hover:text-brand"
+              @click="copy(proofUrl)"
+            >
+              <i class="bi bi-clipboard cursor-pointer" />
+              Copy
+            </button>
           </div>
         </div>
       </div>
@@ -32,10 +43,13 @@
   </section>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import ApplicationLinkModule from "@/store/modules/ApplicationLinkModule";
 import ApplicationLinkTwitch from "@/core/types/ApplicationLinks/ApplicationLinkTwitch";
+import ClipboardModule from "@/store/modules/ClipboardModule";
+import { getModule } from "vuex-module-decorators";
+const clipboardModule = getModule(ClipboardModule);
 
 export default defineComponent({
   components: {},
@@ -61,6 +75,9 @@ export default defineComponent({
     };
   },
   methods: {
+    copy(value: string) {
+      clipboardModule.copy(value);
+    },
     submitApplicationLink() {
       const callData = Buffer.from(
         JSON.stringify({
