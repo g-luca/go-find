@@ -1,5 +1,6 @@
 import ApplicationLink from '@/core/types/ApplicationLink';
 import ApplicationLinkDiscord from '@/core/types/ApplicationLinks/ApplicationLinkDiscord';
+import ApplicationLinkDomain from '@/core/types/ApplicationLinks/ApplicationLinkDomain';
 import ApplicationLinkGithub from '@/core/types/ApplicationLinks/ApplicationLinkGithub';
 import ApplicationLinkTwitch from '@/core/types/ApplicationLinks/ApplicationLinkTwitch';
 import ApplicationLinkTwitter from '@/core/types/ApplicationLinks/ApplicationLinkTwitter';
@@ -76,6 +77,9 @@ export default class ApplicationLinkModule extends VuexModule {
                             break;
                         case "twitch":
                             applicationLinks.push(new ApplicationLinkTwitch(applicationLinkRaw.username, applicationLinkRaw.state));
+                            break;
+                        case "domain":
+                            applicationLinks.push(new ApplicationLinkDomain(applicationLinkRaw.username, applicationLinkRaw.state));
                             break;
                     }
                 })
