@@ -156,7 +156,7 @@
           <div class="inline-block px-3 sm:px-10 md:px-12 lg:px-14 w-full max-w-6xl p-6 pb-1 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-900 shadow-xl rounded-2xl">
             <DialogTitle class="text-3xl font-bold leading-6 text-gray-900 dark:text-white">
               <span class="flex">
-                <div class="flex text-brand text-4xl">Connect Social Network</div>
+                <div class="flex text-brand text-4xl">Connect Social Networks</div>
                 <div class="flex-auto text-right">
                   <button class="bg-gray-200 dark:bg-gray-800 rounded-full p-1 hover:text-red-500">
                     <i
@@ -171,7 +171,7 @@
             <section class="p-4">
               <!-- Blockchain Select -->
               <div
-                v-if="selectedApplication === '' || !hasUploadedProof"
+                v-if="selectedApplication === null || !hasUploadedProof"
                 class="md:flex"
               >
                 <div class="px-4">
@@ -193,13 +193,13 @@
                         <div class="col-span-4">
                           <img
                             class="p-4 pointer-events-none select-none h-16 w-auto"
-                            :src="require('@/assets/brands/' + application + '/logo.svg')"
+                            :src="application.logo"
                             alt=""
                           />
                         </div>
                         <div class="col-span-5 my-auto">
                           <h5 class="dark:text-white text-2xl capitalize">
-                            {{ application }}
+                            {{ application.displayName }}
                           </h5>
                         </div>
                         <div class="col-span-3 text-right my-auto pr-4">
@@ -220,7 +220,7 @@
 
               <!-- Wallet Input for proof sign -->
               <div
-                v-if="selectedApplication !== '' && !hasUploadedProof"
+                v-if="selectedApplication !== null && !hasUploadedProof"
                 class="md:flex"
               >
                 <div class="px-4 pt-2">
@@ -241,9 +241,11 @@
                     >
                       Your
                       <span class="capitalize text-brand">
-                        {{ selectedApplication }}
+                        {{ selectedApplication.displayName }}
                       </span>
-                      username
+                      <span v-if="selectedApplication.name!=='domain'">
+                        username
+                      </span>
                     </label>
                     <input
                       id="applicationUsername"
@@ -251,7 +253,7 @@
                       type="text"
                       class="rounded-lg border w-full py-3 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 dark:border-gray-700 shadow-sm text-base focus:outline-none"
                       name="applicationUsername"
-                      placeholder="Username"
+                      :placeholder="selectedApplication.usernamePlaceholder"
                       @input="resetGeneratedProof()"
                     />
                   </div>
@@ -331,30 +333,42 @@
                 "
                 class="pt-4"
               >
-                <div class="text-center w-full text-4xl font-black pb-2 text-brand">
-                  <img
-                    class="p-4 pointer-events-none select-none h-24 w-auto mx-auto"
-                    :src="require('@/assets/brands/' + selectedApplication + '/logo.svg')"
-                    alt=""
-                  />
+                <div class="text-center w-full text-5xl font-black pb-2 dark:text-white">
+                  <div class="w-full mx-auto py-auto">
+                    <img
+                      class="p-4 pointer-events-none select-none h-24 w-auto mx-auto inline-block"
+                      :src="selectedApplication?.logo"
+                      alt=""
+                    >
+                    <span class="align-middle">
+                      {{selectedApplication?.displayName}}
+                    </span>
+                  </div>
                 </div>
                 <div class="pb-4">
-                  <AccountApplicationLinkTutorialDiscord v-if="selectedApplication === 'discord'" />
+                  <AccountApplicationLinkTutorialDiscord v-if="selectedApplication?.name === 'discord'" />
                   <AccountApplicationLinkTutorialGithub
-                    v-if="selectedApplication === 'github'"
+                    v-if="selectedApplication?.name === 'github'"
                     :username="applicationUsername"
                     :proof="generatedProof"
                     @applicationLinkSent="onApplicationLinkSent"
                   />
                   <AccountApplicationLinkTutorialTwitch
-                    v-if="selectedApplication === 'twitch'"
+                    v-if="selectedApplication?.name === 'twitch'"
                     :username="applicationUsername"
                     :proof="generatedProof"
                     :proof-url="proofUrl"
                     @applicationLinkSent="onApplicationLinkSent"
                   />
                   <AccountApplicationLinkTutorialTwitter
-                    v-if="selectedApplication === 'twitter'"
+                    v-if="selectedApplication?.name === 'twitter'"
+                    :username="applicationUsername"
+                    :proof="generatedProof"
+                    :proof-url="proofUrl"
+                    @applicationLinkSent="onApplicationLinkSent"
+                  />
+                  <AccountApplicationLinkTutorialDomain
+                    v-if="selectedApplication?.name === 'domain'"
                     :username="applicationUsername"
                     :proof="generatedProof"
                     :proof-url="proofUrl"

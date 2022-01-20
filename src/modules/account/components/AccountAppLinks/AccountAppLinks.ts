@@ -1,3 +1,7 @@
+import ApplicationLinkDomain from '@/core/types/ApplicationLinks/ApplicationLinkDomain';
+import ApplicationLinkTwitch from '@/core/types/ApplicationLinks/ApplicationLinkTwitch';
+import ApplicationLinkGithub from '@/core/types/ApplicationLinks/ApplicationLinkGithub';
+import ApplicationLinkTwitter from '@/core/types/ApplicationLinks/ApplicationLinkTwitter';
 import { defineComponent, ref, watchEffect } from "vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
@@ -20,6 +24,7 @@ import AccountApplicationLinkTutorialDiscord from "@/modules/account/components/
 import AccountApplicationLinkTutorialGithub from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialGithub.vue";
 import AccountApplicationLinkTutorialTwitch from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialTwitch.vue";
 import AccountApplicationLinkTutorialTwitter from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialTwitter.vue";
+import AccountApplicationLinkTutorialDomain from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialDomain.vue";
 import ApplicationLink from "@/core/types/ApplicationLink";
 import DesmosNetworkModule from "@/store/modules/DesmosNetworkModule";
 import Api from "@/core/api/Api";
@@ -42,12 +47,18 @@ export default defineComponent({
         AccountApplicationLinkTutorialGithub,
         AccountApplicationLinkTutorialTwitch,
         AccountApplicationLinkTutorialTwitter,
+        AccountApplicationLinkTutorialDomain,
         Clipboard
     },
     data() {
         return {
-            supportedApplicationLinks: ["twitter", "github", "twitch"],
-            selectedApplication: '',
+            supportedApplicationLinks: [
+                new ApplicationLinkTwitter(""),
+                new ApplicationLinkGithub(""),
+                new ApplicationLinkTwitch(""),
+                new ApplicationLinkDomain(""),
+            ] as ApplicationLink[],
+            selectedApplication: null as ApplicationLink | null,
             isApplicationLinkEditorOpen: false,
 
             applicationUsername: "",
@@ -98,9 +109,9 @@ export default defineComponent({
             }
         })
     }, methods: {
-        toggleApplicationLinkEditor(): void {
+        async toggleApplicationLinkEditor(): Promise<void> {
             this.isApplicationLinkEditorOpen = !this.isApplicationLinkEditorOpen;
-            this.selectedApplication = '';
+            this.selectedApplication = null;
         },
         /**
          * Delete a connected application link
@@ -218,7 +229,6 @@ export default defineComponent({
                 }
 
                 if (generatedProof) {
-                    console.log(generatedProof)
                     this.generatedProof = JSON.stringify(generatedProof);
                     this.isUploadingProof = true;
                     try {
@@ -242,29 +252,27 @@ export default defineComponent({
             this.isGeneratingProof = false;
             return this.proofUrl !== '';
         },
-        selectApplication(applicationName: string | null): void {
+        selectApplication(applicationLink: ApplicationLink): void {
             this.applicationUsername = "";
             this.hasUploadedProof = false;
             this.isUploadingProof = false;
             this.proofUrl = '';
             this.generatedProof = null;
-            if (applicationName === null) {
-                this.selectedApplication = '';
-            } else {
-                this.selectedApplication = applicationName;
+            if (applicationLink !== null) {
+                this.selectedApplication = applicationLink;
             }
         },
         resetGeneratedProof() {
             this.generatedProof = null;
         },
-        onApplicationLinkSent(payload: { txBody: CosmosTxBody, applicationLink: ApplicationLink } | null) {
+        async onApplicationLinkSent(payload: { txBody: CosmosTxBody, applicationLink: ApplicationLink } | null) {
             this.newApplicationLink = null;
+            await this.toggleApplicationLinkEditor();
 
             if (payload) {
                 this.isApplicationLinkEditorOpen = false;
                 this.tx = payload.txBody;
                 this.newApplicationLink = payload.applicationLink;
-                console.log(this.newApplicationLink.state)
                 this.isExecutingTransaction = true;
                 transactionModule.start({
                     tx: payload.txBody,
@@ -272,12 +280,15 @@ export default defineComponent({
                 });
             } else {
                 //TODO: replace
-                alert('error')
+                console.log('payload error')
             }
         },
         openApplicationLink(applicationLink: ApplicationLink): void {
-            const url = encodeURI(`${applicationLink.url}${applicationLink.username}`);
+            let url = encodeURI(`${applicationLink.url}${applicationLink.username}`);
+            if (applicationLink.name === 'domain') {
+                url = encodeURI(`https://${applicationLink.username}`);
+            }
             window.open(url, '_blank')
-        }
+        },
     },
 });
