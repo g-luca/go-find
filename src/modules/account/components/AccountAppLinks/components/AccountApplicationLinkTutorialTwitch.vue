@@ -19,6 +19,7 @@
               {{ proofUrl }}
             </div>
             <button
+              type="button"
               class="px-4 py-1 text-sm font-light text-white hover:text-brand"
               @click="copy(proofUrl)"
             >

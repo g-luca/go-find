@@ -55,7 +55,7 @@
           </div>
           <div class="col-span-12 md:col-span-11 dark:text-white text-lg md:pl-8">
             <h1 class="text-xl font-bold">
-              Post this tweet with that account
+              Post this tweet with your account
               <button
                 type="button"
                 class="py-1 px-4 flex justify-center items-center w-full rounded-lg text-white"
@@ -89,7 +89,7 @@
                 for="inputTweetUrl"
                 class="dark:text-white text-xl font-bold"
               >
-                Copy here the Tweet link
+                Copy the Tweet link
               </label>
               <Field
                 id="inputTweetUrl"
@@ -138,6 +138,7 @@
                 {{ proofUrl }}
               </div>
               <button
+                type="button"
                 class="px-4 py-1 text-sm font-light text-white hover:text-brand"
                 @click="copy(proofUrl)"
               >
