@@ -2,7 +2,7 @@
   <div>
     <Clipboard />
     <AppHeader />
-    <div class="w-full dark:bg-denim-900 bg-gray-50">
+    <div class="w-full bg-gradient-to-br to-purple-600 via-royalblue-800 from-royalblue-900 pt-14">
       <!-- Link is present in the URL -->
       <span v-if="link.length>0">
         <div class="min-h-screen h-screen">
@@ -11,11 +11,12 @@
             class="h-1/2 mx-auto"
           >
           <div class="pt-10">
-            <h1 class="text-4xl md:text-7xl text-center dark:text-white ">
+            <h1 class="text-4xl md:text-7xl text-center text-white ">
               Skyrocketing to
-              <span class="text-brand font-semibold"> @{{ $route.params['dtag'] }} </span><br>
-              <span class="text-transparent bg-clip-text bg-gradient-to-br from-royalblue-400 via-royalblue-500 to-royalblue-700 font-bold capitalize">{{ link }}
-              </span>
+              <span class="text-transparent bg-clip-text bg-gradient-to-br from-royalblue-200 via-royalblue-300 to-royalblue-400 font-bold capitalize">{{ link }}
+              </span><br>
+              <span class="text-brand font-medium"> @{{ $route.params['dtag'] }} </span>
+
             </h1>
           </div>
         </div>
