@@ -9,15 +9,20 @@
         <label class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl">Password</label>
         <input
           v-model="inputMPassword"
-          :class="{'border-red-700 dark:border-red-700': hasLoginError, 'focus:border-brand dark:border-gray-700': !isTouched}"
+          :class="{'border-red-700 dark:border-red-700': hasLoginError,'border-gray-300 dark:border-gray-500': !hasLoginError, 'focus:border-brand dark:border-gray-700': !isTouched}"
           type="password"
           required="required"
-          class="relative block w-full px-3 py-2 mt-2 border border-gray-300 dark:border-gray-500 placeholder-gray-300 
+          class="relative block w-full px-3 py-2 mt-2 border placeholder-gray-300 
                 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:z-10 text-sm md:text-xl
                 dark:bg-denim-900 dark:placeholder-gray-600 dark:text-white"
           placeholder="Wallet Password"
         >
       </div>
+      <span v-if="hasLoginError">
+        <p class="font-semibold text-lg pt-2 dark:text-white">
+          <i class="bi bi-exclamation-circle-fill text-red-500" /> Wrong Wallet password.
+        </p>
+      </span>
 
       <div>
         <button
