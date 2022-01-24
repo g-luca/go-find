@@ -55,6 +55,32 @@ export default class CryptoUtils {
         const decrypted = decipher.update(encrypted, 'hex', 'utf8') + decipher.final('utf8');
         return decrypted;
     }
+
+
+
+
+
+    //https://github.com/cosmos/cosmjs/blob/79396bfaa49831127ccbbbfdbb1185df14230c63/packages/amino/src/signdoc.ts
+    private static sortedObject(obj: any): any {
+        if (typeof obj !== "object" || obj === null) {
+            return obj;
+        }
+        if (Array.isArray(obj)) {
+            return obj.map(CryptoUtils.sortedObject);
+        }
+        const sortedKeys = Object.keys(obj).sort();
+        const result: Record<string, any> = {};
+        // NOTE: Use forEach instead of reduce for performance with large objects eg Wasm code
+        sortedKeys.forEach((key) => {
+            result[key] = CryptoUtils.sortedObject(obj[key]);
+        });
+        return result;
+    }
+
+    /** Returns a JSON string with objects sorted by key */
+    public static sortedJsonStringify(obj: any): string {
+        return JSON.stringify(CryptoUtils.sortedObject(obj));
+    }
 }
 
 
