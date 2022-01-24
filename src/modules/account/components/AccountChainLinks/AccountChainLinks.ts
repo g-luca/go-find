@@ -461,6 +461,12 @@ export default defineComponent({
                             // Catch & handle sign response
                             this.terraExtension!.once(async (payload) => {
                                 if (payload.error) {
+                                    if (payload.error.message === "Unknown Status Code: 27404") {
+                                        payload.error.message += " (Make sure your Ledger is unlocked)";
+                                    }
+                                    if ((payload.error.message as string).includes("rpc error: code = NotFound desc = account")) {
+                                        payload.error.message += " (Make sure that your account exists, has a positive balance, or has made at least one transaction)";
+                                    }
                                     this.generateProofError = payload.error.message || 'Unknown Error';
                                 } else {
                                     try {
