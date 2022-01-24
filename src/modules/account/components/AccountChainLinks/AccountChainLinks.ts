@@ -430,20 +430,22 @@ export default defineComponent({
             this.isSigningProof = false;
         },
         async gerateProofWithTerrastation(): Promise<any> {
+            // Check if Terra Extension is already initialized
             if (this.terraExtension === null) {
                 this.terraExtension = new TerraExtension();
             }
 
+            // If initialized and available, connect
             if (this.terraExtension && this.terraExtension.isAvailable) {
                 this.terraExtension.connect();
 
                 try {
                     this.terraExtension.once(({ error, address }) => {
-                        console.log(address)
                         if (error) {
                             this.generateProofError = error.message || 'Unknown Error';
                         }
                         try {
+                            // Request transaction sign
                             this.terraExtension!.sign({
                                 msgs: [new TerraMsgSend(address, address, { uluna: 0 })],
                                 memo: `${authModule.account?.address}`,
@@ -455,6 +457,8 @@ export default defineComponent({
                                     gas: '1'
                                 }),
                             })
+
+                            // Catch & handle sign response
                             this.terraExtension!.once(async (payload) => {
                                 if (payload.error) {
                                     this.generateProofError = payload.error.message || 'Unknown Error';
@@ -475,6 +479,8 @@ export default defineComponent({
                                         const terraAccountNumber = auth.getAccountNumber() || 0;
 
                                         let finalProof = null as DesmosProof | null;
+
+                                        // Terra Station sign
                                         if (terraSignMode === 'SIGN_MODE_DIRECT') {
                                             const txBody = terraBody
                                             const signDoc = new TerraSignDoc(
@@ -495,6 +501,7 @@ export default defineComponent({
                                                 plainText: Buffer.from(signDoc.toBytes()).toString('hex'),
                                             }
                                         } else {
+                                            // Terra Station + Ledger sign
                                             const tmpProof = {
                                                 account_number: String(terraAccountNumber),
                                                 chain_id: this.selectedChain?.chainId,
