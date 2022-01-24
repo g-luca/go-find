@@ -472,7 +472,7 @@ export default defineComponent({
                                         const terraBody = payload.result.body || {};
                                         const terraAuthInfo = payload.result.auth_info;
                                         const terraLCDClient = new TerraLCDClient({
-                                            URL: 'https://dev.terra.dev',
+                                            URL: 'https://lcd.terra.dev',
                                             chainID: this.selectedChain!.chainId,
                                         })
                                         const auth = await terraLCDClient.auth.accountInfo(terraAddress)
