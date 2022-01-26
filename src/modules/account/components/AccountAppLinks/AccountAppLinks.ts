@@ -1,3 +1,4 @@
+import ApplicationLinkDiscord from '@/core/types/ApplicationLinks/ApplicationLinkDiscord';
 import ApplicationLinkDomain from '@/core/types/ApplicationLinks/ApplicationLinkDomain';
 import ApplicationLinkTwitch from '@/core/types/ApplicationLinks/ApplicationLinkTwitch';
 import ApplicationLinkGithub from '@/core/types/ApplicationLinks/ApplicationLinkGithub';
@@ -21,6 +22,7 @@ import TransactionModule, { TransactionStatus } from "@/store/modules/Transactio
 import AccountModule from "@/store/modules/AccountModule";
 import Clipboard from '@/ui/components/Clipboard.vue';
 import AccountApplicationLinkTutorialDiscord from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialDiscord.vue";
+import AccountApplicationLinkTutorialDiscordVerify from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialDiscordVerify.vue";
 import AccountApplicationLinkTutorialGithub from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialGithub.vue";
 import AccountApplicationLinkTutorialTwitch from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialTwitch.vue";
 import AccountApplicationLinkTutorialTwitter from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialTwitter.vue";
@@ -44,6 +46,7 @@ export default defineComponent({
         DialogOverlay,
         DialogTitle,
         AccountApplicationLinkTutorialDiscord,
+        AccountApplicationLinkTutorialDiscordVerify,
         AccountApplicationLinkTutorialGithub,
         AccountApplicationLinkTutorialTwitch,
         AccountApplicationLinkTutorialTwitter,
@@ -56,6 +59,7 @@ export default defineComponent({
                 new ApplicationLinkTwitter(""),
                 new ApplicationLinkGithub(""),
                 new ApplicationLinkTwitch(""),
+                new ApplicationLinkDiscord(""),
                 new ApplicationLinkDomain(""),
             ] as ApplicationLink[],
             selectedApplication: null as ApplicationLink | null,
@@ -75,6 +79,9 @@ export default defineComponent({
             isUploadingProof: false,
             hasUploadedProof: false,
             proofUrl: '',
+
+
+            isModalDiscordVerifyOpen: false,
         }
     },
     beforeMount() {
@@ -92,7 +99,11 @@ export default defineComponent({
                     if (this.tx?.messages[0].typeUrl === "/desmos.profiles.v1beta1.MsgLinkApplication" && this.newApplicationLink) {
                         console.log('application link success!')
                         // application link message sent, now we need also to wait the verification process
-                        accountModule.profile.applicationLinks.push(this.newApplicationLink);
+
+                        // if Discord, reopen the modal to complete the process
+                        if (this.newApplicationLink.name === 'discord') {
+                            this.toggleModalDiscordVerify();
+                        }
                     }
 
                     // handle application unlink
@@ -290,5 +301,8 @@ export default defineComponent({
             }
             window.open(url, '_blank')
         },
+        async toggleModalDiscordVerify(): Promise<void> {
+            this.isModalDiscordVerifyOpen = !this.isModalDiscordVerifyOpen;
+        }
     },
 });

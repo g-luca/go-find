@@ -6,6 +6,7 @@ export default class ApplicationLinkDiscord extends ApplicationLink {
     readonly displayName: string = 'Discord';
     readonly logo: string = require('@/assets/brands/discord/logo.svg');
     readonly url: string = "https://www.discord.com/channels/@me/";
+    readonly usernamePlaceholder: string = "Username#1234";
 
     constructor(username: string, state = DesmosApplicationLinkState.APPLICATION_LINK_STATE_INITIALIZED_UNSPECIFIED) {
         super(username, state);

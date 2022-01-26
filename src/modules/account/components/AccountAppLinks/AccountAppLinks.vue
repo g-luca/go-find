@@ -346,7 +346,12 @@
                   </div>
                 </div>
                 <div class="pb-4">
-                  <AccountApplicationLinkTutorialDiscord v-if="selectedApplication?.name === 'discord'" />
+                  <AccountApplicationLinkTutorialDiscord
+                    v-if="selectedApplication?.name === 'discord'"
+                    :username="applicationUsername"
+                    :proof="generatedProof"
+                    @applicationLinkSent="onApplicationLinkSent"
+                  />
                   <AccountApplicationLinkTutorialGithub
                     v-if="selectedApplication?.name === 'github'"
                     :username="applicationUsername"
@@ -377,6 +382,36 @@
                 </div>
               </div>
             </section>
+          </div>
+        </div>
+      </div>
+    </Dialog>
+
+    <!-- Discord Verify -->
+    <Dialog
+      :open="this.isModalDiscordVerifyOpen"
+      @close="this.toggleModalDiscordVerify()"
+    >
+      <div class="fixed inset-0 z-20 overflow-y-auto bg-opacity-50 bg-gray-500">
+        <div class="min-h-screen px-4 text-center">
+          <span class="inline-block h-screen align-middle"> &#8203; </span>
+
+          <div class="inline-block px-3 sm:px-10 md:px-12 lg:px-14 w-full max-w-6xl p-6 pb-1 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-900 shadow-xl rounded-2xl">
+            <DialogTitle class="text-3xl font-bold leading-6 text-gray-900 dark:text-white">
+              <span class="flex">
+                <div class="flex text-brand text-4xl">Discord Verification</div>
+                <div class="flex-auto text-right">
+                  <button class="bg-gray-200 dark:bg-gray-800 rounded-full p-1 hover:text-red-500">
+                    <i
+                      class="bi bi-x h-12 w-12"
+                      @click="toggleModalDiscordVerify()"
+                    />
+                  </button>
+                </div>
+              </span>
+            </DialogTitle>
+
+            <AccountApplicationLinkTutorialDiscordVerify :username="applicationUsername" />
           </div>
         </div>
       </div>
