@@ -99,6 +99,7 @@ export default defineComponent({
                     if (this.tx?.messages[0].typeUrl === "/desmos.profiles.v1beta1.MsgLinkApplication" && this.newApplicationLink) {
                         console.log('application link success!')
                         // application link message sent, now we need also to wait the verification process
+                        accountModule.profile.applicationLinks.push(this.newApplicationLink);
 
                         // if Discord, reopen the modal to complete the process
                         if (this.newApplicationLink.name === 'discord') {
