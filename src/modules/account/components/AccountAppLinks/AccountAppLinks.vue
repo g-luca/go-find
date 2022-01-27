@@ -73,7 +73,7 @@
                       <h4 class="dark:text-white select-none pt-1 text-xl font-medium has-tooltip">
                         {{ applicationLink.displayName }}
                         <span
-                          class="text-sm font-light text-white tooltip ml-0.5 py-0.5 text-left dark:bg-gray-800 bg-gray-500 px-2 rounded-xl"
+                          class="text-sm font-light text-white tooltip ml-0.5 py-0.5 text-left dark:bg-gray-800 bg-gray-500 px-2 rounded-xl shadow-md"
                           v-if="applicationLink.name!=='domain'"
                         >
                           {{applicationLink.username}}
