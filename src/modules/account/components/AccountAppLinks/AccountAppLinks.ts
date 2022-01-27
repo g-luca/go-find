@@ -295,11 +295,7 @@ export default defineComponent({
             }
         },
         openApplicationLink(applicationLink: ApplicationLink): void {
-            let url = encodeURI(`${applicationLink.url}${applicationLink.username}`);
-            if (applicationLink.name === 'domain') {
-                url = encodeURI(`https://${applicationLink.username}`);
-            }
-            window.open(url, '_blank')
+            window.open(applicationLink.redirectUrl, '_blank')
         },
         async toggleModalDiscordVerify(): Promise<void> {
             this.isModalDiscordVerifyOpen = !this.isModalDiscordVerifyOpen;

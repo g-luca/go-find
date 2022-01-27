@@ -6,6 +6,7 @@ export default class ApplicationLinkDomain extends ApplicationLink {
     readonly displayName: string = 'Domain';
     readonly logo: string = require('@/assets/brands/domain/logo.svg');
     readonly url: string = "";
+    readonly redirectUrl = `https://${this.username}`;
     readonly usernamePlaceholder: string = "Domain (ex. go-find.me)";
 
 

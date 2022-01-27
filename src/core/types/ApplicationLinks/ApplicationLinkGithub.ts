@@ -6,6 +6,7 @@ export default class ApplicationLinkGithub extends ApplicationLink {
     readonly displayName: string = 'GitHub';
     readonly logo: string = require('@/assets/brands/github/logo.svg');
     readonly url: string = "https://www.github.com/";
+    readonly redirectUrl = `${this.url}${this.username}`;
 
     constructor(username: string, state = DesmosApplicationLinkState.APPLICATION_LINK_STATE_INITIALIZED_UNSPECIFIED) {
         super(username, state);
