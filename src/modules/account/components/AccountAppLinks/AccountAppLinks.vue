@@ -126,7 +126,7 @@
               <span>
                 <h4 class="text-3xl text-center dark:text-white">Wow, such empty</h4>
                 <h5 class="text-lg text-gray-700 dark:text-gray-300 text-center">
-                  You don't have any Blockchain connected to your profile
+                  You don't have any Social Network connected to your profile
                 </h5>
               </span>
             </div>
@@ -135,7 +135,7 @@
                 class="bg-brand hover:bg-yellow-600 w-full rounded-xl py-3 text-xl font-bold text-white"
                 @click="toggleApplicationLinkEditor()"
               >
-                Connect a new Social
+                Connect a new Social Network
               </button>
             </div>
           </span>
