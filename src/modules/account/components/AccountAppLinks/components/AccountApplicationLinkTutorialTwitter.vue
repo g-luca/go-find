@@ -155,6 +155,9 @@
           (selectedVerificationMethod.id === 'tweet' && tweetId) ||
           selectedVerificationMethod.id === 'bio'
         ">
+        <div class="text-red-500 py-1 pl-4">
+          {{this.checkError}}
+        </div>
         <button
           type="button"
           class="py-2 w-full bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-lg"
@@ -230,6 +233,7 @@ export default defineComponent({
       tweetId: "",
       verificationMethods: verificationMethods,
       selectedVerificationMethod: verificationMethods[0],
+      checkError: "",
     };
   },
   methods: {
@@ -258,16 +262,49 @@ export default defineComponent({
       );
     },
     submitApplicationLink() {
-      let data = {
-        method: "tweet",
-        value: this.tweetId,
-      };
-      if (this.selectedVerificationMethod.id === "bio") {
-        data = {
+      if (this.selectedVerificationMethod.id === "tweet") {
+        this.submitApplicationLinkTweet();
+      } else {
+        this.submitApplicationLinkBio();
+      }
+    },
+    async submitApplicationLinkBio() {
+      this.checkError = "";
+      let checkSuccess = false;
+      const endpointCheck = `https://themis.mainnet.desmos.network/twitter/users/${this.username}`;
+      const regexpCheck = new RegExp("(https?://[^s]+)");
+      try {
+        const res = await (await fetch(endpointCheck)).json();
+        if (regexpCheck.test(res.bio)) {
+          checkSuccess = true;
+        }
+      } catch (e) {
+        // check failed
+      }
+      if (checkSuccess) {
+        const data = {
           method: "bio",
           value: this.username,
         };
+        const callData = Buffer.from(JSON.stringify(data)).toString("hex");
+        const txBody = ApplicationLinkModule.generateApplicationLinkTxBody(
+          "twitter",
+          this.username,
+          callData
+        );
+        this.$emit("applicationLinkSent", {
+          txBody: txBody,
+          applicationLink: new ApplicationLinkTwitter(this.username),
+        });
+      } else {
+        this.checkError = "Twitter biography link not found";
       }
+    },
+    async submitApplicationLinkTweet() {
+      const data = {
+        method: "tweet",
+        value: this.tweetId,
+      };
       const callData = Buffer.from(JSON.stringify(data)).toString("hex");
       const txBody = ApplicationLinkModule.generateApplicationLinkTxBody(
         "twitter",

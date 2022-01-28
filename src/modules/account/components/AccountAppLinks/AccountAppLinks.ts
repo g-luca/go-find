@@ -66,6 +66,7 @@ export default defineComponent({
             isApplicationLinkEditorOpen: false,
 
             applicationUsername: "",
+            isValidApplicationUsername: true,
             mPassword: "",
 
             isExecutingTransaction: false,
@@ -158,6 +159,12 @@ export default defineComponent({
             }
         },
         async generateProof(): Promise<boolean> {
+            this.isValidApplicationUsername = true;
+            if (!this.selectedApplication?.usernameRegExp.test(this.applicationUsername)) {
+                this.isValidApplicationUsername = false;
+                return false;
+            }
+
             this.isGeneratingProof = true;
             try {
                 this.generateProofError = "";

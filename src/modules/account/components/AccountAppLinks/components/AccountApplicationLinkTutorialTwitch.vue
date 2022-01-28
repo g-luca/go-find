@@ -33,6 +33,9 @@
 
     <!-- Send Application Link -->
     <section>
+      <div class="text-red-500 py-1 pl-4">
+        {{this.checkError}}
+      </div>
       <button
         type="button"
         class="py-2 ml-0 md:ml-4 w-full bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
@@ -73,27 +76,44 @@ export default defineComponent({
     return {
       inputPasteUrl: "",
       pasteRawUrl: "",
+      checkError: "",
     };
   },
   methods: {
     copy(value: string) {
       clipboardModule.copy(value);
     },
-    submitApplicationLink() {
-      const callData = Buffer.from(
-        JSON.stringify({
-          username: this.username,
-        })
-      ).toString("hex");
-      const txBody = ApplicationLinkModule.generateApplicationLinkTxBody(
-        "twitch",
-        this.username,
-        callData
-      );
-      this.$emit("applicationLinkSent", {
-        txBody: txBody,
-        applicationLink: new ApplicationLinkTwitch(this.username),
-      });
+    async submitApplicationLink() {
+      this.checkError = "";
+      let checkSuccess = false;
+      const endpointCheck = `https://themis.mainnet.desmos.network/twitch/users/${this.username}`;
+      const regexpCheck = new RegExp("(https?://[^s]+)");
+      try {
+        const res = await (await fetch(endpointCheck)).json();
+        if (regexpCheck.test(res.bio)) {
+          checkSuccess = true;
+        }
+      } catch (e) {
+        // check failed
+      }
+      if (checkSuccess) {
+        const callData = Buffer.from(
+          JSON.stringify({
+            username: this.username,
+          })
+        ).toString("hex");
+        const txBody = ApplicationLinkModule.generateApplicationLinkTxBody(
+          "twitch",
+          this.username,
+          callData
+        );
+        this.$emit("applicationLinkSent", {
+          txBody: txBody,
+          applicationLink: new ApplicationLinkTwitch(this.username),
+        });
+      } else {
+        this.checkError = "Twitch biography link not found";
+      }
     },
   },
 });
