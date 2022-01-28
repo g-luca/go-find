@@ -244,6 +244,7 @@ export default defineComponent({
       if (this.inputTweetUrl) {
         try {
           this.tweetId = this.inputTweetUrl.split("/status/")[1];
+          this.tweetId = this.tweetId.split("?")[0]; // ignore possible query params
         } catch (e) {
           console.log("invalid tweet url");
         }
