@@ -1,5 +1,6 @@
 import ApplicationLink from '@/core/types/ApplicationLink';
 import ApplicationLinkDiscord from '@/core/types/ApplicationLinks/ApplicationLinkDiscord';
+import ApplicationLinkDomain from '@/core/types/ApplicationLinks/ApplicationLinkDomain';
 import ApplicationLinkGithub from '@/core/types/ApplicationLinks/ApplicationLinkGithub';
 import ApplicationLinkTwitch from '@/core/types/ApplicationLinks/ApplicationLinkTwitch';
 import ApplicationLinkTwitter from '@/core/types/ApplicationLinks/ApplicationLinkTwitter';
@@ -27,7 +28,7 @@ export default class ApplicationLinkModule extends VuexModule {
             const msgLinkApplication: DesmosMsgLinkApplication = {
                 callData: callData,
                 sender: authModule.account?.address,
-                sourceChannel: "channel-7",
+                sourceChannel: process.env.VUE_APP_IBC_PROFILES_CHANNEL || "",
                 sourcePort: "ibc-profiles",
                 linkData: {
                     application: application,
@@ -38,7 +39,7 @@ export default class ApplicationLinkModule extends VuexModule {
 
             }
             const txBody: CosmosTxBody = {
-                memo: `Linking ${username} to ${application}`,
+                memo: `Linking ${username} to ${application} | Go-find`,
                 messages: [
                     {
                         typeUrl: "/desmos.profiles.v1beta1.MsgLinkApplication",
@@ -76,6 +77,9 @@ export default class ApplicationLinkModule extends VuexModule {
                             break;
                         case "twitch":
                             applicationLinks.push(new ApplicationLinkTwitch(applicationLinkRaw.username, applicationLinkRaw.state));
+                            break;
+                        case "domain":
+                            applicationLinks.push(new ApplicationLinkDomain(applicationLinkRaw.username, applicationLinkRaw.state));
                             break;
                     }
                 })

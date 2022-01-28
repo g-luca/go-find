@@ -1,3 +1,8 @@
+import ApplicationLinkDiscord from '@/core/types/ApplicationLinks/ApplicationLinkDiscord';
+import ApplicationLinkDomain from '@/core/types/ApplicationLinks/ApplicationLinkDomain';
+import ApplicationLinkTwitch from '@/core/types/ApplicationLinks/ApplicationLinkTwitch';
+import ApplicationLinkGithub from '@/core/types/ApplicationLinks/ApplicationLinkGithub';
+import ApplicationLinkTwitter from '@/core/types/ApplicationLinks/ApplicationLinkTwitter';
 import { defineComponent, ref, watchEffect } from "vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
@@ -15,11 +20,13 @@ import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
 import TransactionModule, { TransactionStatus } from "@/store/modules/TransactionModule";
 import AccountModule from "@/store/modules/AccountModule";
-
+import Clipboard from '@/ui/components/Clipboard.vue';
 import AccountApplicationLinkTutorialDiscord from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialDiscord.vue";
+import AccountApplicationLinkTutorialDiscordVerify from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialDiscordVerify.vue";
 import AccountApplicationLinkTutorialGithub from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialGithub.vue";
 import AccountApplicationLinkTutorialTwitch from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialTwitch.vue";
 import AccountApplicationLinkTutorialTwitter from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialTwitter.vue";
+import AccountApplicationLinkTutorialDomain from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialDomain.vue";
 import ApplicationLink from "@/core/types/ApplicationLink";
 import DesmosNetworkModule from "@/store/modules/DesmosNetworkModule";
 import Api from "@/core/api/Api";
@@ -39,14 +46,23 @@ export default defineComponent({
         DialogOverlay,
         DialogTitle,
         AccountApplicationLinkTutorialDiscord,
+        AccountApplicationLinkTutorialDiscordVerify,
         AccountApplicationLinkTutorialGithub,
         AccountApplicationLinkTutorialTwitch,
         AccountApplicationLinkTutorialTwitter,
+        AccountApplicationLinkTutorialDomain,
+        Clipboard
     },
     data() {
         return {
-            supportedApplicationLinks: ["twitter", "github", "twitch"],
-            selectedApplication: '',
+            supportedApplicationLinks: [
+                new ApplicationLinkTwitter(""),
+                new ApplicationLinkGithub(""),
+                new ApplicationLinkTwitch(""),
+                new ApplicationLinkDiscord(""),
+                new ApplicationLinkDomain(""),
+            ] as ApplicationLink[],
+            selectedApplication: null as ApplicationLink | null,
             isApplicationLinkEditorOpen: false,
 
             applicationUsername: "",
@@ -63,6 +79,9 @@ export default defineComponent({
             isUploadingProof: false,
             hasUploadedProof: false,
             proofUrl: '',
+
+
+            isModalDiscordVerifyOpen: false,
         }
     },
     beforeMount() {
@@ -81,6 +100,11 @@ export default defineComponent({
                         console.log('application link success!')
                         // application link message sent, now we need also to wait the verification process
                         accountModule.profile.applicationLinks.push(this.newApplicationLink);
+
+                        // if Discord, reopen the modal to complete the process
+                        if (this.newApplicationLink.name === 'discord') {
+                            this.toggleModalDiscordVerify();
+                        }
                     }
 
                     // handle application unlink
@@ -97,9 +121,9 @@ export default defineComponent({
             }
         })
     }, methods: {
-        toggleApplicationLinkEditor(): void {
+        async toggleApplicationLinkEditor(): Promise<void> {
             this.isApplicationLinkEditorOpen = !this.isApplicationLinkEditorOpen;
-            this.selectedApplication = '';
+            this.selectedApplication = null;
         },
         /**
          * Delete a connected application link
@@ -113,7 +137,7 @@ export default defineComponent({
                     signer: authModule.account.address,
                 }
                 const txBody: CosmosTxBody = {
-                    memo: "Chain unlink",
+                    memo: "App unlink | Go-find",
                     messages: [
                         {
                             typeUrl: "/desmos.profiles.v1beta1.MsgUnlinkApplication",
@@ -129,7 +153,7 @@ export default defineComponent({
                 this.deletedApplicationLink = applicationLink;
                 transactionModule.start({
                     tx: txBody,
-                    mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+                    mode: CosmosBroadcastMode.BROADCAST_MODE_SYNC,
                 });
             }
         },
@@ -217,7 +241,6 @@ export default defineComponent({
                 }
 
                 if (generatedProof) {
-                    console.log(generatedProof)
                     this.generatedProof = JSON.stringify(generatedProof);
                     this.isUploadingProof = true;
                     try {
@@ -241,42 +264,42 @@ export default defineComponent({
             this.isGeneratingProof = false;
             return this.proofUrl !== '';
         },
-        selectApplication(applicationName: string | null): void {
+        selectApplication(applicationLink: ApplicationLink): void {
             this.applicationUsername = "";
             this.hasUploadedProof = false;
             this.isUploadingProof = false;
             this.proofUrl = '';
             this.generatedProof = null;
-            if (applicationName === null) {
-                this.selectedApplication = '';
-            } else {
-                this.selectedApplication = applicationName;
+            if (applicationLink !== null) {
+                this.selectedApplication = applicationLink;
             }
         },
         resetGeneratedProof() {
             this.generatedProof = null;
         },
-        onApplicationLinkSent(payload: { txBody: CosmosTxBody, applicationLink: ApplicationLink } | null) {
+        async onApplicationLinkSent(payload: { txBody: CosmosTxBody, applicationLink: ApplicationLink } | null) {
             this.newApplicationLink = null;
+            await this.toggleApplicationLinkEditor();
 
             if (payload) {
                 this.isApplicationLinkEditorOpen = false;
                 this.tx = payload.txBody;
                 this.newApplicationLink = payload.applicationLink;
-                console.log(this.newApplicationLink.state)
                 this.isExecutingTransaction = true;
                 transactionModule.start({
                     tx: payload.txBody,
-                    mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+                    mode: CosmosBroadcastMode.BROADCAST_MODE_SYNC,
                 });
             } else {
                 //TODO: replace
-                alert('error')
+                console.log('payload error')
             }
         },
         openApplicationLink(applicationLink: ApplicationLink): void {
-            const url = encodeURI(`${applicationLink.url}${applicationLink.username}`);
-            window.open(url, '_blank')
+            window.open(applicationLink.redirectUrl, '_blank')
+        },
+        async toggleModalDiscordVerify(): Promise<void> {
+            this.isModalDiscordVerifyOpen = !this.isModalDiscordVerifyOpen;
         }
     },
 });

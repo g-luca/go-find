@@ -34,9 +34,9 @@ export default defineComponent({
         next()
     },
     data() {
-        const link = "";
         return {
-            link,
+            requestedLink: "",
+            matchedLinks: [] as ApplicationLink[],
         }
     },
     mounted() {
@@ -45,24 +45,26 @@ export default defineComponent({
     },
     methods: {
         parseLink(linkRaw: string) {
-            this.link = linkRaw.trim();
-            if (this.link.length > 0) {
-                if (supportedSocialNetworks.indexOf(this.link) > -1) {
+            this.requestedLink = linkRaw.trim();
+            if (this.requestedLink.length > 0) {
+                if (supportedSocialNetworks.indexOf(this.requestedLink) > -1) {
                     ref(profileModule);
                     watchEffect(() => {
                         if (profileModule.profile) {
-                            const matches: ApplicationLink[] = [];
+                            this.matchedLinks = [];
                             // search for supported ApplicationLinks
                             profileModule.profile.applicationLinks.forEach((appLink) => {
-                                if (appLink.name === this.link) {
-                                    matches.push(appLink);
+                                if (appLink.name === this.requestedLink) {
+                                    this.matchedLinks.push(appLink);
                                 }
                             });
-                            if (matches.length > 0) {
-                                //TODO: add UI support for multiple links to same app
-                                window.setInterval(() => {
-                                    window.location.href = `${matches[0].url}${matches[0].username}`
-                                }, 2000);
+                            if (this.matchedLinks.length > 0) {
+                                // With only 1 link, automatic redirect
+                                if (this.matchedLinks.length === 1) {
+                                    window.setInterval(() => {
+                                        this.redirectTo(this.matchedLinks[0])
+                                    }, 2000);
+                                }
                             } else {
                                 //No Social Network matches
                                 this.redirectInvalidLink();
@@ -78,8 +80,11 @@ export default defineComponent({
                 }
             }
         },
+        redirectTo(appLink: ApplicationLink) {
+            window.location.href = appLink.redirectUrl;
+        },
         redirectInvalidLink() {
-            this.link = "";
+            this.requestedLink = "";
             this.$router.push(`/${this.$route.params['dtag']}`);
         }
     },

@@ -38,12 +38,12 @@ export default class TransactionModule extends VuexModule {
                 const signedTx = await TransactionModule.handleSign(this.tx, payload.mPassword);
                 if (signedTx) {
                     const broadcastResult = await TransactionModule.handleBroadcast(signedTx, this.broadcastMode);
-                    //const broadcastSuccess = true; // only for development test
+                    //const broadcastResult = { success: true, error: "" }; // only for development test
                     if (broadcastResult.success) {
-                        this.transactionStatus = TransactionStatus.Success;
-                        this.errorMessage = "";
                         setTimeout(() => {
                             this.isOpen = false;
+                            this.transactionStatus = TransactionStatus.Success;
+                            this.errorMessage = "";
                         }, 500)
                     } else {
                         this.transactionStatus = TransactionStatus.Error;

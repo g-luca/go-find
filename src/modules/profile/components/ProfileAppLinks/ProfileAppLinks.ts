@@ -23,8 +23,7 @@ export default defineComponent({
         }
     }, methods: {
         openApplicationLink(applicationLink: ApplicationLink): void {
-            const url = encodeURI(`${applicationLink.url}${applicationLink.username}`);
-            window.open(url, '_blank')
+            window.open(applicationLink.redirectUrl, '_blank')
         }
     },
 });
