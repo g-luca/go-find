@@ -137,7 +137,7 @@ export default defineComponent({
                     signer: authModule.account.address,
                 }
                 const txBody: CosmosTxBody = {
-                    memo: "Chain unlink",
+                    memo: "App unlink | Go-find",
                     messages: [
                         {
                             typeUrl: "/desmos.profiles.v1beta1.MsgUnlinkApplication",

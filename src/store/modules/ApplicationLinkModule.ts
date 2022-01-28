@@ -39,7 +39,7 @@ export default class ApplicationLinkModule extends VuexModule {
 
             }
             const txBody: CosmosTxBody = {
-                memo: `Linking ${username} to ${application}`,
+                memo: `Linking ${username} to ${application} | Go-find`,
                 messages: [
                     {
                         typeUrl: "/desmos.profiles.v1beta1.MsgLinkApplication",
