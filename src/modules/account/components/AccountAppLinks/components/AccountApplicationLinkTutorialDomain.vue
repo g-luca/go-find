@@ -28,6 +28,9 @@
 
     <!-- Send Application Link -->
     <section>
+      <div class="text-red-500 py-1 pl-4">
+        {{this.checkError}}
+      </div>
       <button
         type="button"
         class="py-2 ml-0 md:ml-4 w-full bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-lg"
@@ -60,26 +63,55 @@ export default defineComponent({
     },
   },
   emits: ["applicationLinkSent"],
+  data() {
+    return {
+      checkError: "",
+    };
+  },
   methods: {
     copy(value: string) {
       clipboardModule.copy(value);
     },
-    submitApplicationLink() {
+    async submitApplicationLink() {
       const domain = this.username;
-      const callData = Buffer.from(
-        JSON.stringify({
+
+      this.checkError = "";
+      let checkSuccess = false;
+      const endpointCheck = `https://themis.mainnet.desmos.network/nslookup/${domain}`;
+      try {
+        const res = await (await fetch(endpointCheck)).json();
+        const records = res.txt;
+        records.forEach((recordRaw: any) => {
+          try {
+            const parsed = JSON.parse(recordRaw.text);
+            if (parsed.address) {
+              checkSuccess = true;
+            }
+          } catch (e) {
+            // invalid record
+          }
+        });
+      } catch (e) {
+        // check failed
+      }
+      if (checkSuccess) {
+        const callData = Buffer.from(
+          JSON.stringify({
+            domain,
+          })
+        ).toString("hex");
+        const txBody = ApplicationLinkModule.generateApplicationLinkTxBody(
+          "domain",
           domain,
-        })
-      ).toString("hex");
-      const txBody = ApplicationLinkModule.generateApplicationLinkTxBody(
-        "domain",
-        domain,
-        callData
-      );
-      this.$emit("applicationLinkSent", {
-        txBody: txBody,
-        applicationLink: new ApplicationLinkDomain(this.username),
-      });
+          callData
+        );
+        this.$emit("applicationLinkSent", {
+          txBody: txBody,
+          applicationLink: new ApplicationLinkDomain(this.username),
+        });
+      } else {
+        this.checkError = "Domain TXT DNS record not found";
+      }
     },
   },
 });
