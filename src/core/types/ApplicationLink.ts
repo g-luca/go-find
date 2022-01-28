@@ -8,6 +8,8 @@ export default class ApplicationLink {
     readonly url: string = "";
     readonly usernamePlaceholder: string = "Username";
     readonly redirectUrl: string = "";
+    readonly usernameRegExp: RegExp = /.*/;
+    readonly usernameRegExpError: string = "Invalid username.";
 
     username: string;
     state: DesmosApplicationLinkState = DesmosApplicationLinkState.APPLICATION_LINK_STATE_INITIALIZED_UNSPECIFIED

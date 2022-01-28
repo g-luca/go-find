@@ -262,6 +262,12 @@
                       :placeholder="selectedApplication.usernamePlaceholder"
                       @input="resetGeneratedProof()"
                     />
+                    <div
+                      class="py-1 text-red-500"
+                      v-if="!this.isValidApplicationUsername"
+                    >
+                      {{this.selectedApplication.usernameRegExpError}}
+                    </div>
                   </div>
                   <div
                     v-if="
