@@ -34,7 +34,7 @@ export default class ApplicationLinkModule extends VuexModule {
                     application: application,
                     username: username
                 },
-                timeoutTimestamp: (Date.now() + 600000) * 1000000,
+                timeoutTimestamp: (Date.now() + 3600000) * 1000000,
                 timeoutHeight: undefined,
 
             }
