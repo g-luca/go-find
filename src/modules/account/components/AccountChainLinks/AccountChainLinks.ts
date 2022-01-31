@@ -1,3 +1,4 @@
+import LedgerModule from '@/store/modules/LedgerModule';
 import { defineComponent, ref, watchEffect } from "vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
@@ -26,6 +27,7 @@ import { Extension as TerraExtension, MsgSend as TerraMsgSend, Fee as TerraFee, 
 const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
 const transactionModule = getModule(TransactionModule);
+const ledgerModule = getModule(LedgerModule);
 
 class ChainLinkConnectionMethod {
     public id: string;
@@ -607,6 +609,95 @@ export default defineComponent({
         async connectWithTerrastation(): Promise<void> {
             this.isSigningProof = true;
             await this.gerateProofWithTerrastation();
+        },
+        async connectWithLedger(ledgerAppName: string): Promise<void> {
+            if (this.selectedChain && ledgerAppName && this.selectedChain) {
+
+                // generate a "fake" transaction to be used as proof
+                const proofObj = {
+                    account_number: '0',
+                    chain_id: this.selectedChain.chainId,
+                    fee: {
+                        amount: [
+                            {
+                                amount: '0',
+                                denom: `${this.selectedChain.symbol}`,
+                            },
+                        ],
+                        gas: '1',
+                    },
+                    memo: `${authModule.account?.address}`,
+                    msgs: [],
+                    sequence: '0',
+                }
+
+                const selectedChain = this.selectedChain;
+                await this.toggleChainLinkEditor();
+                await ledgerModule.setLedgerAction({ app: selectedChain, ledgerAppName: ledgerAppName, message: proofObj as any });
+                await ledgerModule.startLedgerAction();
+
+                ref(ledgerModule.actionSignature);
+                watchEffect(async () => {
+                    if (ledgerModule.actionSignature !== null) {
+                        setTimeout(async () => {
+                            if (selectedChain && authModule.account) {
+                                await ledgerModule.toggleModal();
+                                await ledgerModule.setLedgerAction({ app: selectedChain, ledgerAppName: ledgerAppName, message: '' });
+                                const finalProof: DesmosProof = {
+                                    pubKey: {
+                                        typeUrl: '/cosmos.crypto.secp256k1.PubKey',
+                                        value: CosmosPubKey.encode({
+                                            key: Buffer.from(ledgerModule.ledgerPubKey, 'hex')
+                                        }).finish()
+                                    },
+                                    signature: ledgerModule.actionSignature!,
+                                    plainText: Buffer.from(JSON.stringify(proofObj, null, 0)).toString('hex'),
+                                }
+
+                                await this.sendChainLink(selectedChain, ledgerModule.ledgerAddress, authModule.account?.address, finalProof);
+                            }
+                        }, 2000)
+                    }
+                })
+            }
+        },
+        async sendChainLink(selectedChain: Blockchain, destAdress: string, userAddress: string, proof: DesmosProof) {
+            const msgLinkChain: DesmosMsgLinkChainAccount = {
+                chainAddress: {
+                    typeUrl: "/desmos.profiles.v1beta1.Bech32Address",
+                    value: DesmosBech32Address.encode({
+                        prefix: selectedChain.bechPrefix,
+                        value: destAdress,
+                    }).finish()
+                },
+                proof: proof,
+                chainConfig: {
+                    name: selectedChain?.id.toLowerCase(),
+                },
+                signer: userAddress,
+            }
+            const txBody: CosmosTxBody = {
+                memo: "Chain link | Go-find",
+                messages: [
+                    {
+                        typeUrl: "/desmos.profiles.v1beta1.MsgLinkChainAccount",
+                        value: DesmosMsgLinkChainAccount.encode(msgLinkChain).finish(),
+                    }
+                ],
+                extensionOptions: [],
+                nonCriticalExtensionOptions: [],
+                timeoutHeight: 0,
+            }
+
+            this.isExecutingTransaction = true;
+            this.newChainLink = new ChainLink(destAdress, selectedChain.id);
+
+            transactionModule.start({
+                tx: txBody,
+                mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+            });
+            this.tx = txBody;
+            this.generateProofError = "";
         },
         getChainLogo(name: string) {
             try {
