@@ -8,10 +8,6 @@ import { LedgerSigner } from '@cosmjs/ledger-amino';
 import { stringToPath } from '@cosmjs/crypto'
 
 
-
-
-
-
 @Module({ store, name: 'LedgerModule', dynamic: true })
 export default class LedgerModule extends VuexModule {
     public isInstalled = false;
@@ -20,6 +16,8 @@ export default class LedgerModule extends VuexModule {
     public hasProfile = false;
 
     public isLoadingTransport = false;
+    public isLedgerReady = false;
+
     private transport: Transport | null = null;
     private signer: LedgerSigner | null = null;
     public transportError = "";
@@ -28,10 +26,7 @@ export default class LedgerModule extends VuexModule {
     public ledgerPubKey = "";
 
 
-
     public isModalOpen = false;
-
-
 
     public actionLedgerAppName = 'cosmos';
     public actionApp = supportedChainLinks[0];
@@ -39,9 +34,11 @@ export default class LedgerModule extends VuexModule {
     public actionError = '';
     public actionSignature: string | null = null;
     public isExecutingActionMessage = false;
-    public isLedgerReady = false;
 
-
+    /**
+     * Setup Ledger action
+     * @param data Ledger action params
+     */
     @Mutation
     public async setLedgerAction(data: { app: Blockchain, ledgerAppName: string, message: string }): Promise<any> {
         this.actionApp = data.app;
@@ -50,7 +47,7 @@ export default class LedgerModule extends VuexModule {
     }
 
     /**
-     * Conenct to Ledger device
+     * Connect to Ledger device & perform the requested action
      */
     @Mutation
     public async startLedgerAction(): Promise<void> {
@@ -89,8 +86,6 @@ export default class LedgerModule extends VuexModule {
                 await resetLedger();
             });
         } catch (e) {
-            console.log(e);
-            console.log('transport error')
             this.transportError = "Ledger not connected";
             await resetLedger();
             return;
@@ -104,8 +99,6 @@ export default class LedgerModule extends VuexModule {
                 ledgerAppName: this.actionApp.ledgerAppNames[0],
             });
         } catch (e) {
-            console.log(e);
-            console.log('signer error')
             this.transportError = "Ledger blocked";
             await resetLedger();
             return;
@@ -118,8 +111,6 @@ export default class LedgerModule extends VuexModule {
             this.ledgerAddress = account.address;
             this.ledgerPubKey = Buffer.from(account.pubkey).toString('hex');
         } catch (e) {
-            console.log(e);
-            console.log('signer account error')
             this.transportError = `Unlock your Ledger and open ${this.actionLedgerAppName} app`
             await resetLedger();
             return;
@@ -142,27 +133,10 @@ export default class LedgerModule extends VuexModule {
             this.actionError = "Operation failed or refused by user";
             this.isExecutingActionMessage = false;
         }
-
-
-
     }
 
     @Mutation
-    public async disconnectLedger(): Promise<void> {
-        try {
-            if (this.transport) {
-                await this.transport.close();
-                this.transport = null;
-                this.transportError = "";
-                this.isLoadingTransport = false;
-            }
-        } catch (e) {
-            this.transport = null;
-        }
-    }
-
-    @Mutation
-    public async toggleModal() {
+    public async toggleModal(): Promise<void> {
         this.isModalOpen = !this.isModalOpen;
     }
 

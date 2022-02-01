@@ -40,9 +40,6 @@ export default defineComponent({
     async connect() {
       await ledgerModule.startLedgerAction();
     },
-    async disconnect() {
-      await ledgerModule.disconnectLedger();
-    },
   },
 });
 </script>
