@@ -111,7 +111,8 @@ export default class LedgerModule extends VuexModule {
             this.ledgerAddress = account.address;
             this.ledgerPubKey = Buffer.from(account.pubkey).toString('hex');
         } catch (e) {
-            this.transportError = `Unlock your Ledger and open ${this.actionLedgerAppName} app`
+            const appName = this.actionLedgerAppName.charAt(0).toUpperCase() + this.actionLedgerAppName.slice(1);
+            this.transportError = `Unlock your Ledger and open the ${appName} app`
             await resetLedger();
             return;
         }
