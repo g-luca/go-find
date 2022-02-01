@@ -95,6 +95,7 @@
       <AppFooter class="mt-8" />
     </div>
     <ModalTransaction />
+    <ModalLedger />
   </div>
 </template>
 

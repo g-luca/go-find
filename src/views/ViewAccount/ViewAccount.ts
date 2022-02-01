@@ -12,6 +12,7 @@ import AccountChainLinks from "@/modules/account/components/AccountChainLinks/Ac
 import AccountModule from "@/store/modules/AccountModule";
 import AccountProfileEdit from "@/modules/account/components/AccountProfileEdit/AccountProfileEdit.vue";
 import AccountAppLinks from "@/modules/account/components/AccountAppLinks/AccountAppLinks.vue";
+import ModalLedger from '@/ui/components/ModalLedger/ModalLedger.vue';
 const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
 
@@ -22,6 +23,7 @@ export default defineComponent({
         SkeletonLoader,
         Error404,
         ModalTransaction,
+        ModalLedger,
         AccountBalance,
         AccountChainLinks,
         AccountProfileEdit,
