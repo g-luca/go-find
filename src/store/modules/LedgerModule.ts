@@ -131,7 +131,7 @@ export default class LedgerModule extends VuexModule {
                 this.isExecutingActionMessage = false;
             }
         } catch (e) {
-            this.actionError = "Operation failed or refused by user";
+            this.actionError = "Operation failed or refused by the user";
             this.isExecutingActionMessage = false;
         }
     }
