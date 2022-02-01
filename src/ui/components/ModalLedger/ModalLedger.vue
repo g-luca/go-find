@@ -33,7 +33,7 @@
               <DialogOverlay />
 
               <ModalLedgerConnect />
-              <div class="pt-4 text-center">
+              <div class="pt-4 text-center dark:text-white text-lg">
                 <span v-if="$store.state.LedgerModule.isExecutingActionMessage">
                   Approve the Transaction on your Ledger device
                 </span>
