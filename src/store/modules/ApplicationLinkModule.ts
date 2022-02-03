@@ -28,7 +28,7 @@ export default class ApplicationLinkModule extends VuexModule {
             const msgLinkApplication: DesmosMsgLinkApplication = {
                 callData: callData,
                 sender: authModule.account?.address,
-                sourceChannel: process.env.VUE_APP_IBC_PROFILES_CHANNEL || "",
+                sourceChannel: import.meta.env.VITE_APP_IBC_PROFILES_CHANNEL || "",
                 sourcePort: "ibc-profiles",
                 linkData: {
                     application: application,

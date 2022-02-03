@@ -39,7 +39,7 @@ export default class KeplrModule extends VuexModule {
 
             // suggest fresh new configuration
             if (authModule.account?.isUsingKeplr) {
-                if (process.env.VUE_APP_IS_TESTNET === "true") {
+                if (import.meta.env.VITE_APP_IS_TESTNET === "true") {
                     await KeplrModule.setupDesmosTestnet();
                 } else {
                     await KeplrModule.setupDesmosMainnet();
@@ -64,7 +64,7 @@ export default class KeplrModule extends VuexModule {
         if (window.keplr) {
             this.isInstalled = true;
             this.isWaitingAuthentication = true;
-            if (process.env.VUE_APP_IS_TESTNET === "true") {
+            if (import.meta.env.VITE_APP_IS_TESTNET === "true") {
                 await KeplrModule.setupDesmosTestnet();
             } else {
                 await KeplrModule.setupDesmosMainnet();
@@ -120,8 +120,8 @@ export default class KeplrModule extends VuexModule {
             await window.keplr!.experimentalSuggestChain({
                 chainId: desmosNetworkModule.chainId,
                 chainName: "Desmos",
-                rpc: `${process.env.VUE_APP_RPC_ENDPOINT}`,
-                rest: `${process.env.VUE_APP_LCD_ENDPOINT}`,
+                rpc: `${import.meta.env.VITE_APP_RPC_ENDPOINT}`,
+                rest: `${import.meta.env.VITE_APP_LCD_ENDPOINT}`,
                 bip44: {
                     coinType: 852,
                 },
@@ -171,8 +171,8 @@ export default class KeplrModule extends VuexModule {
             await window.keplr.experimentalSuggestChain({
                 chainId: desmosNetworkModule.chainId,
                 chainName: "Desmos Testnet",
-                rpc: `${process.env.VUE_APP_RPC_ENDPOINT}`,
-                rest: `${process.env.VUE_APP_LCD_ENDPOINT}`,
+                rpc: `${import.meta.env.VITE_APP_RPC_ENDPOINT}`,
+                rest: `${import.meta.env.VITE_APP_LCD_ENDPOINT}`,
                 bip44: {
                     coinType: 852,
                 },

@@ -6,11 +6,11 @@ import { getMainDefinition } from 'apollo-utilities'
 // HTTP connection to the API
 const httpLink = createHttpLink({
     // You should use an absolute URL here
-    uri: `https://${process.env.VUE_APP_GRAPH_ENDPOINT}`,
+    uri: `https://${import.meta.env.VITE_APP_GRAPH_ENDPOINT}`,
 })
 
 const wsLink = new WebSocketLink({
-    uri: `wss://${process.env.VUE_APP_GRAPH_WS_ENDPOINT}`,
+    uri: `wss://${import.meta.env.VITE_APP_GRAPH_WS_ENDPOINT}`,
     options: {
         reconnect: true,
         timeout: 30000,

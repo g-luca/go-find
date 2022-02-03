@@ -80,7 +80,7 @@ enum ClaimStatus {
 
 @Module({ store, name: 'AirdropModule', dynamic: true })
 export default class AirdropModule extends VuexModule {
-    private static airdrop_endpoint = process.env.VUE_APP_API_AIRDROP_ENDPOINT;
+    private static airdrop_endpoint = import.meta.env.VITE_APP_API_AIRDROP_ENDPOINT;
     public isAirdropModalOpen = false;
     public config: AirdropConfig | null = null;
     public aidropAllocations: Map<ChainLink, AirdropAllocation> = new Map();

@@ -135,8 +135,8 @@ export default defineComponent({
   setup() {
     return {
       isOpen: ref(false),
-      coinDenom: process.env.VUE_APP_COIN_DENOM,
-      ucoinDenom: process.env.VUE_APP_COIN_FEE_DENOM,
+      coinDenom: import.meta.env.VITE_APP_COIN_DENOM,
+      ucoinDenom: import.meta.env.VITE_APP_COIN_FEE_DENOM,
       amountRaw: ref("1"),
       addressTo: ref(""),
       amount: ref(1),

@@ -122,7 +122,7 @@ export default defineComponent({
     MenuItems,
   },
   data() {
-    const isTestnet = process.env.VUE_APP_IS_TESTNET === "true";
+    const isTestnet = import.meta.env.VITE_APP_IS_TESTNET === "true";
     return {
       isTestnet,
     };

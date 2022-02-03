@@ -39,7 +39,7 @@ export default defineComponent({
                 const dtag = this.inputDtag.toString(); // deep copy
                 setTimeout(() => {
                     if (this.inputDtag === dtag) { // verify if the dtag is not changed while waiting the timeout
-                        Api.get(`${process.env.VUE_APP_LCD_ENDPOINT}/desmos/profiles/v1beta1/profiles/` + this.inputDtag).then((response) => {
+                        Api.get(`${import.meta.env.VITE_APP_LCD_ENDPOINT}/desmos/profiles/v1beta1/profiles/` + this.inputDtag).then((response) => {
                             if (this.inputDtag === dtag && response['profile']) {
                                 // dtag already taken
                                 // the availability value depends if is recovering the account

@@ -109,7 +109,7 @@ export default class AuthModule extends VuexModule {
             };
 
             const feeValue: CosmosFee = {
-                amount: [{ denom: `${process.env.VUE_APP_COIN_FEE_DENOM}`, amount: AuthModule.DEFAULT_FEE_AMOUNT }],
+                amount: [{ denom: `${import.meta.env.VITE_APP_COIN_FEE_DENOM}`, amount: AuthModule.DEFAULT_FEE_AMOUNT }],
                 gasLimit: AuthModule.DEFAULT_GAS_LIMIT,
                 payer: "",
                 granter: this.granterAddress
@@ -271,7 +271,7 @@ export default class AuthModule extends VuexModule {
                     sequence: account?.sequence || 0
                 };
                 const feeValue: CosmosFee = {
-                    amount: [{ denom: `${process.env.VUE_APP_COIN_FEE_DENOM}`, amount: AuthModule.DEFAULT_FEE_AMOUNT }],
+                    amount: [{ denom: `${import.meta.env.VITE_APP_COIN_FEE_DENOM}`, amount: AuthModule.DEFAULT_FEE_AMOUNT }],
                     gasLimit: AuthModule.DEFAULT_GAS_LIMIT,
                     payer: '',
                     granter: this.granterAddress
@@ -352,7 +352,7 @@ export default class AuthModule extends VuexModule {
                         };
 
                         const feeValue: CosmosFee = {
-                            amount: [{ denom: `${process.env.VUE_APP_COIN_FEE_DENOM}`, amount: AuthModule.DEFAULT_FEE_AMOUNT }],
+                            amount: [{ denom: `${import.meta.env.VITE_APP_COIN_FEE_DENOM}`, amount: AuthModule.DEFAULT_FEE_AMOUNT }],
                             gasLimit: AuthModule.DEFAULT_GAS_LIMIT,
                             payer: "",
                             granter: this.granterAddress

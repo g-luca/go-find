@@ -20,7 +20,7 @@ export default defineComponent({
     data() {
         this.checkAirdrop()
         return {
-            coinDenom: `${process.env.VUE_APP_COIN_DENOM}`,
+            coinDenom: `${import.meta.env.VITE_APP_COIN_DENOM}`,
             isAirdropActive: false,
         }
     },
