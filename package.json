@@ -31,7 +31,7 @@
     "bootstrap-icons": "^1.7.2",
     "chart.js": "^3.7.0",
     "desmosjs": "^0.1.19",
-    "dompurify": "^2.3.4",
+    "dompurify": "^2.3.5",
     "graphql": "^15.8.0",
     "marked": "^3.0.8",
     "ripemd160": "^2.0.2",

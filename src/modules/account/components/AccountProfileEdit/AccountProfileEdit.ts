@@ -22,7 +22,7 @@ import AccountModule from "@/store/modules/AccountModule";
 import { CosmosBroadcastMode, CosmosTxBody, DesmosMsgDeleteProfile, DesmosMsgSaveProfile } from "desmosjs";
 import TransactionModule, { TransactionStatus } from "@/store/modules/TransactionModule";
 import marked from "marked";
-import { sanitize } from "dompurify";
+import DOMPurify from "dompurify";
 const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
 const transactionModule = getModule(TransactionModule);
@@ -177,7 +177,7 @@ export default defineComponent({
          * @param bio input bio
          */
         markInputBio(bio: string) {
-            this.markedInputBio = sanitize(marked(bio));
+            this.markedInputBio = DOMPurify.sanitize(marked(bio));
         },
 
         /**
@@ -189,7 +189,7 @@ export default defineComponent({
                 this.inputProfilePic = accountModule.profile.profilePic;
                 this.inputProfileCover = accountModule.profile.profileCover;
                 this.inputBio = accountModule.profile.bio;
-                this.markedInputBio = sanitize(marked(accountModule.profile.bio));
+                this.markedInputBio = DOMPurify.sanitize(marked(accountModule.profile.bio));
                 this.resetForm({
                     values: {
                         nickname: this.inputNickname,

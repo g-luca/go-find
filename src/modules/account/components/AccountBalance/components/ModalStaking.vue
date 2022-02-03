@@ -634,7 +634,7 @@ import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
 import { ProfileQuery } from "@/gql/ProfileQuery";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
-import { sanitize } from "dompurify";
+import DOMPurify from "dompurify";
 import marked from "marked";
 import AccountModule from "@/store/modules/AccountModule";
 import {
@@ -679,8 +679,8 @@ export default defineComponent({
 
       isOpenSelectStakingOperationValidatorTo: ref(false),
 
-      coinDenom: process.env.VUE_APP_COIN_DENOM,
-      ucoinDenom: process.env.VUE_APP_COIN_FEE_DENOM,
+      coinDenom: import.meta.env.VITE_APP_COIN_DENOM,
+      ucoinDenom: import.meta.env.VITE_APP_COIN_FEE_DENOM,
     };
   },
   methods: {
@@ -755,7 +755,9 @@ export default defineComponent({
                       try {
                         (this.validators[i]["validator_descriptions"][0][
                           "details"
-                        ] as any) = sanitize(marked(validatorProfile["bio"]));
+                        ] as any) = DOMPurify.sanitize(
+                          marked(validatorProfile["bio"])
+                        );
                       } catch (e) {
                         // skip
                       }

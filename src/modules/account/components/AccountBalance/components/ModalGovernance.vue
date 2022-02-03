@@ -232,7 +232,7 @@ import AuthModule from "@/store/modules/AuthModule";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import TransactionModule from "@/store/modules/TransactionModule";
 import { GovernanceQuery } from "@/gql/GovernanceQuery";
-import { sanitize } from "dompurify";
+import DOMPurify from "dompurify";
 import { BarChart } from "vue-chart-3";
 import { Chart, ChartOptions, registerables } from "chart.js";
 import marked from "marked";
@@ -323,7 +323,7 @@ export default defineComponent({
                 proposalsRaw[i].proposal_votes[0]?.option || "";
 
               // sanitize description
-              proposalsRaw[i].description = sanitize(
+              proposalsRaw[i].description = DOMPurify.sanitize(
                 marked(proposalsRaw[i].description)
               ).replace(/\\n/g, "<br>");
 
