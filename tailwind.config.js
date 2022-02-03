@@ -1,17 +1,10 @@
 /* With purge enabled if there is a new/edited class not used before it will not be loaded */
 module.exports = {
-  mode: 'jit',
-  purge: {
-    enabled: !(process.env.NODE_ENV === 'development'),
-    content: [
-      './src/**/*.html',
-      './src/**/*.vue',
-      './src/**/*.jsx',
-    ],
-    options: {
-      safelist: ["dark"],
-    },
-  },
+  content: [
+    './src/**/*.html',
+    './src/**/*.vue',
+    './src/**/*.jsx',
+  ],
   darkMode: 'class',
   theme: {
     extend: {
