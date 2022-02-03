@@ -699,13 +699,6 @@ export default defineComponent({
             this.tx = txBody;
             this.generateProofError = "";
         },
-        getChainLogo(name: string) {
-            try {
-                return require('@/assets/brands/' + name + '/logo.svg')
-            } catch (e) {
-                return '';
-            }
-        },
         getChainName(nameRaw: string) {
             const supportedChain = supportedChainLinks.find((v) => {
                 return v.id === nameRaw;

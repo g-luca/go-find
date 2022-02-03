@@ -133,7 +133,7 @@
                   <div class="flex py-2 justify-center">
                     <img
                       class="h-8"
-                      :src="require('@/assets/brands/walletconnect/logo.svg')"
+                      src="@/assets/brands/walletconnect/logo.svg"
                       alt=""
                     >
                     <span class="text-white pl-3 text-lg my-auto">
@@ -203,8 +203,9 @@ export default defineComponent({
           if (this.inputDtag === dtag) {
             // verify if the dtag is not changed while waiting the timeout
             Api.get(
-              `${process.env.VUE_APP_LCD_ENDPOINT}/desmos/profiles/v1beta1/profiles/` +
-                this.inputDtag
+              `${
+                import.meta.env.VITE_APP_LCD_ENDPOINT
+              }/desmos/profiles/v1beta1/profiles/` + this.inputDtag
             ).then((response) => {
               if (this.inputDtag === dtag && response["profile"]) {
                 // dtag already taken

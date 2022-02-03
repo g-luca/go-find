@@ -87,7 +87,7 @@
                               <div class="col-span-2 mx-auto">
                                 <img
                                   class="pointer-events-none select-none h-8"
-                                  :src="getChainLogo(stakingAllocation.chain_name)"
+                                  :src="'@/assets/brands/' + stakingAllocation.chain_name.toLowerCase() + '/logo.svg'"
                                   alt=""
                                 >
                               </div>
@@ -114,7 +114,7 @@
                               <div class="col-span-2 mx-auto">
                                 <img
                                   class="pointer-events-none select-none h-8"
-                                  :src="getChainLogo(lpAllocation.chain_name)"
+                                  :src="'@/assets/brands/' + lpAllocation.chain_name.toLowerCase() + '/logo.svg'"
                                   alt=""
                                 >
                               </div>
@@ -289,13 +289,6 @@ export default defineComponent({
   methods: {
     toggleAirdropModal() {
       airdropModule.toggleAirdropModal();
-    },
-    getChainLogo(name: string) {
-      try {
-        return require("@/assets/brands/" + name.toLowerCase() + "/logo.svg");
-      } catch (e) {
-        return "";
-      }
     },
     async claimUserAirdrop() {
       airdropModule.claimAirdrop();

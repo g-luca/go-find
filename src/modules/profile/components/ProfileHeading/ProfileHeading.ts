@@ -14,12 +14,5 @@ export default defineComponent({
         copyAddress(value: string) {
             clipboardModule.copy(value);
         },
-        getChainLogo(name: string) {
-            try {
-                return require('@/assets/brands/' + name + '/logo.svg')
-            } catch (e) {
-                return '';
-            }
-        }
     }
 });

@@ -176,7 +176,7 @@
       >
         <img
           class="h-8"
-          :src="require('@/assets/brands/keplr/logo.svg')"
+          src="@/assets/brands/keplr/logo.svg"
           alt=""
         >
         <span class="text-white pl-3 text-lg">

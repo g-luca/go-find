@@ -16,7 +16,7 @@
             <span class="mt-4 py-1 px-1 flex justify-center items-center">
               <img
                 class="max-h-16"
-                :src="require('@/assets/brands/keplr/logo.svg')"
+                src="@/assets/brands/keplr/logo.svg"
                 alt=""
               >
               <span class="pl-3 text-5xl xl:text-7xl font-extrabold text-gray-900 dark:text-white">
@@ -194,8 +194,9 @@ export default defineComponent({
           if (this.inputDtag === dtag) {
             // verify if the dtag is not changed while waiting the timeout
             Api.get(
-              `${process.env.VUE_APP_LCD_ENDPOINT}/desmos/profiles/v1beta1/profiles/` +
-                this.inputDtag
+              `${
+                import.meta.env.VITE_APP_LCD_ENDPOINT
+              }/desmos/profiles/v1beta1/profiles/` + this.inputDtag
             ).then((response) => {
               if (this.inputDtag === dtag && response["profile"]) {
                 // dtag already taken

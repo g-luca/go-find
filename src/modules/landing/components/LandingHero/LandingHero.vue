@@ -39,7 +39,7 @@
                     <div class="flex py-2 justify-center">
                       <img
                         class="h-8"
-                        :src="require('@/assets/brands/walletconnect/logo.svg')"
+                        src="@/assets/brands/walletconnect/logo.svg"
                         alt=""
                       >
                       <span class="text-white pl-3 text-lg my-auto">
@@ -61,7 +61,7 @@
                     <div class="flex py-2 justify-center">
                       <img
                         class="h-8"
-                        :src="require('@/assets/brands/keplr/logo.svg')"
+                        src="@/assets/brands/keplr/logo.svg"
                         alt=""
                       >
                       <span class="text-white pl-3  text-xl font-bold uppercase my-auto">
@@ -82,7 +82,7 @@
               >
                 <img
                   class="mx-auto w-32 h-32 p-4  select-none pointer-events-none"
-                  :src="require('@/assets/brands/'+name+'/logo.svg')"
+                  :src="'src/assets/brands/'+name+'/logo.svg'"
                   alt=""
                 >
               </div>

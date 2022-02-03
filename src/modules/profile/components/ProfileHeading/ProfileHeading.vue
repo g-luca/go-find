@@ -102,7 +102,7 @@
                         <div class="rounded-full w-10 h-10 md:w-10 md:h-10 m-auto">
                           <img
                             class="p-2 pointer-events-none select-none"
-                            :src="getChainLogo(chainLink.chain)"
+                            :src="'@/assets/brands/' + chainLink.chain + '/logo.svg'"
                             alt=""
                           >
                         </div>
