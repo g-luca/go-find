@@ -1,4 +1,4 @@
-import { createHash, createCipheriv, createDecipheriv, randomBytes } from "crypto"
+import Crypto from "crypto"
 export default class CryptoUtils {
 
 
@@ -8,7 +8,7 @@ export default class CryptoUtils {
      * @returns Base64 hash result
      */
     public static sha256(string: string): string {
-        return createHash('sha256').update(string).digest('hex');
+        return Crypto.createHash('sha256').update(string).digest('hex');
     }
 
 
@@ -18,12 +18,12 @@ export default class CryptoUtils {
      * @returns Base64 hash result
      */
     public static sha256Buffer(buffer: Buffer): Buffer {
-        return createHash('sha256').update(buffer).digest();
+        return Crypto.createHash('sha256').update(buffer).digest();
     }
 
 
     public static randomString(n: number): string {
-        return randomBytes(n).toString('hex');
+        return Crypto.randomBytes(n).toString('hex');
     }
 
 
@@ -36,7 +36,7 @@ export default class CryptoUtils {
     public static encryptAes(password: string, text: string): string {
         const key = password.slice(0, 32);
         const iv = password.slice(32, 48);
-        const cipher = createCipheriv('aes-256-cbc', Buffer.from(key), Buffer.from(iv));
+        const cipher = Crypto.createCipheriv('aes-256-cbc', Buffer.from(key), Buffer.from(iv));
         const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
         return encrypted.toString('hex');
     }
@@ -51,7 +51,7 @@ export default class CryptoUtils {
     public static decryptAes(password: string, encrypted: string): string {
         const key = password.slice(0, 32);
         const iv = password.slice(32, 48);
-        const decipher = createDecipheriv('aes-256-cbc', key, iv);
+        const decipher = Crypto.createDecipheriv('aes-256-cbc', key, iv);
         const decrypted = decipher.update(encrypted, 'hex', 'utf8') + decipher.final('utf8');
         return decrypted;
     }

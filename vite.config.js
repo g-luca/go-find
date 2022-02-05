@@ -4,6 +4,8 @@ import {
 import vue from '@vitejs/plugin-vue'
 const path = require("path");
 import NodeGlobalsPolyfillPlugin from '@esbuild-plugins/node-globals-polyfill'
+import rollupNodePolyFill from 'rollup-plugin-node-polyfills'
+
 
 
 // https://vitejs.dev/config/
@@ -13,16 +15,27 @@ export default defineConfig({
         extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
         alias: {
             "@": path.resolve(__dirname, "./src"),
-            "crypto": "crypto-browserify",
         },
     },
     optimizeDeps: {
+        define: {
+            global: 'globalThis'
+        },
         esbuildOptions: {
             // Enable esbuild polyfill plugins
             plugins: [
                 NodeGlobalsPolyfillPlugin({
                     buffer: true,
                 }),
+            ]
+        }
+    },
+    build: {
+        rollupOptions: {
+            plugins: [
+                // Enable rollup polyfills plugin
+                // used during production bundling
+                rollupNodePolyFill()
             ]
         }
     },
