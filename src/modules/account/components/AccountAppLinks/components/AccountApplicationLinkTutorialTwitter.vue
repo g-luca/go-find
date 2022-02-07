@@ -175,9 +175,7 @@ import { defineComponent } from "vue";
 import { Field, Form } from "vee-validate";
 import ApplicationLinkModule from "@/store/modules/ApplicationLinkModule";
 import ApplicationLinkTwitter from "@/core/types/ApplicationLinks/ApplicationLinkTwitter";
-import ClipboardModule from "@/store/modules/ClipboardModule";
-import { getModule } from "vuex-module-decorators";
-const clipboardModule = getModule(ClipboardModule);
+import { useClipboardStore } from "@/stores/ClipboardModule";
 
 class TwitterVerificationMethod {
   public id: string;
@@ -238,7 +236,7 @@ export default defineComponent({
   },
   methods: {
     copy(value: string) {
-      clipboardModule.copy(value);
+      useClipboardStore().copy(value);
     },
     updateTweetUrl() {
       if (this.inputTweetUrl) {

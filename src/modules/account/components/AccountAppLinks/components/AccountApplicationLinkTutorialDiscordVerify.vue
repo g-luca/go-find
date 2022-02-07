@@ -83,13 +83,12 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { getModule } from "vuex-module-decorators";
-import ClipboardModule from "@/store/modules/ClipboardModule";
 import DesmosNetworkModule from "@/store/modules/DesmosNetworkModule";
 import AuthModule from "@/store/modules/AuthModule";
 import { ApplicationLinkQuery } from "@/gql/ApplicationLinkQuery";
 import { useApolloClient } from "@vue/apollo-composable";
 import AccountModule from "@/store/modules/AccountModule";
-const clipboardModule = getModule(ClipboardModule);
+import { useClipboardStore } from "@/stores/ClipboardModule";
 const desmosNetwork = getModule(DesmosNetworkModule);
 const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
@@ -117,7 +116,7 @@ export default defineComponent({
   },
   methods: {
     copy(value: string) {
-      clipboardModule.copy(value);
+      useClipboardStore().copy(value);
     },
     async waitApplicationLink(): Promise<void> {
       this.isVerifyingAppConnection = true;

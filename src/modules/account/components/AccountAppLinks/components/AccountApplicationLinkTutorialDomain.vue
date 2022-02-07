@@ -45,10 +45,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import ApplicationLinkModule from "@/store/modules/ApplicationLinkModule";
-import { getModule } from "vuex-module-decorators";
-import ClipboardModule from "@/store/modules/ClipboardModule";
 import ApplicationLinkDomain from "@/core/types/ApplicationLinks/ApplicationLinkDomain";
-const clipboardModule = getModule(ClipboardModule);
+import { useClipboardStore } from "@/stores/ClipboardModule";
 
 export default defineComponent({
   components: {},
@@ -70,7 +68,7 @@ export default defineComponent({
   },
   methods: {
     copy(value: string) {
-      clipboardModule.copy(value);
+      useClipboardStore().copy(value);
     },
     async submitApplicationLink() {
       const domain = this.username;

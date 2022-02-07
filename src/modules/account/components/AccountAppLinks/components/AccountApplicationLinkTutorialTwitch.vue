@@ -51,9 +51,7 @@
 import { defineComponent } from "vue";
 import ApplicationLinkModule from "@/store/modules/ApplicationLinkModule";
 import ApplicationLinkTwitch from "@/core/types/ApplicationLinks/ApplicationLinkTwitch";
-import ClipboardModule from "@/store/modules/ClipboardModule";
-import { getModule } from "vuex-module-decorators";
-const clipboardModule = getModule(ClipboardModule);
+import { useClipboardStore } from "@/stores/ClipboardModule";
 
 export default defineComponent({
   components: {},
@@ -81,7 +79,7 @@ export default defineComponent({
   },
   methods: {
     copy(value: string) {
-      clipboardModule.copy(value);
+      useClipboardStore().copy(value);
     },
     async submitApplicationLink() {
       this.checkError = "";

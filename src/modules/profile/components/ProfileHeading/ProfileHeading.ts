@@ -1,9 +1,7 @@
 import { defineComponent } from "vue";
 
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
-import ClipboardModule from "@/store/modules/ClipboardModule";
-import { getModule } from "vuex-module-decorators";
-const clipboardModule = getModule(ClipboardModule);
+import { useClipboardStore } from "@/stores/ClipboardModule";
 
 export default defineComponent({
 
@@ -12,7 +10,7 @@ export default defineComponent({
     },
     methods: {
         copyAddress(value: string) {
-            clipboardModule.copy(value);
+            useClipboardStore().copy(value);
         },
     }
 });

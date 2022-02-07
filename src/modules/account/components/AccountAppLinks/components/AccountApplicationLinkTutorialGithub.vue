@@ -90,9 +90,7 @@ import { defineComponent } from "vue";
 import { Field, Form } from "vee-validate";
 import ApplicationLinkModule from "@/store/modules/ApplicationLinkModule";
 import ApplicationLinkGithub from "@/core/types/ApplicationLinks/ApplicationLinkGithub";
-import { getModule } from "vuex-module-decorators";
-import ClipboardModule from "@/store/modules/ClipboardModule";
-const clipboardModule = getModule(ClipboardModule);
+import { useClipboardStore } from "@/stores/ClipboardModule";
 
 export default defineComponent({
   components: {
@@ -118,7 +116,7 @@ export default defineComponent({
   },
   methods: {
     copy(value: string) {
-      clipboardModule.copy(value);
+      useClipboardStore().copy(value);
     },
     updateGistUrl() {
       if (this.inputGistUrl) {

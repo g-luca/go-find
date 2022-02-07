@@ -1,10 +1,10 @@
 <template>
   <section>
     <div
-      v-if="$store.state.ClipboardModule.isVisible"
+      v-if="cliboardStore.isVisible"
       class="transition duration-700 ease-in-out z-50 fixed top-0 w-full pt-7"
     >
-      <span v-if="$store.state.ClipboardModule.canCopy">
+      <span v-if="cliboardStore.canCopy">
         <div class="mx-auto w-72 border bg-white border-gray-100 dark:border-denim-900 dark:bg-gray-900 rounded-lg shadow-xl">
           <div class="dark:text-white text-xl font-semibold p-4 text-center ">
             <i class="bi bi-clipboard-check text-green-500 text-left pr-2" />
@@ -28,7 +28,7 @@
           </div>
           <div class=" p-3 bg-black rounded-xl text-sm">
             <div class="p-3 overflow-x-auto text-white">
-              {{ $store.state.ClipboardModule.valueToCopy }}
+              {{ cliboardStore.valueToCopy }}
             </div>
           </div>
         </div>
@@ -39,20 +39,20 @@
 
 
 
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
-import { getModule } from "vuex-module-decorators";
-import ClipboardModule from "@/store/modules/ClipboardModule";
-const clipboardModule = getModule(ClipboardModule);
+import { useClipboardStore } from "@/stores/ClipboardModule";
 
 export default defineComponent({
   components: {},
   data() {
-    return {};
+    return {
+      cliboardStore: useClipboardStore(),
+    };
   },
   methods: {
     close() {
-      clipboardModule.close();
+      this.cliboardStore.close();
     },
   },
 });

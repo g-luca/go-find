@@ -80,10 +80,9 @@
 import { defineComponent } from "vue";
 import ApplicationLinkModule from "@/store/modules/ApplicationLinkModule";
 import { getModule } from "vuex-module-decorators";
-import ClipboardModule from "@/store/modules/ClipboardModule";
 import DesmosNetworkModule from "@/store/modules/DesmosNetworkModule";
 import ApplicationLinkDiscord from "@/core/types/ApplicationLinks/ApplicationLinkDiscord";
-const clipboardModule = getModule(ClipboardModule);
+import { useClipboardStore } from "@/stores/ClipboardModule";
 const desmosNetwork = getModule(DesmosNetworkModule);
 
 export default defineComponent({
@@ -110,7 +109,7 @@ export default defineComponent({
   },
   methods: {
     copy(value: string) {
-      clipboardModule.copy(value);
+      useClipboardStore().copy(value);
     },
     async verifyProofUpload(): Promise<boolean> {
       const encodedUsername = encodeURIComponent(this.username);
