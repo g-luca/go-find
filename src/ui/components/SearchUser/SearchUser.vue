@@ -30,10 +30,10 @@
           aria-orientation="vertical"
           aria-labelledby="options-menu"
         >
-          <span v-if="$store.state.SearchModule.userSearchStatus && $store.state.SearchModule.users.length>0">
+          <span v-if="searchStore.userSearchStatus && searchStore.users.length>0">
 
             <div
-              v-for="user of $store.state.SearchModule.users"
+              v-for="user of searchStore.users"
               class="block mx-3 my-1 px-2 py-2 text-md rounded-md cursor-pointer text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-100 dark:hover:text-white dark:hover:bg-gray-600"
               role="menuitem"
             >
@@ -65,7 +65,7 @@
             </div>
           </span>
           <div
-            v-else-if="$store.state.SearchModule.userSearchStatus===0"
+            v-else-if="searchStore.userSearchStatus===0"
             class="dark:text-white py-2 pl-4 select-none"
           >
             Searching...
@@ -83,4 +83,50 @@
 </template>
 
 
-<script lang="ts" src="./SearchUser.ts"></script>
+<script lang="ts">
+import router from "@/router";
+import { useSearchStore } from "@/stores/SearchModule";
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  components: {},
+  data() {
+    return {
+      searchDtag: "",
+      showSearchResults: false,
+      searchStore: useSearchStore(),
+    };
+  },
+  mounted() {
+    window.addEventListener("keydown", (e) => {
+      if (e.metaKey && e.key == "k") {
+        try {
+          (this.$refs.searchInput as HTMLFontElement).focus();
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
+      }
+    });
+  },
+  methods: {
+    search() {
+      const dtag = this.searchDtag.toString();
+      const isDtagValid = dtag.length > 3;
+      this.showSearchResults = isDtagValid;
+      if (isDtagValid) {
+        this.searchStore.search(dtag);
+      }
+    },
+    directSearch() {
+      const dtag = this.searchDtag;
+      const isDtagValid = dtag.length > 3;
+      if (isDtagValid) {
+        router.push(`/${dtag}`);
+      }
+    },
+    openProfile(dtag: string) {
+      this.showSearchResults = false;
+      router.push(`/${dtag}`);
+    },
+  },
+});
+</script>

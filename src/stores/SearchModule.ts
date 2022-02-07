@@ -1,30 +1,38 @@
-import Api from '@/core/api/Api';
-import { Profile } from '@/core/types/Profile';
-import store from '@/store';
-import { Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { LoadingStatus } from '@/core/types/LoadingStatus';
-import { useLazyQuery } from '@vue/apollo-composable';
+import { Profile } from '@/core/types/Profile';
 import { ProfileSearchQuery } from '@/gql/ProfileSearchQuery';
+import { useLazyQuery } from '@vue/apollo-composable';
+import { defineStore } from 'pinia'
+import { registerModuleHMR } from '.';
 
-@Module({ store, name: 'SearchModule', dynamic: true })
-export default class SearchModule extends VuexModule {
-    public users: Array<Profile> = [];
-    public userSearchStatus: LoadingStatus = LoadingStatus.Loading;
-    private searchingDtag = ""; // stores the newest dtag input value, used to avoid the search at every character
 
-    /**
-     * Search a user Desmos profile from a given dtag or from the search cache
-     * @param dtag dtag to search
-     */
-    @Mutation
-    async search(dtag: string): Promise<void> {
-        this.searchingDtag = dtag;
-        setTimeout(async () => {
-            if (this.searchingDtag === dtag) {
+
+export const useSearchStore = defineStore({
+    id: 'SearchStore',
+    state: () => ({
+        users: [] as Profile[],
+        userSearchStatus: LoadingStatus.Loading,
+        searchingDtag: "", // stores the newest dtag input value, used to avoid the search at every character
+    }),
+    getters: {
+    },
+    actions: {
+
+        /**
+         * Search a user Desmos profile from a given dtag or from the search cache
+         * @param dtag dtag to search
+         */
+        async search(dtag: string): Promise<void> {
+            this.searchingDtag = dtag;
+            // debounce to avoid the search at every character
+            setTimeout(async () => {
+                if (this.searchingDtag !== dtag) {
+                    return;
+                }
                 this.userSearchStatus = LoadingStatus.Loading;
                 const getProfileQuery = useLazyQuery(
                     ProfileSearchQuery, {
-                    query: `${dtag}%`
+                    query: `%${dtag}%`
                 });
                 getProfileQuery.onResult((result) => {
                     if (result.loading) {
@@ -44,7 +52,11 @@ export default class SearchModule extends VuexModule {
                     }
                 })
                 getProfileQuery.load();
-            }
-        }, 250);
-    }
-}
+
+            }, 250);
+        }
+    },
+})
+
+// Register the store to enable HMR
+registerModuleHMR(useSearchStore);
