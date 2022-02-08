@@ -28,7 +28,7 @@
 
               <div class="grid grid-cols-8 pt-3">
                 <div
-                  v-if="$store.state.DesmosNetworkModule.isTestnet"
+                  v-if="desmosNetworkStore.isTestnet"
                   class="col-span-8 sm:col-span-3 sm:col-start-2 text-right px-2 pt-3"
                 >
                   <button
@@ -51,7 +51,7 @@
 
                 <div
                   class="px-2 pt-3"
-                  :class="[!$store.state.DesmosNetworkModule.isTestnet?'col-span-8 sm:col-span-8 text-center w-1/2 mx-auto':'col-span-8 sm:col-span-3 text-left']"
+                  :class="[!desmosNetworkStore.isTestnet?'col-span-8 sm:col-span-8 text-center w-1/2 mx-auto':'col-span-8 sm:col-span-3 text-left']"
                 >
                   <button
                     type="button"
@@ -310,4 +310,39 @@
   </div>
 </template>
 
-<script lang="ts" src="./LandingHero.ts" />
+<script lang="ts">
+import LinkBlockSample from "../LinkBlockSample/LinkBlockSample.vue";
+import { useDesmosNetworkStore } from "@/stores/DesmosNetworkModule";
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  components: { LinkBlockSample },
+  data() {
+    const squares: string[] = [
+      "github",
+      "facebook",
+      "band",
+      "discord",
+      "bitcoin",
+      "go-find",
+      "desmos",
+      "dogecoin",
+      "cosmos",
+      "twitter",
+      "instagram",
+      "ethereum",
+      "twitch",
+      "tiktok",
+      "youtube",
+      "osmosis",
+      "crypto.org",
+      "linkedin",
+      "akash",
+    ];
+    return {
+      desmosNetworkStore: useDesmosNetworkStore(),
+      squares,
+    };
+  },
+});
+</script>

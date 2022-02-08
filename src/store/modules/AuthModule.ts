@@ -5,11 +5,10 @@ import AuthAccount from '@/core/types/AuthAccount';
 import { CosmosAuthInfo, CosmosBroadcastMode, CosmosFee, CosmosPubKey, CosmosSignDoc, CosmosSignerInfo, CosmosSignMode, CosmosTxBody, CosmosTxRaw, DesmosJS, Network, Transaction, Wallet } from 'desmosjs';
 import AccountModule from './AccountModule';
 import Long from 'long';
-import DesmosNetworkModule from './DesmosNetworkModule';
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "@walletconnect/qrcode-modal";
 import { SignDoc, TxRaw } from 'desmosjs/dist/types/lib/proto/cosmos/tx/v1beta1/tx';
-const desmosNetworkModule = getModule(DesmosNetworkModule);
+import { useDesmosNetworkStore } from './../../stores/DesmosNetworkModule';
 
 export enum AuthLevel {
     None,
@@ -99,7 +98,8 @@ export default class AuthModule extends VuexModule {
 
 
     private static async signWithWalletConenct(txBody: CosmosTxBody, address: string): Promise<Transaction | false> {
-        const account = await desmosNetworkModule.network.getAccount(address);
+        const desmosNetworkStore = useDesmosNetworkStore();
+        const account = await desmosNetworkStore.network.getAccount(address);
         if (account) {
 
             const signerInfo: CosmosSignerInfo = {
@@ -125,7 +125,7 @@ export default class AuthModule extends VuexModule {
                     bodyBytes: bodyBytes,
                     accountNumber: accountNumber,
                     authInfoBytes: authInfoBytes,
-                    chainId: desmosNetworkModule.chainId
+                    chainId: desmosNetworkStore.chainId
                 } as SignDoc),
             }];
             try {
@@ -157,6 +157,7 @@ export default class AuthModule extends VuexModule {
      * @returns {}
      */
     public static async signAppLinkWithWalletConenct(txBody: CosmosTxBody, address: string): Promise<any> {
+        const desmosNetworkStore = useDesmosNetworkStore();
         const signerInfo: CosmosSignerInfo = { modeInfo: { single: { mode: CosmosSignMode.SIGN_MODE_DIRECT } }, sequence: 0 };
 
         const feeValue: CosmosFee = {
@@ -171,7 +172,7 @@ export default class AuthModule extends VuexModule {
             bodyBytes: bodyBytes,
             accountNumber: accountNumber,
             authInfoBytes: authInfoBytes,
-            chainId: desmosNetworkModule.chainId
+            chainId: desmosNetworkStore.chainId
         }
         const doc = this.stringifySignDocValues(docValues as SignDoc);
         const params = [{
@@ -242,12 +243,12 @@ export default class AuthModule extends VuexModule {
      * @returns A signed Traansaction object or the string error
      */
     private static async signTxWithKeplr(txBody: CosmosTxBody, address: string): Promise<Transaction | false> {
-
+        const desmosNetworkStore = useDesmosNetworkStore();
         let account = null;
         if (!this.granterAddress) {
-            account = await desmosNetworkModule.network.getAccount(address);
+            account = await desmosNetworkStore.network.getAccount(address);
         }
-        const pubKey = await window.keplr?.getKey(desmosNetworkModule.chainId);
+        const pubKey = await window.keplr?.getKey(desmosNetworkStore.chainId);
         if ((account || account === null && this.granterAddress) && pubKey) {
             try {
 
@@ -259,7 +260,7 @@ export default class AuthModule extends VuexModule {
                     }
                 };
                 // Get Keplr signer
-                const signer = window.keplr?.getOfflineSigner(desmosNetworkModule.chainId);
+                const signer = window.keplr?.getOfflineSigner(desmosNetworkStore.chainId);
                 const signerInfo: CosmosSignerInfo = {
                     publicKey: {
                         typeUrl: "/cosmos.crypto.secp256k1.PubKey",
@@ -288,7 +289,7 @@ export default class AuthModule extends VuexModule {
                     accountNumber: Long.fromNumber(accountNumber),
                     authInfoBytes: authInfoBytes,
                     bodyBytes: bodyBytes,
-                    chainId: desmosNetworkModule.chainId,
+                    chainId: desmosNetworkStore.chainId,
                 });
 
 
@@ -321,6 +322,7 @@ export default class AuthModule extends VuexModule {
      * @returns A signed Traansaction object or the string error
      */
     private static async signTxWithPassword(tx: CosmosTxBody, address: string, mPasswordClear: string): Promise<Transaction | false> {
+        const desmosNetworkStore = useDesmosNetworkStore();
         const mPassword = CryptoUtils.sha256(mPasswordClear);
         const mKey = AuthModule.getMKey(mPassword);
         if (mKey) {
@@ -329,7 +331,7 @@ export default class AuthModule extends VuexModule {
 
                 let account = null;
                 if (!this.granterAddress) {
-                    account = await desmosNetworkModule.network.getAccount(address);
+                    account = await desmosNetworkStore.network.getAccount(address);
                 }
                 console.log(account)
                 if (account || (account === null && this.granterAddress)) {

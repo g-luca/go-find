@@ -28,13 +28,12 @@ import AccountApplicationLinkTutorialTwitch from "@/modules/account/components/A
 import AccountApplicationLinkTutorialTwitter from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialTwitter.vue";
 import AccountApplicationLinkTutorialDomain from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialDomain.vue";
 import ApplicationLink from "@/core/types/ApplicationLink";
-import DesmosNetworkModule from "@/store/modules/DesmosNetworkModule";
 import Api from "@/core/api/Api";
+import { useDesmosNetworkStore } from '@/stores/DesmosNetworkModule';
 
 const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
 const transactionModule = getModule(TransactionModule);
-const desmosNetworkModule = getModule(DesmosNetworkModule);
 
 export default defineComponent({
     components: {
@@ -55,6 +54,7 @@ export default defineComponent({
     },
     data() {
         return {
+            desmosNetworkStore: useDesmosNetworkStore(),
             supportedApplicationLinks: [
                 new ApplicationLinkTwitter(""),
                 new ApplicationLinkGithub(""),
@@ -173,16 +173,16 @@ export default defineComponent({
                 this.proofUrl = '';
                 let generatedProof = null as any;
                 if (authModule.account?.isUsingKeplr) {
-                    const keplrAccount = await window.keplr?.getKey(desmosNetworkModule.chainId);
+                    const keplrAccount = await window.keplr?.getKey(this.desmosNetworkStore.chainId);
                     if (keplrAccount) {
                         try {
                             // Get Keplr signer
-                            const signer = window.keplr?.getOfflineSigner(desmosNetworkModule.chainId);
+                            const signer = window.keplr?.getOfflineSigner(this.desmosNetworkStore.chainId);
                             const address = new ripemd160().update(CryptoUtils.sha256Buffer(Buffer.from(keplrAccount.pubKey))).digest('hex');
                             const pub_key = Buffer.from(keplrAccount.pubKey).toString('hex').toLowerCase();
                             const proofObj = {
                                 account_number: "",
-                                chain_id: desmosNetworkModule.chainId,
+                                chain_id: this.desmosNetworkStore.chainId,
                                 fee: {
                                     amount: [{
                                         amount: "0",

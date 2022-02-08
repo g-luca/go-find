@@ -1,3 +1,4 @@
+import { useDesmosNetworkStore } from './../../stores/DesmosNetworkModule';
 import store from '@/store';
 import { getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { Window as KeplrWindow } from "@keplr-wallet/types";
@@ -6,9 +7,7 @@ import { ProfileQuery } from '@/gql/ProfileQuery';
 import AuthModule from './AuthModule';
 import AuthAccount from '@/core/types/AuthAccount';
 import router from '@/router';
-import DesmosNetworkModule from './DesmosNetworkModule';
 const authModule = getModule(AuthModule);
-const desmosNetworkModule = getModule(DesmosNetworkModule);
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -69,8 +68,9 @@ export default class KeplrModule extends VuexModule {
             } else {
                 await KeplrModule.setupDesmosMainnet();
             }
-            const keplrAccount = await window.keplr.getKey(desmosNetworkModule.chainId)
-            if ((await window.keplr.getKey(desmosNetworkModule.chainId) as any).isNanoLedger) {
+            const desmosNetworkStore = useDesmosNetworkStore();
+            const keplrAccount = await window.keplr.getKey(desmosNetworkStore.chainId)
+            if ((await window.keplr.getKey(desmosNetworkStore.chainId) as any).isNanoLedger) {
                 alert('Keplr does not support Desmos when used with a Ledger. You can either use your mnemonic, or if you want to use the Ledger use Forbole X instead (https://x.forbole.com/)');
                 this.isWaitingAuthentication = false;
                 this.hasProfile = false;
@@ -118,7 +118,7 @@ export default class KeplrModule extends VuexModule {
     public static async setupDesmosMainnet(): Promise<void> {
         if (await window.keplr) {
             await window.keplr!.experimentalSuggestChain({
-                chainId: desmosNetworkModule.chainId,
+                chainId: useDesmosNetworkStore().chainId,
                 chainName: "Desmos",
                 rpc: `${import.meta.env.VITE_APP_RPC_ENDPOINT}`,
                 rest: `${import.meta.env.VITE_APP_LCD_ENDPOINT}`,
@@ -169,7 +169,7 @@ export default class KeplrModule extends VuexModule {
     private static async setupDesmosTestnet(): Promise<void> {
         if (window.keplr) {
             await window.keplr.experimentalSuggestChain({
-                chainId: desmosNetworkModule.chainId,
+                chainId: useDesmosNetworkStore().chainId,
                 chainName: "Desmos Testnet",
                 rpc: `${import.meta.env.VITE_APP_RPC_ENDPOINT}`,
                 rest: `${import.meta.env.VITE_APP_LCD_ENDPOINT}`,

@@ -1,3 +1,4 @@
+import { useDesmosNetworkStore } from './../stores/DesmosNetworkModule';
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import 'vue-router';
 import ViewHome from "../views/ViewLanding.vue";
@@ -13,10 +14,8 @@ import ViewError404 from "../views/errors/ViewError404/ViewError404.vue";
 import { getModule } from "vuex-module-decorators";
 import AuthModule, { AuthLevel } from "@/store/modules/AuthModule";
 import KeplrModule from "@/store/modules/KeplrModule";
-import DesmosNetworkModule from "@/store/modules/DesmosNetworkModule";
 const authModule = getModule(AuthModule);
 const keplrModule = getModule(KeplrModule);
-const desmosNetworkModule = getModule(DesmosNetworkModule);
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -56,7 +55,7 @@ const routes: Array<RouteRecordRaw> = [
     component: ViewWalletConnect,
     meta: { requiresAuth: false, hiddenWithAuth: true },
     beforeEnter: (to, from, next) => {
-      if (!desmosNetworkModule.isTestnet) {
+      if (!useDesmosNetworkStore().isTestnet) {
         next('/login');
       } else {
         next();

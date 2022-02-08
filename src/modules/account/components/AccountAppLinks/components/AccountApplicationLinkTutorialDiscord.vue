@@ -79,11 +79,9 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import ApplicationLinkModule from "@/store/modules/ApplicationLinkModule";
-import { getModule } from "vuex-module-decorators";
-import DesmosNetworkModule from "@/store/modules/DesmosNetworkModule";
 import ApplicationLinkDiscord from "@/core/types/ApplicationLinks/ApplicationLinkDiscord";
 import { useClipboardStore } from "@/stores/ClipboardModule";
-const desmosNetwork = getModule(DesmosNetworkModule);
+import { useDesmosNetworkStore } from "@/stores/DesmosNetworkModule";
 
 export default defineComponent({
   components: {},
@@ -98,10 +96,11 @@ export default defineComponent({
     },
   },
   data(props) {
-    const net = desmosNetwork.isTestnet ? "testnet" : "mainnet";
+    const net = useDesmosNetworkStore().isTestnet ? "testnet" : "mainnet";
     const cmdConnect = `!connect ${net} ${props.proof}`;
     return {
-      cmdConnect,
+      desmosNetworkStore: useDesmosNetworkStore(),
+      cmdConnect: cmdConnect,
       isVerifyingConnect: false,
       hasConnected: false,
       connectError: "",
@@ -113,7 +112,7 @@ export default defineComponent({
     },
     async verifyProofUpload(): Promise<boolean> {
       const encodedUsername = encodeURIComponent(this.username);
-      const endpoint = desmosNetwork.isTestnet
+      const endpoint = this.desmosNetworkStore.isTestnet
         ? `https://themis.morpheus.desmos.network/discord/${encodedUsername}`
         : `https://themis.mainnet.desmos.network/discord/${encodedUsername}`;
       try {

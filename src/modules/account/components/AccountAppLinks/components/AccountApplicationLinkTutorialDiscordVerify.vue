@@ -83,13 +83,12 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { getModule } from "vuex-module-decorators";
-import DesmosNetworkModule from "@/store/modules/DesmosNetworkModule";
 import AuthModule from "@/store/modules/AuthModule";
 import { ApplicationLinkQuery } from "@/gql/ApplicationLinkQuery";
 import { useApolloClient } from "@vue/apollo-composable";
 import AccountModule from "@/store/modules/AccountModule";
 import { useClipboardStore } from "@/stores/ClipboardModule";
-const desmosNetwork = getModule(DesmosNetworkModule);
+import { useDesmosNetworkStore } from "@/stores/DesmosNetworkModule";
 const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
 
@@ -102,7 +101,7 @@ export default defineComponent({
     },
   },
   data() {
-    const net = desmosNetwork.isTestnet ? "testnet" : "mainnet";
+    const net = useDesmosNetworkStore().isTestnet ? "testnet" : "mainnet";
     const cmdVerify = `!verify ${net}`;
     return {
       cmdVerify,

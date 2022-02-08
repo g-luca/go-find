@@ -1,10 +1,9 @@
+import { useDesmosNetworkStore } from './../../stores/DesmosNetworkModule';
 import store from '@/store';
 import { CosmosBroadcastMode, CosmosTxBody, CosmosTxResponse, Transaction } from 'desmosjs';
 import { getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import AuthModule from './AuthModule';
-import DesmosNetworkModule from './DesmosNetworkModule';
 const authModule = getModule(AuthModule);
-const desmosNetworkModule = getModule(DesmosNetworkModule);
 
 export enum TransactionStatus {
     Error = -1,
@@ -117,7 +116,7 @@ export default class TransactionModule extends VuexModule {
      */
     private static async handleBroadcast(signedTx: Transaction, broadcastMode = CosmosBroadcastMode.BROADCAST_MODE_ASYNC): Promise<{ success: boolean, error: string }> {
         try {
-            const broadcastRawResult = await desmosNetworkModule.network.broadcast(signedTx, broadcastMode);
+            const broadcastRawResult = await useDesmosNetworkStore().network.broadcast(signedTx, broadcastMode);
             const broadcastResult = CosmosTxResponse.fromJSON(broadcastRawResult.tx_response);
             console.log(`tx hash: ${broadcastResult.txhash}`);
             if (broadcastResult.txhash && broadcastResult.code === 0) {
