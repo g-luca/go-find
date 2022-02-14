@@ -38,7 +38,7 @@
 
                 <!-- Airdrop -->
                 <span
-                  v-if="$store.state.AirdropModule.config!==null&&$store.state.AirdropModule.config.airdrop_enabled===true"
+                  v-if="airdropStore.config!==null&&airdropStore.config.airdrop_enabled===true"
                   class="col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-1 mx-auto"
                 >
 
@@ -86,4 +86,47 @@
   </section>
 </template>
 
-<script lang="ts" src="./AccountBalance.ts"/>
+<script lang="ts">
+import { useAirdropStore } from "@/stores/AirdropModule";
+import { defineComponent } from "vue";
+import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
+import AccountAirdrop from "@/modules/account/components/AccountAirdrop/AccountAirdrop.vue";
+import ModalSend from "@/ui/components/ModalSend/ModalSend.vue";
+import ModalStaking from "@/modules/account/components/AccountBalance/components/ModalStaking.vue";
+import ModalGovernance from "@/modules/account/components/AccountBalance/components/ModalGovernance.vue";
+
+export default defineComponent({
+  components: {
+    SkeletonLoader,
+    AccountAirdrop,
+    ModalSend,
+    ModalStaking,
+    ModalGovernance,
+  },
+  data() {
+    return {
+      airdropStore: useAirdropStore(),
+      coinDenom: `${import.meta.env.VITE_APP_COIN_DENOM}`,
+      isAirdropActive: false,
+    };
+  },
+  mounted() {
+    this.checkAirdrop();
+  },
+  methods: {
+    splitNumberLeft(value: number, separator: string) {
+      return String(value).split(separator)[0];
+    },
+    splitNumberRight(value: number, separator: string) {
+      return String(value).split(separator)[1];
+    },
+    toggleAirdropModal() {
+      this.airdropStore.toggleAirdropModal();
+      this.airdropStore.checkAirdrop();
+    },
+    async checkAirdrop() {
+      await this.airdropStore.loadAirdropConfig();
+    },
+  },
+});
+</script>

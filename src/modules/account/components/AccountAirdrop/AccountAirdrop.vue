@@ -1,7 +1,7 @@
 <template>
   <span>
     <Dialog
-      :open="$store.state.AirdropModule.isAirdropModalOpen"
+      :open="airdropStore.isAirdropModalOpen"
       @close="toggleAirdropModal()"
     >
       <div class="fixed inset-0 z-20 overflow-y-auto bg-opacity-50 bg-gray-500">
@@ -25,7 +25,7 @@
             <div class="dark:text-white py-3 px-4">
 
               <!-- Requirements -->
-              <section v-if="$store.state.AirdropModule.grantStatus!=='GrantRequested'&&$store.state.AirdropModule.grantStatus!=='GrantReceived'">
+              <section v-if="airdropStore.grantStatus!=='GrantRequested'&&airdropStore.grantStatus!=='GrantReceived'">
                 <div class="grid grid-cols-12 md:pl-10">
                   <div class="col-span-12 md:col-span-7 mx-auto md:mx-0">
                     <h1 class="text-5xl font-bold text-brand">Ready to claim?</h1>
@@ -37,7 +37,7 @@
                         /></li>
                       <li class="">
                         Connect eligible address using "Connect Blockchain" <i
-                          v-if="$store.state.AirdropModule.aidropAllocations.size>0"
+                          v-if="airdropStore.aidropAllocations.size>0"
                           class="bi bi-check-lg text-green-500 text-lg align-middle"
                         /></li>
                       <li class="pt-1">
@@ -63,18 +63,18 @@
               <!-- If profile exists on chain, claim flow! -->
               <span v-if="$store.state.AccountModule.profile&&(!$store.state.AccountModule.isNewProfile||$store.state.AccountModule.account._balance)">
                 <!-- Available Airdrops / Claim -->
-                <section v-if="$store.state.AccountModule && $store.state.AirdropModule.aidropAllocations && $store.state.AirdropModule.claimStatus==='None'">
+                <section v-if="$store.state.AccountModule && airdropStore.aidropAllocations && airdropStore.claimStatus==='None'">
                   <div class="grid grid-cols-12 md:pl-10">
                     <div class="col-span-12 my-4">
                       <h1 class="text-4xl">Your Airdrops <i class="bi bi-gift-fill text-red-400" /> </h1>
                     </div>
 
                     <div
-                      v-if="!$store.state.AirdropModule.isLoadingAirdropAllocations"
+                      v-if="!airdropStore.isLoadingAirdropAllocations"
                       class="col-span-12"
                     >
                       <div
-                        v-for="(allocation) in $store.state.AirdropModule.aidropAllocations"
+                        v-for="(allocation) in airdropStore.aidropAllocations"
                         class="col-span-12 md:ml-4"
                       >
                         <div class="grid grid-cols-12">
@@ -134,13 +134,13 @@
                         </div>
                       </div>
                       <div
-                        v-if="$store.state.AirdropModule.aidropAllocations.size<=0"
+                        v-if="airdropStore.aidropAllocations.size<=0"
                         class="text-red-500"
                       >
                         No claimable address found
                       </div>
                       <div class="col-span-12 pt-3">
-                        <span v-if="$store.state.AirdropModule.claimStatus!=='Loading'">
+                        <span v-if="airdropStore.claimStatus!=='Loading'">
                           <button
                             class="rounded-3xl bg-brand hover:brightness-90 w-full py-1 text-xl brightness-100 transition ease-in duration-100"
                             @click="claimUserAirdrop()"
@@ -172,16 +172,16 @@
                 </section>
 
                 <!-- Claim Status -->
-                <section v-if="$store.state.AirdropModule.claimStatus!=='None'||$store.state.AirdropModule.grantStatus==='GrantReceived'">
+                <section v-if="airdropStore.claimStatus!=='None'||airdropStore.grantStatus==='GrantReceived'">
                   <div class="grid grid-cols-12">
                     <div class="col-span-12 mx-auto">
-                      <span v-if="$store.state.AirdropModule.claimStatus==='ClaimRequested'">
+                      <span v-if="airdropStore.claimStatus==='ClaimRequested'">
                         <AccountAirdropClaimRequested />
                       </span>
-                      <span v-if="$store.state.AirdropModule.claimStatus==='Error'">
+                      <span v-if="airdropStore.claimStatus==='Error'">
                         <AccountAirdropClaimError />
                       </span>
-                      <span v-if="$store.state.AirdropModule.claimStatus==='Loading'">
+                      <span v-if="airdropStore.claimStatus==='Loading'">
                         <AccountAirdropClaimLoading />
                       </span>
                     </div>
@@ -190,11 +190,11 @@
               </span>
 
               <!-- If profile does not exist on chain, grant flow! -->
-              <span v-else-if="$store.state.AirdropModule.grantStatus==='None'">
+              <span v-else-if="airdropStore.grantStatus==='None'">
                 <div class="md:pl-10">
                   <div class="relative text-gray-700 dark:text-white">
-                    <span v-if="!$store.state.AirdropModule.isLoadingGrant">
-                      <span v-if="$store.state.AirdropModule.isGrantSuccess">
+                    <span v-if="!airdropStore.isLoadingGrant">
+                      <span v-if="airdropStore.isGrantSuccess">
                         <h1 class="text-2xl text-center text-brand">Grant received!</h1>
                         <p class="text-center">You can now setup a free Desmos Profile and connect your eligible address to get your airdrop DSM!</p>
                       </span>
@@ -216,7 +216,7 @@
                           @click="checkGrantUserStatus()"
                         >Continue</button>
 
-                        {{$store.state.AirdropModule.grantResponse}}
+                        {{airdropStore.grantResponse}}
                       </span>
                     </span>
                     <span v-else>
@@ -227,19 +227,19 @@
               </span>
 
               <!-- Grant Status -->
-              <section v-if="$store.state.AirdropModule.grantStatus!=='None'">
+              <section v-if="airdropStore.grantStatus!=='None'">
                 <div class="grid grid-cols-12">
                   <div class="col-span-12 mx-auto">
-                    <span v-if="$store.state.AirdropModule.grantStatus==='GrantRequested'">
+                    <span v-if="airdropStore.grantStatus==='GrantRequested'">
                       <AccountAirdropGrantRequested />
                     </span>
-                    <span v-if="$store.state.AirdropModule.grantStatus==='GrantReceived'">
+                    <span v-if="airdropStore.grantStatus==='GrantReceived'">
                       <AccountAirdropGrantReceived />
                     </span>
-                    <span v-if="$store.state.AirdropModule.grantStatus==='Error'">
+                    <span v-if="airdropStore.grantStatus==='Error'">
                       <AccountAirdropGrantError />
                     </span>
-                    <span v-if="$store.state.AirdropModule.grantStatus==='Loading'">
+                    <span v-if="airdropStore.grantStatus==='Loading'">
                       <AccountAirdropGrantLoading />
                     </span>
                   </div>
@@ -256,9 +256,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { getModule } from "vuex-module-decorators";
 import { Dialog, DialogOverlay, DialogTitle } from "@headlessui/vue";
-import AirdropModule from "@/store/modules/AirdropModule";
 import AccountAirdropClaimRequested from "@/modules/account/components/AccountAirdrop/components/AccountAirdropClaimRequested.vue";
 import AccountAirdropClaimError from "@/modules/account/components/AccountAirdrop/components/AccountAirdropClaimError.vue";
 import AccountAirdropClaimLoading from "@/modules/account/components/AccountAirdrop/components/AccountAirdropClaimLoading.vue";
@@ -266,7 +264,7 @@ import AccountAirdropGrantRequested from "@/modules/account/components/AccountAi
 import AccountAirdropGrantReceived from "@/modules/account/components/AccountAirdrop/components/AccountAirdropGrantReceived.vue";
 import AccountAirdropGrantError from "@/modules/account/components/AccountAirdrop/components/AccountAirdropGrantError.vue";
 import AccountAirdropGrantLoading from "@/modules/account/components/AccountAirdrop/components/AccountAirdropGrantLoading.vue";
-const airdropModule = getModule(AirdropModule);
+import { useAirdropStore } from "@/stores/AirdropModule";
 
 export default defineComponent({
   components: {
@@ -283,21 +281,22 @@ export default defineComponent({
   },
   setup() {
     return {
+      airdropStore: useAirdropStore(),
       inputElegibleAddress: "",
     };
   },
   methods: {
     toggleAirdropModal() {
-      airdropModule.toggleAirdropModal();
+      this.airdropStore.toggleAirdropModal();
     },
     async claimUserAirdrop() {
-      airdropModule.claimAirdrop();
+      this.airdropStore.claimAirdrop();
     },
     async askUserGrant() {
-      //airdropModule.askGrant(this.inputElegibleAddress);
+      //this.airdropStore.askGrant(this.inputElegibleAddress);
     },
     async checkGrantUserStatus() {
-      airdropModule.checkGrantStatus(this.inputElegibleAddress);
+      this.airdropStore.checkGrantStatus(this.inputElegibleAddress);
     },
   },
 });
