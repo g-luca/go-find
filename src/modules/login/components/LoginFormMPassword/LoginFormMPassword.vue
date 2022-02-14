@@ -42,4 +42,67 @@
   </div>
 </template>
         
-<script lang="tsx" src="./LoginFormMPassword.ts"/>
+<script lang="ts">
+import AuthAccount from "@/core/types/AuthAccount";
+import { Profile } from "@/core/types/Profile";
+import LinkBlockSample from "@/modules/landing/components/LinkBlockSample/LinkBlockSample.vue";
+import router from "@/router";
+import AuthModule from "@/store/modules/AuthModule";
+import { useLoginStore } from "@/stores/LoginModule";
+import CryptoUtils from "@/utils/CryptoUtils";
+import { defineComponent } from "vue";
+import { getModule } from "vuex-module-decorators";
+const authModule = getModule(AuthModule);
+
+export default defineComponent({
+  components: {
+    LinkBlockSample,
+  },
+  data() {
+    return {
+      loginStore: useLoginStore(),
+      isValidMPassword: false,
+      hasLoginError: false,
+      isTouched: false,
+      inputMPassword: "",
+    };
+  },
+  methods: {
+    validatePassword() {
+      this.isValidMPassword = Profile.PASSWORD_REGEX.test(this.inputMPassword);
+    },
+    signin() {
+      this.validatePassword();
+      if (this.isValidMPassword) {
+        const mPassword = CryptoUtils.sha256(this.inputMPassword); // generate hashed mPassword
+        try {
+          //ePaassword is already hashed
+          const mKeyRaw = CryptoUtils.decryptAes(
+            this.loginStore.ePassword,
+            this.loginStore.eKey
+          ); // decrypt mKey
+          const mKey = mKeyRaw.split("#ok")[0];
+          CryptoUtils.decryptAes(mPassword, mKey); // try to decrypt privKey
+          this.hasLoginError = false;
+          authModule.saveMKey({ mKey, mPassword });
+
+          authModule.saveAuthAccount({
+            account: new AuthAccount(
+              this.loginStore.dtag,
+              this.loginStore.address,
+              false
+            ),
+          });
+          this.loginStore.reset();
+          router.push({ path: "/me" });
+        } catch (e) {
+          console.log(e);
+          this.hasLoginError = true;
+        }
+      } else {
+        this.hasLoginError = true;
+      }
+    },
+  },
+});
+</script>

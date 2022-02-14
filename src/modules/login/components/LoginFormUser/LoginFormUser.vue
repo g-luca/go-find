@@ -125,4 +125,81 @@
   </div>
 </template>
         
-<script lang="tsx" src="./LoginFormUser.ts"/>
+<script lang="ts">
+import { LoadingStatus } from "@/core/types/LoadingStatus";
+import { Profile } from "@/core/types/Profile";
+import LinkBlockSample from "@/modules/landing/components/LinkBlockSample/LinkBlockSample.vue";
+import { LoginState, useLoginStore } from "@/stores/LoginModule";
+import CryptoUtils from "@/utils/CryptoUtils";
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  components: {
+    LinkBlockSample,
+  },
+  data() {
+    return {
+      loginStore: useLoginStore(),
+      isLoading: LoadingStatus.Loaded,
+      isValidDtag: false,
+      isValidEPassword: false,
+      isValidAddress: false,
+      hasLoginError: false,
+      isTouched: false,
+      inputDtag: "",
+      inputAddress: "",
+      inputEPassword: "",
+      isLoginWithAddress: false,
+    };
+  },
+  methods: {
+    validateDtag() {
+      this.isValidDtag = Profile.DTAG_REGEX.test(this.inputDtag);
+    },
+    validatePassword() {
+      this.isValidEPassword = Profile.PASSWORD_REGEX.test(this.inputEPassword);
+    },
+    validateAddress() {
+      //TODO: add better control with regex
+      this.isValidAddress = this.inputAddress.length > 10;
+    },
+    toggleAddressLogin() {
+      this.isLoginWithAddress = !this.isLoginWithAddress;
+      this.inputAddress = "";
+    },
+    async signin() {
+      this.isTouched = true;
+      this.validateDtag();
+      this.validatePassword();
+      this.validateAddress();
+
+      if (
+        (this.isValidEPassword &&
+          this.isValidDtag &&
+          !this.isLoginWithAddress) ||
+        (this.isLoginWithAddress && this.isValidAddress)
+      ) {
+        const ePassword = CryptoUtils.sha256(this.inputEPassword); // generate the hashed ePassword
+
+        // Call the login endpoint, if dtag and ePassword matches it will return eKey, empty string otherwise
+        this.isLoading = LoadingStatus.Loading;
+        await this.loginStore.login({
+          dtag: this.inputDtag,
+          ePassword,
+          address: this.inputAddress,
+        });
+        const eKey = this.loginStore.eKey;
+        if (eKey) {
+          this.isLoading = LoadingStatus.Loaded;
+          this.loginStore.nextState(LoginState.StateMLogin);
+        } else {
+          this.hasLoginError = true;
+          this.isLoading = LoadingStatus.Error;
+        }
+      } else {
+        this.hasLoginError = true;
+      }
+    },
+  },
+});
+</script>

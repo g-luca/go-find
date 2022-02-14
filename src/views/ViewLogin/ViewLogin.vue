@@ -20,8 +20,8 @@
               Sign In
             </span>
           </div>
-          <LoginFormUser v-if="$store.state.LoginModule.currentState==='StateELogin'" />
-          <LoginFormMPassword v-if="$store.state.LoginModule.currentState==='StateMLogin'" />
+          <LoginFormUser v-if="loginStore.currentState==='StateELogin'" />
+          <LoginFormMPassword v-if="loginStore.currentState==='StateMLogin'" />
         </div>
       </div>
     </div>
@@ -29,4 +29,27 @@
   </div>
 </template>
 
-<script lang="ts" src="./ViewLogin.ts"/>
+<script lang="ts">
+import { defineComponent } from "vue";
+
+import AppFooter from "@/ui/components/AppFooter/AppFooter.vue";
+import AppHeader from "@/ui/components/AppHeader/AppHeader.vue";
+import LoginFormUser from "@/modules/login/components/LoginFormUser/LoginFormUser.vue";
+import LoginFormMPassword from "@/modules/login/components/LoginFormMPassword/LoginFormMPassword.vue";
+import { useLoginStore } from "@/stores/LoginModule";
+
+export default defineComponent({
+  components: {
+    AppHeader,
+    AppFooter,
+    LoginFormUser,
+    LoginFormMPassword,
+  },
+  data() {
+    return {
+      loginStore: useLoginStore(),
+    };
+  },
+  methods: {},
+});
+</script>
