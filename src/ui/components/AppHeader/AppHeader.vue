@@ -107,9 +107,8 @@ import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
 import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
 import router from "@/router";
-import WalletConnectModule from "@/store/modules/WalletConnectModule";
+import { useWalletConnectStore } from "@/stores/WalletConnectModule";
 const authModule = getModule(AuthModule);
-const walletConnectModule = getModule(WalletConnectModule);
 
 export default defineComponent({
   components: {
@@ -124,13 +123,14 @@ export default defineComponent({
   data() {
     const isTestnet = import.meta.env.VITE_APP_IS_TESTNET === "true";
     return {
+      walletConnectStore: useWalletConnectStore(),
       isTestnet,
     };
   },
   methods: {
     logout() {
       if (authModule.account?.isUsingWalletConnect) {
-        walletConnectModule.logout();
+        this.walletConnectStore.logout();
       }
       authModule.logout();
       router.push("/");

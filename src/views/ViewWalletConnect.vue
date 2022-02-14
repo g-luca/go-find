@@ -22,7 +22,7 @@
 
           <div class="pt-14">
             <!-- WalletConnect connected but no Desmos profile -->
-            <span v-if="!$store.state.WalletConnectModule.hasProfile&&$store.state.WalletConnectModule.connectedAddress">
+            <span v-if="!walletConnectStore.hasProfile&&walletConnectStore.connectedAddress">
               <div class="text-center">
                 <!-- Dtag -->
                 <div>
@@ -123,7 +123,7 @@
               </div>
             </span>
 
-            <span v-if="!$store.state.WalletConnectModule.connectedAddress">
+            <span v-if="!walletConnectStore.connectedAddress">
               <div class="text-center">
                 <button
                   type="button"
@@ -155,16 +155,13 @@
 <script lang="ts">
 import AppFooter from "@/ui/components/AppFooter/AppFooter.vue";
 import AppHeader from "@/ui/components/AppHeader/AppHeader.vue";
-import { getModule } from "vuex-module-decorators";
 import { defineComponent } from "vue";
 import { Profile } from "@/core/types/Profile";
 import Api from "@/core/api/Api";
 import { Field, Form } from "vee-validate";
-import WalletConnectModule from "@/store/modules/WalletConnectModule";
 import AuthModule from "@/store/modules/AuthModule";
-const walletConnectModule = getModule(WalletConnectModule);
-const authModule = getModule(AuthModule);
 import QRCodeModal from "@walletconnect/qrcode-modal";
+import { useWalletConnectStore } from "@/stores/WalletConnectModule";
 
 export default defineComponent({
   components: {
@@ -178,6 +175,7 @@ export default defineComponent({
       dtag: { required: true, regex: Profile.DTAG_REGEX },
     };
     return {
+      walletConnectStore: useWalletConnectStore(),
       formSchema,
       isValidDtag: false,
       isDtagAvailable: false,
@@ -186,12 +184,12 @@ export default defineComponent({
     };
   },
   mounted() {
-    walletConnectModule.connect();
+    this.walletConnectStore.connect();
   },
   methods: {
     openWalletConnect(): void {
       QRCodeModal.open(AuthModule.walletConnectClient.uri, QRCodeModal.close);
-      walletConnectModule.connect();
+      this.walletConnectStore.connect();
     },
     validateDtag() {
       this.isDtagAvailable = false;
@@ -223,7 +221,9 @@ export default defineComponent({
       return this.isValidDtag;
     },
     setDtag() {
-      walletConnectModule.setupProfileWalletConnect({ dtag: this.inputDtag });
+      this.walletConnectStore.setupProfileWalletConnect({
+        dtag: this.inputDtag,
+      });
     },
   },
 });
