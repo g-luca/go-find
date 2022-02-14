@@ -645,10 +645,9 @@ import {
   CosmosMsgWithdrawDelegatorReward,
   CosmosTxBody,
 } from "desmosjs";
-import TransactionModule from "@/store/modules/TransactionModule";
+import { useTransactionStore } from "@/stores/TransactionModule";
 const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
-const transactionModule = getModule(TransactionModule);
 
 enum StakingOperations {
   None = "none",
@@ -662,6 +661,7 @@ export default defineComponent({
   components: { Dialog, DialogOverlay, DialogTitle, SkeletonLoader },
   setup() {
     return {
+      transactionStore: useTransactionStore(),
       isOpen: ref(false),
       isStakingOperationOpen: ref(false),
       isLoadingValidators: ref(false),
@@ -954,7 +954,7 @@ export default defineComponent({
           timeoutHeight: 0,
         };
         await this.toggleStakingOperationModal();
-        transactionModule.start({
+        this.transactionStore.start({
           tx: txBody,
           mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
         });
@@ -990,7 +990,7 @@ export default defineComponent({
           timeoutHeight: 0,
         };
         await this.toggleStakingOperationModal();
-        transactionModule.start({
+        this.transactionStore.start({
           tx: txBody,
           mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
         });
@@ -1022,7 +1022,7 @@ export default defineComponent({
           timeoutHeight: 0,
         };
         await this.toggleStakingOperationModal();
-        transactionModule.start({
+        this.transactionStore.start({
           tx: txBody,
           mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
         });
@@ -1050,7 +1050,7 @@ export default defineComponent({
           nonCriticalExtensionOptions: [],
           timeoutHeight: 0,
         };
-        transactionModule.start({
+        this.transactionStore.start({
           tx: txBody,
           mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
         });

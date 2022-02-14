@@ -230,7 +230,6 @@ import { useApolloClient } from "@vue/apollo-composable";
 import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
-import TransactionModule from "@/store/modules/TransactionModule";
 import { GovernanceQuery } from "@/gql/GovernanceQuery";
 import DOMPurify from "dompurify";
 import { BarChart } from "vue-chart-3";
@@ -242,8 +241,8 @@ import {
   CosmosTxBody,
   CosmosVoteOption,
 } from "desmosjs";
+import { useTransactionStore } from "@/stores/TransactionModule";
 const authModule = getModule(AuthModule);
-const transactionModule = getModule(TransactionModule);
 
 Chart.register(...registerables);
 
@@ -285,6 +284,7 @@ export default defineComponent({
       },
     };
     return {
+      transactionStore: useTransactionStore(),
       isOpen: ref(false),
       isLoadinGovernance: ref(false),
       proposals: ref([]),
@@ -424,7 +424,7 @@ export default defineComponent({
           timeoutHeight: 0,
         };
         await this.toggleModal();
-        transactionModule.start({
+        this.transactionStore.start({
           tx: txBody,
           mode: CosmosBroadcastMode.BROADCAST_MODE_SYNC,
         });

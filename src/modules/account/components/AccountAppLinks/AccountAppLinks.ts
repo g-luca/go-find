@@ -18,7 +18,6 @@ import { CosmosAuthInfo, CosmosBroadcastMode, CosmosTxBody, DesmosMsgUnlinkAppli
 import CryptoUtils from "@/utils/CryptoUtils";
 import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
-import TransactionModule, { TransactionStatus } from "@/store/modules/TransactionModule";
 import AccountModule from "@/store/modules/AccountModule";
 import Clipboard from '@/ui/components/Clipboard.vue';
 import AccountApplicationLinkTutorialDiscord from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialDiscord.vue";
@@ -30,10 +29,10 @@ import AccountApplicationLinkTutorialDomain from "@/modules/account/components/A
 import ApplicationLink from "@/core/types/ApplicationLink";
 import Api from "@/core/api/Api";
 import { useDesmosNetworkStore } from '@/stores/DesmosNetworkModule';
+import { useTransactionStore, TransactionStatus } from '@/stores/TransactionModule';
 
 const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
-const transactionModule = getModule(TransactionModule);
 
 export default defineComponent({
     components: {
@@ -54,6 +53,7 @@ export default defineComponent({
     },
     data() {
         return {
+            transactionStore: useTransactionStore(),
             desmosNetworkStore: useDesmosNetworkStore(),
             supportedApplicationLinks: [
                 new ApplicationLinkTwitter(""),
@@ -86,11 +86,11 @@ export default defineComponent({
         }
     },
     beforeMount() {
-        ref(transactionModule);
+        ref();
         watchEffect(() => {
             // check if is processing the right transaction and the status
-            if (accountModule.profile && transactionModule.tx === this.tx && (transactionModule.transactionStatus === TransactionStatus.Error || transactionModule.transactionStatus === TransactionStatus.Success)) {
-                if (transactionModule.errorMessage) {
+            if (accountModule.profile && this.transactionStore.tx === this.tx && (this.transactionStore.transactionStatus === TransactionStatus.Error || this.transactionStore.transactionStatus === TransactionStatus.Success)) {
+                if (this.transactionStore.errorMessage) {
                     // the transaction has an error message, failed
                     console.log('application link failure!')
                 } else {
@@ -152,7 +152,7 @@ export default defineComponent({
                 this.tx = txBody;
                 this.newApplicationLink = null;
                 this.deletedApplicationLink = applicationLink;
-                transactionModule.start({
+                this.transactionStore.start({
                     tx: txBody,
                     mode: CosmosBroadcastMode.BROADCAST_MODE_SYNC,
                 });
@@ -293,7 +293,7 @@ export default defineComponent({
                 this.tx = payload.txBody;
                 this.newApplicationLink = payload.applicationLink;
                 this.isExecutingTransaction = true;
-                transactionModule.start({
+                this.transactionStore.start({
                     tx: payload.txBody,
                     mode: CosmosBroadcastMode.BROADCAST_MODE_SYNC,
                 });

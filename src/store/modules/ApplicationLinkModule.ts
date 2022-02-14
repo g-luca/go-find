@@ -8,8 +8,6 @@ import store from '@/store'
 import { CosmosTxBody, DesmosMsgLinkApplication } from 'desmosjs';
 import { getModule, Module, VuexModule } from 'vuex-module-decorators'
 import AuthModule from './AuthModule';
-import TransactionModule from './TransactionModule';
-const transactionModule = getModule(TransactionModule);
 const authModule = getModule(AuthModule);
 
 

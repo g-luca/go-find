@@ -125,10 +125,9 @@ import {
   CosmosTxBody,
   DesmosJS,
 } from "desmosjs";
-import TransactionModule from "@/store/modules/TransactionModule";
 import AuthModule from "@/store/modules/AuthModule";
+import { useTransactionStore } from "@/stores/TransactionModule";
 const accountModule = getModule(AccountModule);
-const transactionModule = getModule(TransactionModule);
 
 export default defineComponent({
   components: { Dialog, DialogOverlay, DialogTitle },
@@ -218,7 +217,7 @@ export default defineComponent({
           timeoutHeight: 0,
         };
         await this.toggleModal();
-        transactionModule.start({
+        useTransactionStore().start({
           tx: txBody,
           mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
         });

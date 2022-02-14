@@ -18,15 +18,14 @@ import { Wallet, } from "desmosjs";
 import CryptoUtils from "@/utils/CryptoUtils";
 import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
-import TransactionModule, { TransactionStatus } from "@/store/modules/TransactionModule";
 import ChainLink from "@/core/types/ChainLink";
 import AccountModule from "@/store/modules/AccountModule";
 import { Key } from "@keplr-wallet/types";
 import KeplrModule from "@/store/modules/KeplrModule";
 import { Extension as TerraExtension, MsgSend as TerraMsgSend, Fee as TerraFee, LCDClient as TerraLCDClient, TxBody as TerraTxBody, AuthInfo as TerraAuthInfo, SignDoc as TerraSignDoc } from "@terra-money/terra.js";
+import { useTransactionStore, TransactionStatus } from '@/stores/TransactionModule';
 const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
-const transactionModule = getModule(TransactionModule);
 const ledgerModule = getModule(LedgerModule);
 
 class ChainLinkConnectionMethod {
@@ -58,6 +57,7 @@ export default defineComponent({
     },
     data() {
         return {
+            transactionStore: useTransactionStore(),
             supportedChainLinkConnectionMethods: [new ChainLinkConnectionMethod("keplr", "Keplr", "keplr"), new ChainLinkConnectionMethod("ledger", "Ledger", "ledger"), new ChainLinkConnectionMethod("terrastation", "Terra Station", "terrastation", ["terra"])],
             selectedConnectionMethod: null as ChainLinkConnectionMethod | null,
             supportedChainLinks,
@@ -84,11 +84,11 @@ export default defineComponent({
         }
     },
     beforeMount() {
-        ref(transactionModule);
+        ref(this.transactionStore);
         watchEffect(() => {
             // check if is processing the right transaction and the status
-            if (accountModule.profile && transactionModule.tx === this.tx && (transactionModule.transactionStatus === TransactionStatus.Error || transactionModule.transactionStatus === TransactionStatus.Success)) {
-                if (transactionModule.errorMessage) {
+            if (accountModule.profile && this.transactionStore.tx === this.tx && (this.transactionStore.transactionStatus === TransactionStatus.Error || this.transactionStore.transactionStatus === TransactionStatus.Success)) {
+                if (this.transactionStore.errorMessage) {
                     // the transaction has an error message, failed
                     console.log('chain link failure!')
                 } else {
@@ -169,7 +169,7 @@ export default defineComponent({
                 this.tx = txBody;
                 this.newChainLink = null;
                 this.deletedChainLink = chainLink;
-                transactionModule.start({
+                this.transactionStore.start({
                     tx: txBody,
                     mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
                 });
@@ -236,7 +236,7 @@ export default defineComponent({
                     this.newChainLink = new ChainLink(destWallet.address, this.selectedChain.id);
 
                     await this.toggleChainLinkEditor();
-                    transactionModule.start({
+                    this.transactionStore.start({
                         tx: this.tx,
                         mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
                     });
@@ -337,7 +337,7 @@ export default defineComponent({
                         this.newChainLink = new ChainLink(extKeplrWallet.bech32Address, this.selectedChain.id);
 
                         await this.toggleChainLinkEditor();
-                        transactionModule.start({
+                        this.transactionStore.start({
                             tx: txBody,
                             mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
                         });
@@ -572,7 +572,7 @@ export default defineComponent({
                                                 this.newChainLink = new ChainLink(terraAddress, this.selectedChain.id);
 
                                                 await this.toggleChainLinkEditor();
-                                                transactionModule.start({
+                                                this.transactionStore.start({
                                                     tx: txBody,
                                                     mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
                                                 });
@@ -692,7 +692,7 @@ export default defineComponent({
             this.isExecutingTransaction = true;
             this.newChainLink = new ChainLink(destAdress, selectedChain.id);
 
-            transactionModule.start({
+            this.transactionStore.start({
                 tx: txBody,
                 mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
             });
