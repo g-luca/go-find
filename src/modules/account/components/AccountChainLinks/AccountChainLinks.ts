@@ -1,4 +1,3 @@
-import LedgerModule from '@/store/modules/LedgerModule';
 import { defineComponent, ref, watchEffect } from "vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
@@ -24,9 +23,9 @@ import { Key } from "@keplr-wallet/types";
 import KeplrModule from "@/store/modules/KeplrModule";
 import { Extension as TerraExtension, MsgSend as TerraMsgSend, Fee as TerraFee, LCDClient as TerraLCDClient, TxBody as TerraTxBody, AuthInfo as TerraAuthInfo, SignDoc as TerraSignDoc } from "@terra-money/terra.js";
 import { useTransactionStore, TransactionStatus } from '@/stores/TransactionModule';
+import { useLedgerStore } from "@/stores/LedgerModule";
 const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);
-const ledgerModule = getModule(LedgerModule);
 
 class ChainLinkConnectionMethod {
     public id: string;
@@ -58,6 +57,7 @@ export default defineComponent({
     data() {
         return {
             transactionStore: useTransactionStore(),
+            ledgerStore: useLedgerStore(),
             supportedChainLinkConnectionMethods: [new ChainLinkConnectionMethod("keplr", "Keplr", "keplr"), new ChainLinkConnectionMethod("ledger", "Ledger", "ledger"), new ChainLinkConnectionMethod("terrastation", "Terra Station", "terrastation", ["terra"])],
             selectedConnectionMethod: null as ChainLinkConnectionMethod | null,
             supportedChainLinks,
@@ -633,28 +633,28 @@ export default defineComponent({
 
                 const selectedChain = this.selectedChain;
                 await this.toggleChainLinkEditor();
-                await ledgerModule.setLedgerAction({ app: selectedChain, ledgerAppName: ledgerAppName, message: proofObj as any });
-                await ledgerModule.startLedgerAction();
+                await this.ledgerStore.setLedgerAction({ app: selectedChain, ledgerAppName: ledgerAppName, message: proofObj as any });
+                await this.ledgerStore.startLedgerAction();
 
-                ref(ledgerModule.actionSignature);
+                ref(this.ledgerStore.actionSignature);
                 watchEffect(async () => {
-                    if (ledgerModule.actionSignature !== null) {
+                    if (this.ledgerStore.actionSignature !== null) {
                         setTimeout(async () => {
                             if (selectedChain && authModule.account) {
-                                await ledgerModule.toggleModal();
-                                await ledgerModule.setLedgerAction({ app: selectedChain, ledgerAppName: ledgerAppName, message: '' });
+                                await this.ledgerStore.toggleModal();
+                                await this.ledgerStore.setLedgerAction({ app: selectedChain, ledgerAppName: ledgerAppName, message: '' });
                                 const finalProof: DesmosProof = {
                                     pubKey: {
                                         typeUrl: '/cosmos.crypto.secp256k1.PubKey',
                                         value: CosmosPubKey.encode({
-                                            key: Buffer.from(ledgerModule.ledgerPubKey, 'hex')
+                                            key: Buffer.from(this.ledgerStore.ledgerPubKey, 'hex')
                                         }).finish()
                                     },
-                                    signature: ledgerModule.actionSignature!,
+                                    signature: this.ledgerStore.actionSignature!,
                                     plainText: Buffer.from(JSON.stringify(proofObj, null, 0)).toString('hex'),
                                 }
 
-                                await this.sendChainLink(selectedChain, ledgerModule.ledgerAddress, authModule.account?.address, finalProof);
+                                await this.sendChainLink(selectedChain, this.ledgerStore.ledgerAddress, authModule.account?.address, finalProof);
                             }
                         }, 2000)
                     }
