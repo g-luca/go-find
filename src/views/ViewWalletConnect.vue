@@ -29,7 +29,7 @@
                   <label
                     class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
                     for="dtag"
-                  > <span v-if="!$store.state.RegisterModule.hasDesmosProfile">
+                  > <span v-if="!registerStore.hasDesmosProfile">
                       Choose your
                     </span>
                     <span v-else>
@@ -162,6 +162,7 @@ import { Field, Form } from "vee-validate";
 import AuthModule from "@/store/modules/AuthModule";
 import QRCodeModal from "@walletconnect/qrcode-modal";
 import { useWalletConnectStore } from "@/stores/WalletConnectModule";
+import { useRegisterStore } from "@/stores/RegisterModule";
 
 export default defineComponent({
   components: {
@@ -175,6 +176,7 @@ export default defineComponent({
       dtag: { required: true, regex: Profile.DTAG_REGEX },
     };
     return {
+      registerStore: useRegisterStore(),
       walletConnectStore: useWalletConnectStore(),
       formSchema,
       isValidDtag: false,

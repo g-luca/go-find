@@ -23,4 +23,20 @@
   </div>
 </template>
 
-<script lang="ts" src="./RegisterFail.ts"/>
+<script lang="ts">
+import { useRegisterStore } from "@/stores/RegisterModule";
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  data() {
+    return {
+      registerStore: useRegisterStore(),
+    };
+  },
+  methods: {
+    reset(): void {
+      this.registerStore.reset();
+    },
+  },
+});
+</script>

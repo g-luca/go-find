@@ -48,7 +48,7 @@
                   <label
                     class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
                     for="dtag"
-                  > <span v-if="!$store.state.RegisterModule.hasDesmosProfile">
+                  > <span v-if="!registerStore.hasDesmosProfile">
                       Choose your
                     </span>
                     <span v-else>
@@ -159,6 +159,7 @@ import { defineComponent } from "vue";
 import { Profile } from "@/core/types/Profile";
 import Api from "@/core/api/Api";
 import { Field, Form } from "vee-validate";
+import { useRegisterStore } from "@/stores/RegisterModule";
 const keplrModule = getModule(KeplrModule);
 
 export default defineComponent({
@@ -173,6 +174,7 @@ export default defineComponent({
       dtag: { required: true, regex: Profile.DTAG_REGEX },
     };
     return {
+      registerStore: useRegisterStore(),
       formSchema,
       isValidDtag: false,
       isDtagAvailable: false,

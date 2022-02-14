@@ -14,7 +14,7 @@
 
           <div class="flex justify-center">
             <span
-              v-if="$store.state.RegisterModule.currentState!=='StateRegistrationSuccess'"
+              v-if="registerStore.currentState!=='StateRegistrationSuccess'"
               class="pl-4 my-auto text-5xl xl:text-7xl font-extrabold text-gray-900 dark:text-white"
             >
               Sign In
@@ -37,6 +37,7 @@ import AppHeader from "@/ui/components/AppHeader/AppHeader.vue";
 import LoginFormUser from "@/modules/login/components/LoginFormUser/LoginFormUser.vue";
 import LoginFormMPassword from "@/modules/login/components/LoginFormMPassword/LoginFormMPassword.vue";
 import { useLoginStore } from "@/stores/LoginModule";
+import { useRegisterStore } from "@/stores/RegisterModule";
 
 export default defineComponent({
   components: {
@@ -47,6 +48,7 @@ export default defineComponent({
   },
   data() {
     return {
+      registerStore: useRegisterStore(),
       loginStore: useLoginStore(),
     };
   },
