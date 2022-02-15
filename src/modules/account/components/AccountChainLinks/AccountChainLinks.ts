@@ -1,3 +1,4 @@
+import { useKeplrStore } from '@/stores/KeplrModule';
 import { useAccountStore } from '@/stores/AccountModule';
 import { defineComponent, ref, watchEffect } from "vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
@@ -20,7 +21,6 @@ import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
 import ChainLink from "@/core/types/ChainLink";
 import { Key } from "@keplr-wallet/types";
-import KeplrModule from "@/store/modules/KeplrModule";
 import { Extension as TerraExtension, MsgSend as TerraMsgSend, Fee as TerraFee, LCDClient as TerraLCDClient, TxBody as TerraTxBody, AuthInfo as TerraAuthInfo, SignDoc as TerraSignDoc } from "@terra-money/terra.js";
 import { useTransactionStore, TransactionStatus } from '@/stores/TransactionModule';
 import { useLedgerStore } from "@/stores/LedgerModule";
@@ -125,9 +125,10 @@ export default defineComponent({
             this.selectedChain = null;
             this.filteredSupportedChainLinks = this.supportedChainLinks;
             this.isSigningProof = false;
-            await KeplrModule.setupTerraMainnet();
-            await KeplrModule.setupJunoMainnet();
-            await KeplrModule.setupBandMainnet();
+            const keplrStore = useKeplrStore();
+            await keplrStore.setupTerraMainnet();
+            await keplrStore.setupJunoMainnet();
+            await keplrStore.setupBandMainnet();
         }, toggleAdvancedOptions(): void {
             this.isAdvancedOptionsOpen = !this.isAdvancedOptionsOpen;
         },

@@ -27,21 +27,21 @@
 
           <div class="pt-14">
             <!-- Keplr not installed -->
-            <span v-if="!$store.state.KeplrModule.isInstalled">
+            <span v-if="!keplrStore.isInstalled">
               <div class="text-center">
                 <p class="text-xl text-red-600">Keplr is not installed or available</p>
               </div>
             </span>
 
             <!-- Keplr installed & blocked-->
-            <span v-if="$store.state.KeplrModule.isInstalled&&$store.state.KeplrModule.isWaitingAuthentication">
+            <span v-if="keplrStore.isInstalled&&keplrStore.isWaitingAuthentication">
               <div class="text-center">
                 <p class="text-xl text-yellow-500">Waiting Keplr authentication</p>
               </div>
             </span>
 
             <!-- Keplr installed & unlocked -->
-            <span v-if="$store.state.KeplrModule.isInstalled&&!$store.state.KeplrModule.isWaitingAuthentication&&!$store.state.KeplrModule.hasProfile">
+            <span v-if="keplrStore.isInstalled&&!keplrStore.isWaitingAuthentication&&!keplrStore.hasProfile">
               <div class="text-center">
                 <!-- Dtag -->
                 <div>
@@ -153,14 +153,12 @@
 <script lang="ts">
 import AppFooter from "@/ui/components/AppFooter/AppFooter.vue";
 import AppHeader from "@/ui/components/AppHeader/AppHeader.vue";
-import { getModule } from "vuex-module-decorators";
-import KeplrModule from "@/store/modules/KeplrModule";
 import { defineComponent } from "vue";
 import { Profile } from "@/core/types/Profile";
 import Api from "@/core/api/Api";
 import { Field, Form } from "vee-validate";
 import { useRegisterStore } from "@/stores/RegisterModule";
-const keplrModule = getModule(KeplrModule);
+import { useKeplrStore } from "@/stores/KeplrModule";
 
 export default defineComponent({
   components: {
@@ -174,6 +172,7 @@ export default defineComponent({
       dtag: { required: true, regex: Profile.DTAG_REGEX },
     };
     return {
+      keplrStore: useKeplrStore(),
       registerStore: useRegisterStore(),
       formSchema,
       isValidDtag: false,
@@ -183,7 +182,7 @@ export default defineComponent({
     };
   },
   mounted() {
-    keplrModule.auth();
+    this.keplrStore.auth();
   },
   methods: {
     validateDtag() {
@@ -216,7 +215,7 @@ export default defineComponent({
       return this.isValidDtag;
     },
     setDtag() {
-      keplrModule.setupProfile({ dtag: this.inputDtag });
+      this.keplrStore.setupProfile({ dtag: this.inputDtag });
     },
   },
 });

@@ -1,3 +1,4 @@
+import { useKeplrStore } from './../stores/KeplrModule';
 import { useDesmosNetworkStore } from './../stores/DesmosNetworkModule';
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import 'vue-router';
@@ -13,9 +14,7 @@ import ViewError404 from "../views/errors/ViewError404/ViewError404.vue";
 
 import { getModule } from "vuex-module-decorators";
 import AuthModule, { AuthLevel } from "@/store/modules/AuthModule";
-import KeplrModule from "@/store/modules/KeplrModule";
 const authModule = getModule(AuthModule);
-const keplrModule = getModule(KeplrModule);
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -90,7 +89,7 @@ router.beforeEach((to, from, next) => {
 
   // check authentication
   authModule.authenticate();
-  keplrModule.init();
+  useKeplrStore().init();
 
   if (requiresAuth && authModule.authLevel === AuthLevel.None) {
     next('/login');
