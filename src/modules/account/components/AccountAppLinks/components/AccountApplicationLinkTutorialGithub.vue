@@ -88,9 +88,9 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { Field, Form } from "vee-validate";
-import ApplicationLinkModule from "@/store/modules/ApplicationLinkModule";
 import ApplicationLinkGithub from "@/core/types/ApplicationLinks/ApplicationLinkGithub";
 import { useClipboardStore } from "@/stores/ClipboardModule";
+import { useApplicationLinkStore } from "@/stores/ApplicationLinkModule";
 
 export default defineComponent({
   components: {
@@ -136,7 +136,7 @@ export default defineComponent({
           gist_id: this.gistId,
         })
       ).toString("hex");
-      const txBody = ApplicationLinkModule.generateApplicationLinkTxBody(
+      const txBody = useApplicationLinkStore().generateApplicationLinkTxBody(
         "github",
         this.username,
         callData

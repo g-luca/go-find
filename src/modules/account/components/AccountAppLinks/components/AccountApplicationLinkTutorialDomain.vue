@@ -44,9 +44,9 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import ApplicationLinkModule from "@/store/modules/ApplicationLinkModule";
 import ApplicationLinkDomain from "@/core/types/ApplicationLinks/ApplicationLinkDomain";
 import { useClipboardStore } from "@/stores/ClipboardModule";
+import { useApplicationLinkStore } from "@/stores/ApplicationLinkModule";
 
 export default defineComponent({
   components: {},
@@ -98,7 +98,7 @@ export default defineComponent({
             domain,
           })
         ).toString("hex");
-        const txBody = ApplicationLinkModule.generateApplicationLinkTxBody(
+        const txBody = useApplicationLinkStore().generateApplicationLinkTxBody(
           "domain",
           domain,
           callData

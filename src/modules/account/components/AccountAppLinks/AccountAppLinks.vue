@@ -786,6 +786,7 @@ export default defineComponent({
           this.isUploadingProof = false;
         }
       } catch (e) {
+        console.log(e);
         // catch all
       }
 

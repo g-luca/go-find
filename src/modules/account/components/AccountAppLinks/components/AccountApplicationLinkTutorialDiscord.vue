@@ -78,10 +78,10 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import ApplicationLinkModule from "@/store/modules/ApplicationLinkModule";
 import ApplicationLinkDiscord from "@/core/types/ApplicationLinks/ApplicationLinkDiscord";
 import { useClipboardStore } from "@/stores/ClipboardModule";
 import { useDesmosNetworkStore } from "@/stores/DesmosNetworkModule";
+import { useApplicationLinkStore } from "@/stores/ApplicationLinkModule";
 
 export default defineComponent({
   components: {},
@@ -143,7 +143,7 @@ export default defineComponent({
           username: this.username,
         })
       ).toString("hex");
-      const txBody = ApplicationLinkModule.generateApplicationLinkTxBody(
+      const txBody = useApplicationLinkStore().generateApplicationLinkTxBody(
         "discord",
         this.username,
         callData

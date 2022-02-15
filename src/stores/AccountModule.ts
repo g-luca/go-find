@@ -11,8 +11,8 @@ import { ApplicationLinkSubscription } from '@/gql/ApplicationLinkSubscription';
 import { useLazyQuery, useApolloClient } from '@vue/apollo-composable';
 import { getModule } from 'vuex-module-decorators';
 import AuthModule, { AuthLevel } from '@/store/modules/AuthModule';
-import ApplicationLinkModule from '@/store/modules/ApplicationLinkModule';
 import ChainLink from '@/core/types/ChainLink';
+import { useApplicationLinkStore } from './ApplicationLinkModule';
 const authModule = getModule(AuthModule);
 
 
@@ -65,7 +65,7 @@ export const useAccountStore = defineStore({
                         },
                     })
                     applicationLinkObserver.subscribe((response) => {
-                        const newApplicationLinks = ApplicationLinkModule.parseApplicationLinks(response['data']['profile'][0]);
+                        const newApplicationLinks = useApplicationLinkStore().parseApplicationLinks(response['data']['profile'][0]);
                         if (this.profile) {
                             this.profile.applicationLinks = newApplicationLinks;
                         }
@@ -205,7 +205,7 @@ function parseGqlAccountResult(accountRaw: any): Account {
  */
 function parseGqlProfileResult(profileRaw: any): Profile {
     // calculate the total of the delegations (if they exists)
-    const applicationLinks = ApplicationLinkModule.parseApplicationLinks(profileRaw);
+    const applicationLinks = useApplicationLinkStore().parseApplicationLinks(profileRaw);
     const chainLinks: ChainLink[] = [];
     if (profileRaw.chain_links && profileRaw.chain_links.length > 0) {
         profileRaw.chain_links.forEach((chainLink: any) => {

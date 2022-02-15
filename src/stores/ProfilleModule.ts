@@ -3,10 +3,10 @@ import { LoadingStatus } from '@/core/types/LoadingStatus';
 import { Profile } from '@/core/types/Profile';
 import { apolloClient } from '@/gql/Apollo';
 import { ProfileQuery } from '@/gql/ProfileQuery';
-import ApplicationLinkModule from '@/store/modules/ApplicationLinkModule';
 import { provideApolloClient, useLazyQuery } from '@vue/apollo-composable';
 import { defineStore } from 'pinia'
 import { registerModuleHMR } from '.';
+import { useApplicationLinkStore } from './ApplicationLinkModule';
 
 provideApolloClient(apolloClient)
 
@@ -39,7 +39,7 @@ export const useProfileStore = defineStore({
                 }
                 if (result.data && result.data.profile[0] && !result.loading) {
                     const profileRaw = result.data.profile[0];
-                    const applicationLinks = ApplicationLinkModule.parseApplicationLinks(profileRaw);
+                    const applicationLinks = useApplicationLinkStore().parseApplicationLinks(profileRaw);
                     const chainLinks: ChainLink[] = [];
                     if (profileRaw.chain_links && profileRaw.chain_links.length > 0) {
                         profileRaw.chain_links.forEach((chainLink: any) => {

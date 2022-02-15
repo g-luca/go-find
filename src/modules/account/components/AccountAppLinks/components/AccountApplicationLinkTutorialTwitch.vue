@@ -49,9 +49,9 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import ApplicationLinkModule from "@/store/modules/ApplicationLinkModule";
 import ApplicationLinkTwitch from "@/core/types/ApplicationLinks/ApplicationLinkTwitch";
 import { useClipboardStore } from "@/stores/ClipboardModule";
+import { useApplicationLinkStore } from "@/stores/ApplicationLinkModule";
 
 export default defineComponent({
   components: {},
@@ -100,7 +100,7 @@ export default defineComponent({
             username: this.username,
           })
         ).toString("hex");
-        const txBody = ApplicationLinkModule.generateApplicationLinkTxBody(
+        const txBody = useApplicationLinkStore().generateApplicationLinkTxBody(
           "twitch",
           this.username,
           callData

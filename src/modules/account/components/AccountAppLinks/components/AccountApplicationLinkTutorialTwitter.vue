@@ -173,9 +173,9 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { Field, Form } from "vee-validate";
-import ApplicationLinkModule from "@/store/modules/ApplicationLinkModule";
 import ApplicationLinkTwitter from "@/core/types/ApplicationLinks/ApplicationLinkTwitter";
 import { useClipboardStore } from "@/stores/ClipboardModule";
+import { useApplicationLinkStore } from "@/stores/ApplicationLinkModule";
 
 class TwitterVerificationMethod {
   public id: string;
@@ -286,7 +286,7 @@ export default defineComponent({
           value: this.username,
         };
         const callData = Buffer.from(JSON.stringify(data)).toString("hex");
-        const txBody = ApplicationLinkModule.generateApplicationLinkTxBody(
+        const txBody = useApplicationLinkStore().generateApplicationLinkTxBody(
           "twitter",
           this.username,
           callData
@@ -305,7 +305,7 @@ export default defineComponent({
         value: this.tweetId,
       };
       const callData = Buffer.from(JSON.stringify(data)).toString("hex");
-      const txBody = ApplicationLinkModule.generateApplicationLinkTxBody(
+      const txBody = useApplicationLinkStore().generateApplicationLinkTxBody(
         "twitter",
         this.username,
         callData
