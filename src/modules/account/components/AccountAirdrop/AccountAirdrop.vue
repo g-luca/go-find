@@ -32,7 +32,7 @@
                     <h1 class="text-lg pt-3">This is what you need:</h1>
                     <ol class="list-decimal pl-6">
                       <li class="py-1">Saved Desmos Profile <i
-                          v-if="$store.state.AccountModule.profile&&(!$store.state.AccountModule.isNewProfile)"
+                          v-if="accountStore.profile&&(!accountStore.isNewProfile)"
                           class="bi bi-check-lg text-green-500 text-lg align-middle"
                         /></li>
                       <li class="">
@@ -61,9 +61,9 @@
               </section>
 
               <!-- If profile exists on chain, claim flow! -->
-              <span v-if="$store.state.AccountModule.profile&&(!$store.state.AccountModule.isNewProfile||$store.state.AccountModule.account._balance)">
+              <span v-if="accountStore.profile&&(!accountStore.isNewProfile||accountStore.account.balance)">
                 <!-- Available Airdrops / Claim -->
-                <section v-if="$store.state.AccountModule && airdropStore.aidropAllocations && airdropStore.claimStatus==='None'">
+                <section v-if="accountStore && airdropStore.aidropAllocations && airdropStore.claimStatus==='None'">
                   <div class="grid grid-cols-12 md:pl-10">
                     <div class="col-span-12 my-4">
                       <h1 class="text-4xl">Your Airdrops <i class="bi bi-gift-fill text-red-400" /> </h1>
@@ -155,8 +155,8 @@
                       v-else
                       class="col-span-12"
                     >
-                      <span v-if="$store.state.AccountModule.profile.chainLinks.length<=0">
-                        <span v-if="$store.state.AccountModule.isNewProfile">
+                      <span v-if="accountStore.profile.chainLinks.length<=0">
+                        <span v-if="accountStore.isNewProfile">
                           Create a profile and connect an eligible address to get started
                         </span>
                         <span v-else>
@@ -265,6 +265,7 @@ import AccountAirdropGrantReceived from "@/modules/account/components/AccountAir
 import AccountAirdropGrantError from "@/modules/account/components/AccountAirdrop/components/AccountAirdropGrantError.vue";
 import AccountAirdropGrantLoading from "@/modules/account/components/AccountAirdrop/components/AccountAirdropGrantLoading.vue";
 import { useAirdropStore } from "@/stores/AirdropModule";
+import { useAccountStore } from "@/stores/AccountModule";
 
 export default defineComponent({
   components: {
@@ -281,6 +282,7 @@ export default defineComponent({
   },
   setup() {
     return {
+      accountStore: useAccountStore(),
       airdropStore: useAirdropStore(),
       inputElegibleAddress: "",
     };

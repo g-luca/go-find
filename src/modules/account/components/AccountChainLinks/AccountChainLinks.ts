@@ -1,3 +1,4 @@
+import { useAccountStore } from '@/stores/AccountModule';
 import { defineComponent, ref, watchEffect } from "vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
@@ -18,14 +19,12 @@ import CryptoUtils from "@/utils/CryptoUtils";
 import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
 import ChainLink from "@/core/types/ChainLink";
-import AccountModule from "@/store/modules/AccountModule";
 import { Key } from "@keplr-wallet/types";
 import KeplrModule from "@/store/modules/KeplrModule";
 import { Extension as TerraExtension, MsgSend as TerraMsgSend, Fee as TerraFee, LCDClient as TerraLCDClient, TxBody as TerraTxBody, AuthInfo as TerraAuthInfo, SignDoc as TerraSignDoc } from "@terra-money/terra.js";
 import { useTransactionStore, TransactionStatus } from '@/stores/TransactionModule';
 import { useLedgerStore } from "@/stores/LedgerModule";
 const authModule = getModule(AuthModule);
-const accountModule = getModule(AccountModule);
 
 class ChainLinkConnectionMethod {
     public id: string;
@@ -56,6 +55,7 @@ export default defineComponent({
     },
     data() {
         return {
+            accountStore: useAccountStore(),
             transactionStore: useTransactionStore(),
             ledgerStore: useLedgerStore(),
             supportedChainLinkConnectionMethods: [new ChainLinkConnectionMethod("keplr", "Keplr", "keplr"), new ChainLinkConnectionMethod("ledger", "Ledger", "ledger"), new ChainLinkConnectionMethod("terrastation", "Terra Station", "terrastation", ["terra"])],
@@ -87,7 +87,7 @@ export default defineComponent({
         ref(this.transactionStore);
         watchEffect(() => {
             // check if is processing the right transaction and the status
-            if (accountModule.profile && this.transactionStore.tx === this.tx && (this.transactionStore.transactionStatus === TransactionStatus.Error || this.transactionStore.transactionStatus === TransactionStatus.Success)) {
+            if (this.accountStore.profile && this.transactionStore.tx === this.tx && (this.transactionStore.transactionStatus === TransactionStatus.Error || this.transactionStore.transactionStatus === TransactionStatus.Success)) {
                 if (this.transactionStore.errorMessage) {
                     // the transaction has an error message, failed
                     console.log('chain link failure!')
@@ -97,15 +97,15 @@ export default defineComponent({
                     // handle new chain link
                     if (this.tx?.messages[0].typeUrl === "/desmos.profiles.v1beta1.MsgLinkChainAccount" && this.newChainLink) {
                         console.log('chain link success!')
-                        accountModule.profile.chainLinks.push(new ChainLink(this.newChainLink.address, this.newChainLink.chain));
+                        this.accountStore.profile.chainLinks.push(new ChainLink(this.newChainLink.address, this.newChainLink.chain));
                         this.newChainLink = null;
                         this.deletedChainLink = null;
                     }
 
                     // handle chain unlink
                     if (this.tx?.messages[0].typeUrl === "/desmos.profiles.v1beta1.MsgUnlinkChainAccount" && this.deletedChainLink) {
-                        accountModule.profile.chainLinks.slice(accountModule.profile.chainLinks.indexOf(new ChainLink(this.deletedChainLink.address, this.deletedChainLink.chain)), 1);
-                        accountModule.profile.chainLinks = accountModule.profile.chainLinks.filter((chainLink: ChainLink) => {
+                        this.accountStore.profile.chainLinks.slice(this.accountStore.profile.chainLinks.indexOf(new ChainLink(this.deletedChainLink.address, this.deletedChainLink.chain)), 1);
+                        this.accountStore.profile.chainLinks = this.accountStore.profile.chainLinks.filter((chainLink: ChainLink) => {
                             return chainLink.address !== this.deletedChainLink?.address && chainLink.chain !== this.deletedChainLink?.chain;
                         });
                         this.newChainLink = null;
@@ -384,15 +384,15 @@ export default defineComponent({
             if (authModule.account) {
 
                 // parse new data to ensure that the profile exists
-                const profile = await AccountModule.getProfile(authModule.account.dtag);
+                const profile = await this.accountStore.getProfile(authModule.account.dtag);
                 if (profile) {
                     profileExists = true;
                     try {
                         // check if the chain link with the same address-chainId already exists
 
-                        if (accountModule.profile) {
+                        if (this.accountStore.profile) {
                             // parse local chain links first
-                            const localChainLink = accountModule.profile.chainLinks.find(c => (c.address === extAddress && c.chain.toLowerCase() === chain.toLowerCase()));
+                            const localChainLink = this.accountStore.profile.chainLinks.find(c => (c.address === extAddress && c.chain.toLowerCase() === chain.toLowerCase()));
                             if (localChainLink) {
                                 chainLinkExists = true;
                             }

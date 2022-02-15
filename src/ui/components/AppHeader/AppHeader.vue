@@ -35,7 +35,7 @@
                 <div>
                   <MenuButton class="">
                     <img
-                      :src="$store.state.AccountModule.profile._profilePic || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
+                      :src="accountStore.profile._profilePic || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
                       class="mx-auto object-cover h-10 w-10 rounded-full"
                     >
                   </MenuButton>
@@ -108,6 +108,7 @@ import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
 import router from "@/router";
 import { useWalletConnectStore } from "@/stores/WalletConnectModule";
+import { useAccountStore } from "@/stores/AccountModule";
 const authModule = getModule(AuthModule);
 
 export default defineComponent({
@@ -123,6 +124,7 @@ export default defineComponent({
   data() {
     const isTestnet = import.meta.env.VITE_APP_IS_TESTNET === "true";
     return {
+      accountStore: useAccountStore(),
       walletConnectStore: useWalletConnectStore(),
       isTestnet,
     };

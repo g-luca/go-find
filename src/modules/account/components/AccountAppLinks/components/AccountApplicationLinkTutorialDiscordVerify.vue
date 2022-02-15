@@ -86,11 +86,10 @@ import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
 import { ApplicationLinkQuery } from "@/gql/ApplicationLinkQuery";
 import { useApolloClient } from "@vue/apollo-composable";
-import AccountModule from "@/store/modules/AccountModule";
 import { useClipboardStore } from "@/stores/ClipboardModule";
 import { useDesmosNetworkStore } from "@/stores/DesmosNetworkModule";
+import { useAccountStore } from "@/stores/AccountModule";
 const authModule = getModule(AuthModule);
-const accountModule = getModule(AccountModule);
 
 export default defineComponent({
   components: {},
@@ -104,6 +103,7 @@ export default defineComponent({
     const net = useDesmosNetworkStore().isTestnet ? "testnet" : "mainnet";
     const cmdVerify = `!verify ${net}`;
     return {
+      accountStore: useAccountStore(),
       cmdVerify,
       isVerifyingAppConnection: false,
       isAppConnected: false,
@@ -139,8 +139,8 @@ export default defineComponent({
               case "APPLICATION_LINK_STATE_VERIFICATION_SUCCESS":
                 this.isAppConnected = true;
                 this.isVerifyingAppConnection = false;
-                if (accountModule.profile) {
-                  accountModule.loadAccount(true);
+                if (this.accountStore.profile) {
+                  this.accountStore.loadAccount(true);
                 }
                 break;
               case "APPLICATION_LINK_STATE_TIMED_OUT":

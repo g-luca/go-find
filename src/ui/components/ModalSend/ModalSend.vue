@@ -65,9 +65,9 @@
                       </div>
                       <div
                         class="text-sm text-gray-500 text-center pt-1"
-                        :class="{'text-red-500':amount>$store.state.AccountModule.account._balance}"
+                        :class="{'text-red-500':amount>accountStore.account.balance}"
                       >
-                        Available: {{$store.state.AccountModule.account._balance - feeAmount}} {{coinDenom}}
+                        Available: {{accountStore.account.balance - feeAmount}} {{coinDenom}}
                       </div>
                     </div>
 
@@ -117,8 +117,6 @@
 import { defineComponent } from "vue";
 import { ref } from "vue";
 import { Dialog, DialogOverlay, DialogTitle } from "@headlessui/vue";
-import { getModule } from "vuex-module-decorators";
-import AccountModule from "@/store/modules/AccountModule";
 import {
   CosmosBroadcastMode,
   CosmosMsgSend,
@@ -127,12 +125,13 @@ import {
 } from "desmosjs";
 import AuthModule from "@/store/modules/AuthModule";
 import { useTransactionStore } from "@/stores/TransactionModule";
-const accountModule = getModule(AccountModule);
+import { useAccountStore } from "@/stores/AccountModule";
 
 export default defineComponent({
   components: { Dialog, DialogOverlay, DialogTitle },
   setup() {
     return {
+      accountStore: useAccountStore(),
       isOpen: ref(false),
       coinDenom: import.meta.env.VITE_APP_COIN_DENOM,
       ucoinDenom: import.meta.env.VITE_APP_COIN_FEE_DENOM,
@@ -155,8 +154,8 @@ export default defineComponent({
       this.validateAmount();
     },
     setMaxAmount() {
-      if (accountModule.account) {
-        const max = accountModule.account.balance - this.feeAmount;
+      if (this.accountStore.account) {
+        const max = this.accountStore.account.balance - this.feeAmount;
         this.amount = max;
         this.amountRaw = String(max);
         this.isValidAmount = true;
@@ -167,7 +166,7 @@ export default defineComponent({
     },
     validateAmount() {
       let isValidNumber = false;
-      if (accountModule.account) {
+      if (this.accountStore.account) {
         // check regex
         const amountRegex = /^[0-9.,]{1,}$/;
         const validAmountRaw = amountRegex.exec(this.amountRaw);
@@ -179,7 +178,7 @@ export default defineComponent({
           }
           this.isValidAmount =
             this.amount >= 0.000001 &&
-            this.amount <= accountModule.account.balance - this.feeAmount;
+            this.amount <= this.accountStore.account.balance - this.feeAmount;
         }
       }
 
@@ -193,9 +192,9 @@ export default defineComponent({
     },
     async send() {
       const sendAmount = this.amount * 1000000;
-      if (accountModule.profile) {
+      if (this.accountStore.profile) {
         const msgSend: CosmosMsgSend = {
-          fromAddress: accountModule.profile.address,
+          fromAddress: this.accountStore.profile.address,
           toAddress: this.addressTo,
           amount: [
             {

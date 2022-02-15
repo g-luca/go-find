@@ -1,6 +1,6 @@
 <template>
   <section>
-    <span v-if="$store.state.AccountModule.profileLoadingStatus">
+    <span v-if="accountStore.profileLoadingStatus">
       <div class="bg-white dark:bg-gray-900 overflow-hidden shadow-xl hover:shadow-2xl rounded-3xl relative mb-8 mt-8 lg:mt-0">
         <img
           src="@/assets/brands/desmos/logo.svg"
@@ -13,14 +13,14 @@
               Wallet
             </dt>
             <div class="font-mono text-md truncate py-2 dark:text-gray-400 text-gray-700">
-              {{ $store.state.AccountModule.account._address }}
+              {{ accountStore.account.address }}
             </div>
             <div class="mb-6">
               <div class="grid grid-cols-12">
 
                 <!-- Send -->
                 <div
-                  v-if="$store.state.AccountModule.account._balance>0"
+                  v-if="accountStore.account.balance>0"
                   class="col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-1 mx-auto"
                 >
                   <ModalSend />
@@ -60,9 +60,9 @@
             <!-- Balance value -->
             <div>
               <span class="text-brand font-bold pt-1 text-6xl">
-                {{ splitNumberLeft($store.state.AccountModule.account._balance,".") }}
+                {{ splitNumberLeft(accountStore.account.balance,".") }}
                 <span class="text-sm">
-                  .{{ splitNumberRight($store.state.AccountModule.account._balance,".") }}
+                  .{{ splitNumberRight(accountStore.account.balance,".") }}
                 </span>
                 <span class="text-black dark:text-white pl-4 text-4xl">
                   {{coinDenom}}
@@ -94,6 +94,7 @@ import AccountAirdrop from "@/modules/account/components/AccountAirdrop/AccountA
 import ModalSend from "@/ui/components/ModalSend/ModalSend.vue";
 import ModalStaking from "@/modules/account/components/AccountBalance/components/ModalStaking.vue";
 import ModalGovernance from "@/modules/account/components/AccountBalance/components/ModalGovernance.vue";
+import { useAccountStore } from "@/stores/AccountModule";
 
 export default defineComponent({
   components: {
@@ -105,6 +106,7 @@ export default defineComponent({
   },
   data() {
     return {
+      accountStore: useAccountStore(),
       airdropStore: useAirdropStore(),
       coinDenom: `${import.meta.env.VITE_APP_COIN_DENOM}`,
       isAirdropActive: false,

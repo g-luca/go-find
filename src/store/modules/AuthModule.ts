@@ -1,14 +1,14 @@
 import store from '@/store';
 import CryptoUtils from '@/utils/CryptoUtils';
-import { getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
+import { Module, Mutation, VuexModule } from "vuex-module-decorators";
 import AuthAccount from '@/core/types/AuthAccount';
 import { CosmosAuthInfo, CosmosBroadcastMode, CosmosFee, CosmosPubKey, CosmosSignDoc, CosmosSignerInfo, CosmosSignMode, CosmosTxBody, CosmosTxRaw, DesmosJS, Network, Transaction, Wallet } from 'desmosjs';
-import AccountModule from './AccountModule';
 import Long from 'long';
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "@walletconnect/qrcode-modal";
 import { SignDoc, TxRaw } from 'desmosjs/dist/types/lib/proto/cosmos/tx/v1beta1/tx';
 import { useDesmosNetworkStore } from './../../stores/DesmosNetworkModule';
+import { useAccountStore } from '@/stores/AccountModule';
 
 export enum AuthLevel {
     None,
@@ -46,7 +46,7 @@ export default class AuthModule extends VuexModule {
         this._account = null;
         this.mPassword = null;
         this._authLevel = AuthLevel.None;
-        getModule(AccountModule).reset();
+        useAccountStore().reset();
     }
 
     /**

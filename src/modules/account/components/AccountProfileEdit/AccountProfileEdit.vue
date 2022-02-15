@@ -6,18 +6,18 @@
       :initial-values="initialValues"
       @submit="submitEdit"
     >
-      <span v-if="$store.state.AccountModule.profileLoadingStatus">
+      <span v-if="accountStore.profileLoadingStatus">
         <div class="w-full text-center md:text-left dark:text-white">
           <div class="pb-4 pt-8 grid grid-cols-12">
             <div class="col-span-11">
               <h2 class="dark:text-white font-bold text-5xl">
-                Welcome back, <span class="text-brand">{{ $store.state.AccountModule.profile.dtag }}</span>
+                Welcome back, <span class="text-brand">{{ accountStore.profile.dtag }}</span>
               </h2>
             </div>
             <div class="col-span-1 text-right my-auto">
               <div class="relative inline-block text-left">
                 <button
-                  v-if="!$store.state.AccountModule.isNewProfile"
+                  v-if="!accountStore.isNewProfile"
                   type="button"
                 >
                   <div
@@ -322,7 +322,6 @@ import { Dialog, DialogTitle } from "@headlessui/vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
-import AccountModule from "@/store/modules/AccountModule";
 import {
   CosmosBroadcastMode,
   CosmosTxBody,
@@ -335,8 +334,8 @@ import {
   TransactionStatus,
   useTransactionStore,
 } from "@/stores/TransactionModule";
+import { useAccountStore } from "@/stores/AccountModule";
 const authModule = getModule(AuthModule);
-const accountModule = getModule(AccountModule);
 
 enum UploadImageType {
   "profilePic" = "profilePic",
@@ -360,16 +359,18 @@ export default defineComponent({
     };
     let initialValues = {};
     // set the default values form the accountModule
-    if (accountModule.profile) {
+    const tmpAccountStore = useAccountStore();
+    if (tmpAccountStore.profile) {
       initialValues = {
-        nickname: accountModule.profile.nickname,
-        profilePic: accountModule.profile.profilePic,
-        profileCover: accountModule.profile.profileCover,
-        bio: accountModule.profile.bio,
+        nickname: tmpAccountStore.profile.nickname,
+        profilePic: tmpAccountStore.profile.profilePic,
+        profileCover: tmpAccountStore.profile.profileCover,
+        bio: tmpAccountStore.profile.bio,
       };
     }
     return {
       transactionStore: useTransactionStore(),
+      accountStore: useAccountStore(),
       initialValues,
       formSchema,
       txSent: null as CosmosTxBody | null,
@@ -398,16 +399,16 @@ export default defineComponent({
   async beforeMount() {
     const account = authModule.account;
     if (account) {
-      await accountModule.loadAccount();
+      await this.accountStore.loadAccount();
 
       //register the watcher of the accountModule user account profile
-      ref(accountModule.profile);
+      ref(this.accountStore.profile);
       watchEffect(() => {
-        if (accountModule.profile) {
-          this.inputNickname = accountModule.profile.nickname;
-          this.inputProfilePic = accountModule.profile.profilePic;
-          this.inputProfileCover = accountModule.profile.profileCover;
-          this.inputBio = accountModule.profile.bio;
+        if (this.accountStore.profile) {
+          this.inputNickname = this.accountStore.profile.nickname;
+          this.inputProfilePic = this.accountStore.profile.profilePic;
+          this.inputProfileCover = this.accountStore.profile.profileCover;
+          this.inputBio = this.accountStore.profile.bio;
         }
       });
 
@@ -416,7 +417,7 @@ export default defineComponent({
       watchEffect(() => {
         // check if is processing the right transaction and the status
         if (
-          accountModule.profile &&
+          this.accountStore.profile &&
           this.transactionStore.tx === this.txSent &&
           (this.transactionStore.transactionStatus ===
             TransactionStatus.Error ||
@@ -431,16 +432,16 @@ export default defineComponent({
               this.txSent?.messages[0].typeUrl ===
               "/desmos.profiles.v1beta1.MsgDeleteProfile"
             ) {
-              accountModule.setIsNewProfile();
+              this.accountStore.setIsNewProfile();
             } else {
               // the tx went well! update the data
               console.log("update success!");
-              accountModule.profile.nickname = this.inputNickname;
-              accountModule.profile.profilePic = this.inputProfilePic;
-              accountModule.profile.profileCover = this.inputProfileCover;
-              accountModule.profile.bio = this.inputBio;
-              if (accountModule.isNewProfile) {
-                accountModule.setNotNewProfile();
+              this.accountStore.profile.nickname = this.inputNickname;
+              this.accountStore.profile.profilePic = this.inputProfilePic;
+              this.accountStore.profile.profileCover = this.inputProfileCover;
+              this.accountStore.profile.bio = this.inputBio;
+              if (this.accountStore.isNewProfile) {
+                this.accountStore.setNotNewProfile();
               }
             }
             this.txSent = null;
@@ -452,27 +453,27 @@ export default defineComponent({
   },
   methods: {
     submitEdit(_data: void, { resetForm }: unknown): void {
-      if (accountModule.profile) {
+      if (this.accountStore.profile) {
         const doNotModify = "[do-not-modify]";
         const msgSaveProfile: DesmosMsgSaveProfile = {
-          dtag: accountModule.profile.dtag,
+          dtag: this.accountStore.profile.dtag,
           nickname:
-            accountModule.profile.nickname !== this.inputNickname
+            this.accountStore.profile.nickname !== this.inputNickname
               ? this.inputNickname
               : doNotModify,
           bio:
-            accountModule.profile.bio !== this.inputBio
+            this.accountStore.profile.bio !== this.inputBio
               ? this.inputBio
               : doNotModify,
           profilePicture:
-            accountModule.profile.profilePic !== this.inputProfilePic
+            this.accountStore.profile.profilePic !== this.inputProfilePic
               ? this.inputProfilePic
               : doNotModify,
           coverPicture:
-            accountModule.profile.profileCover !== this.inputProfileCover
+            this.accountStore.profile.profileCover !== this.inputProfileCover
               ? this.inputProfileCover
               : doNotModify,
-          creator: accountModule.profile.address,
+          creator: this.accountStore.profile.address,
         };
         const txBody: CosmosTxBody = {
           memo: "Profile update",
@@ -509,13 +510,13 @@ export default defineComponent({
      * Reset the form and the input data
      */
     handleResetForm(): void {
-      if (accountModule.profile) {
-        this.inputNickname = accountModule.profile.nickname;
-        this.inputProfilePic = accountModule.profile.profilePic;
-        this.inputProfileCover = accountModule.profile.profileCover;
-        this.inputBio = accountModule.profile.bio;
+      if (this.accountStore.profile) {
+        this.inputNickname = this.accountStore.profile.nickname;
+        this.inputProfilePic = this.accountStore.profile.profilePic;
+        this.inputProfileCover = this.accountStore.profile.profileCover;
+        this.inputBio = this.accountStore.profile.bio;
         this.markedInputBio = DOMPurify.sanitize(
-          marked(accountModule.profile.bio)
+          marked(this.accountStore.profile.bio)
         );
         this.resetForm({
           values: {

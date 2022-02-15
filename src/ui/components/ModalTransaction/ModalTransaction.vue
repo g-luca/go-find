@@ -60,7 +60,7 @@
                 {{ tx.$tx.$fee.$amount[0].$denom }}
               </span>
             </div> -->
-              <span v-if="$store.state.AccountModule.account._balance>0">
+              <span v-if="accountStore.account.balance>0">
                 <div class="pt-4">
                   <button
                     v-if="(!$store.state.AuthModule._account.isUsingKeplr&&!$store.state.AuthModule._account.isUsingWalletConnect&&inputMPassword.length>0)||$store.state.AuthModule._account.isUsingKeplr||$store.state.AuthModule._account.isUsingWalletConnect"
@@ -151,6 +151,7 @@
 import { defineComponent } from "vue";
 import { Dialog, DialogTitle } from "@headlessui/vue";
 import { useTransactionStore } from "@/stores/TransactionModule";
+import { useAccountStore } from "@/stores/AccountModule";
 
 export default defineComponent({
   components: {
@@ -160,6 +161,7 @@ export default defineComponent({
   data() {
     return {
       inputMPassword: "",
+      accountStore: useAccountStore(),
       transactionStore: useTransactionStore(),
     };
   },

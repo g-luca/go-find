@@ -33,15 +33,15 @@
         <section>
           <div class="grid grid-cols-12">
             <div class="col-span-12 my-auto">
-              <span v-if="$store.state.AccountModule.profileLoadingStatus">
+              <span v-if="accountStore.profileLoadingStatus">
                 <img
                   alt="cover"
-                  :src="$store.state.AccountModule.profile.profileCover || 'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=='"
+                  :src="accountStore.profile.profileCover || 'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=='"
                   class="mx-auto object-cover w-full max-h-80 pointer-events-none select-none"
                 >
                 <img
                   alt="pic"
-                  :src="$store.state.AccountModule.profile.profilePic || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
+                  :src="accountStore.profile.profilePic || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
                   class="mx-auto object-cover rounded-full h-44 w-44 md:h-56 md:w-56 pointer-events-none select-none -mt-32"
                 >
               </span>
@@ -56,7 +56,7 @@
           </div>
         </section>
 
-        <section v-if="$store.state.AccountModule.isNewProfile">
+        <section v-if="accountStore.isNewProfile">
           <div class="w-full px-4 pt-4">
             <div class="py-6 border-2 border-red-700 rounded-3xl dark:text-white text-center bg-gray-100 shadow-lg dark:bg-gray-800">
               <h1 class="text-2xl md:text-3xl lg:text-4xl dark:text-white font-bold text-5xl"> <i class="bi bi-exclamation-circle-fill text-red-600" /> Your Profile is not saved on chain</h1>
@@ -67,7 +67,7 @@
           </div>
         </section>
 
-        <span v-if="$store.state.AccountModule.profile">
+        <span v-if="accountStore.profile">
           <!-- Content -->
           <div class="grid grid-cols-12 pt-8 mx-4">
 
@@ -83,12 +83,12 @@
               <AccountBalance />
 
               <!-- Chain Links -->
-              <AccountChainLinks v-if="!$store.state.AccountModule.isNewProfile" />
+              <AccountChainLinks v-if="!accountStore.isNewProfile" />
             </div>
           </div>
 
           <!-- Application Links -->
-          <AccountAppLinks v-if="!$store.state.AccountModule.isNewProfile" />
+          <AccountAppLinks v-if="!accountStore.isNewProfile" />
         </span>
 
       </span>
@@ -99,4 +99,56 @@
   </div>
 </template>
 
-<script lang="ts" src="./ViewAccount.ts"/>
+<script lang="ts">
+import { defineComponent } from "vue";
+import AppFooter from "@/ui/components/AppFooter/AppFooter.vue";
+import AppHeader from "@/ui/components/AppHeader/AppHeader.vue";
+
+import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
+import { getModule } from "vuex-module-decorators";
+import AuthModule from "@/store/modules/AuthModule";
+import Error404 from "@/ui/components/errors/Error404.vue";
+import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
+import AccountBalance from "@/modules/account/components/AccountBalance/AccountBalance.vue";
+import AccountChainLinks from "@/modules/account/components/AccountChainLinks/AccountChainLinks.vue";
+import AccountProfileEdit from "@/modules/account/components/AccountProfileEdit/AccountProfileEdit.vue";
+import AccountAppLinks from "@/modules/account/components/AccountAppLinks/AccountAppLinks.vue";
+import ModalLedger from "@/ui/components/ModalLedger/ModalLedger.vue";
+import { useAccountStore } from "@/stores/AccountModule";
+const authModule = getModule(AuthModule);
+
+export default defineComponent({
+  components: {
+    AppHeader,
+    AppFooter,
+    SkeletonLoader,
+    Error404,
+    ModalTransaction,
+    ModalLedger,
+    AccountBalance,
+    AccountChainLinks,
+    AccountProfileEdit,
+    AccountAppLinks,
+  },
+  data() {
+    return {
+      accountStore: useAccountStore(),
+      isAlertDismissed: false,
+    };
+  },
+  async mounted() {
+    const account = authModule.account;
+    if (account) {
+      await this.accountStore.loadAccount();
+    }
+    this.isAlertDismissed =
+      window.localStorage.getItem("isAlertDismissed") === "true";
+  },
+  methods: {
+    dismissAlert() {
+      this.isAlertDismissed = true;
+      window.localStorage.setItem("isAlertDismissed", "true");
+    },
+  },
+});
+</script>

@@ -42,7 +42,7 @@
                 <section class="pb-4">
 
                   <!-- Totals -->
-                  <span v-if="$store.state.AccountModule.account._delegations>0">
+                  <span v-if="accountStore.account.delegations>0">
                     <div class="grid grid-cols-12 pt-4 text-xl">
                       <!-- Delegations -->
                       <div class="col-span-12 md:col-span-4">
@@ -58,9 +58,9 @@
                           <div class="flex flex-col justify-start">
                             <p class="text-gray-700 dark:text-gray-100 text-4xl text-left font-bold my-4">
                               <span class="text-yellow-600 font-bold py-1">
-                                {{ splitNumberLeft($store.state.AccountModule.account._delegations,".") }}
+                                {{ splitNumberLeft(accountStore.account.delegations,".") }}
                                 <span class="text-lg">
-                                  .{{ splitNumberRight($store.state.AccountModule.account._delegations,".") }}
+                                  .{{ splitNumberRight(accountStore.account.delegations,".") }}
                                 </span>
                                 <span class="text-gray-700 dark:text-gray-300 pl-2 text-sm">
                                   {{coinDenom}}
@@ -85,9 +85,9 @@
                           <div class="flex flex-col justify-start">
                             <p class="text-gray-700 dark:text-gray-100 text-4xl text-left font-bold my-4">
                               <span class="text-seagreen-600 font-bold py-1">
-                                {{ splitNumberLeft($store.state.AccountModule.account._unbonding,".") }}
+                                {{ splitNumberLeft(accountStore.account.unbonding,".") }}
                                 <span class="text-lg">
-                                  .{{ splitNumberRight($store.state.AccountModule.account._unbonding,".") }}
+                                  .{{ splitNumberRight(accountStore.account.unbonding,".") }}
                                 </span>
                                 <span class="text-gray-700 dark:text-gray-300 pl-2 text-sm">
                                   {{coinDenom}}
@@ -112,9 +112,9 @@
                           <div class="flex flex-col justify-start">
                             <p class="text-gray-700 dark:text-gray-100 text-4xl text-left font-bold my-4">
                               <span class="text-blue-600 font-bold py-1">
-                                {{ splitNumberLeft($store.state.AccountModule.account._rewards,".") }}
+                                {{ splitNumberLeft(accountStore.account.rewards,".") }}
                                 <span class="text-lg">
-                                  .{{ splitNumberRight($store.state.AccountModule.account._rewards,".") }}
+                                  .{{ splitNumberRight(accountStore.account.rewards,".") }}
                                 </span>
                                 <span class="text-gray-700 dark:text-gray-300 pl-2 text-sm">
                                   {{coinDenom}}
@@ -299,7 +299,7 @@
                                   {{toDigitsFormat(userDelegation/1000000,6)}} {{coinDenom}}
                                 </h6>
                                 <button
-                                  v-if="$store.state.AccountModule.account._balance>0"
+                                  v-if="accountStore.account.balance>0"
                                   class="px-4 py-1 bg-yellow-500 hover:bg-yellow-600 rounded-lg text-white mr-1"
                                   type="button"
                                   @click="onDelegate(validator)"
@@ -636,7 +636,6 @@ import { ProfileQuery } from "@/gql/ProfileQuery";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import DOMPurify from "dompurify";
 import marked from "marked";
-import AccountModule from "@/store/modules/AccountModule";
 import {
   CosmosBroadcastMode,
   CosmosMsgBeginRedelegate,
@@ -646,8 +645,8 @@ import {
   CosmosTxBody,
 } from "desmosjs";
 import { useTransactionStore } from "@/stores/TransactionModule";
+import { useAccountStore } from "@/stores/AccountModule";
 const authModule = getModule(AuthModule);
-const accountModule = getModule(AccountModule);
 
 enum StakingOperations {
   None = "none",
@@ -661,6 +660,7 @@ export default defineComponent({
   components: { Dialog, DialogOverlay, DialogTitle, SkeletonLoader },
   setup() {
     return {
+      accountStore: useAccountStore(),
       transactionStore: useTransactionStore(),
       isOpen: ref(false),
       isStakingOperationOpen: ref(false),
@@ -873,8 +873,8 @@ export default defineComponent({
             this.stakingOperationValidatorFrom.delegations[0]?.amount.amount /
               1000000 || 0;
         } else {
-          if (accountModule.account) {
-            maxAmount = accountModule.account.balance;
+          if (this.accountStore.account) {
+            maxAmount = this.accountStore.account.balance;
           }
         }
       } catch (e) {
@@ -893,7 +893,7 @@ export default defineComponent({
     },
     async setMaxAmount() {
       await this.updateMaxAmount();
-      if (accountModule.account) {
+      if (this.accountStore.account) {
         this.stakingOperationAmount = this.stakingOperationMaxAmount;
         this.stakingOperationAmountRaw = String(this.stakingOperationMaxAmount);
         this.stakingOperationIsValidAmount = true;
@@ -901,7 +901,7 @@ export default defineComponent({
     },
     validateAmount() {
       let isValidNumber = false;
-      if (accountModule.account) {
+      if (this.accountStore.account) {
         //this.updateMaxAmount();
         // check regex
         const amountRegex = /^[0-9.,]{1,}$/;
@@ -932,9 +932,9 @@ export default defineComponent({
       const amount = this.stakingOperationAmount * 1000000;
       const toValidatorAddress =
         this.stakingOperationValidatorTo.validator_info.operator_address;
-      if (accountModule.profile) {
+      if (this.accountStore.profile) {
         const msgDelegate: CosmosMsgDelegate = {
-          delegatorAddress: accountModule.profile.address,
+          delegatorAddress: this.accountStore.profile.address,
           validatorAddress: toValidatorAddress,
           amount: {
             denom: this.ucoinDenom!,
@@ -967,9 +967,9 @@ export default defineComponent({
         this.stakingOperationValidatorTo.validator_info.operator_address;
       const fromValidatorAddress =
         this.stakingOperationValidatorFrom.validator_info.operator_address;
-      if (accountModule.profile) {
+      if (this.accountStore.profile) {
         const msgRedelegate: CosmosMsgBeginRedelegate = {
-          delegatorAddress: accountModule.profile.address,
+          delegatorAddress: this.accountStore.profile.address,
           validatorSrcAddress: fromValidatorAddress,
           validatorDstAddress: toValidatorAddress,
           amount: {
@@ -1000,9 +1000,9 @@ export default defineComponent({
       const amount = this.stakingOperationAmount * 1000000;
       const fromValidatorAddress =
         this.stakingOperationValidatorFrom.validator_info.operator_address;
-      if (accountModule.profile) {
+      if (this.accountStore.profile) {
         const msgUnbond: CosmosMsgUndelegate = {
-          delegatorAddress: accountModule.profile.address,
+          delegatorAddress: this.accountStore.profile.address,
           validatorAddress: fromValidatorAddress,
           amount: {
             denom: this.ucoinDenom!,
@@ -1029,9 +1029,9 @@ export default defineComponent({
       }
     },
     async withdrawRewards(validatorAddress: string) {
-      if (accountModule.profile) {
+      if (this.accountStore.profile) {
         const msgWithdrawRewards: CosmosMsgWithdrawDelegatorReward = {
-          delegatorAddress: accountModule.profile.address,
+          delegatorAddress: this.accountStore.profile.address,
           validatorAddress: validatorAddress,
         };
         const txBody: CosmosTxBody = {

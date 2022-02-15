@@ -1,11 +1,8 @@
+import { useAccountStore } from './AccountModule';
 import { defineStore } from 'pinia'
 import { registerModuleHMR } from '.';
 import Api from '@/core/api/Api';
 import ChainLink from '@/core/types/ChainLink';
-import { getModule } from "vuex-module-decorators";
-import AccountModule from '../store/modules/AccountModule';
-
-const accountModule = getModule(AccountModule);
 
 
 
@@ -134,19 +131,20 @@ export const useAirdropStore = defineStore({
         },
 
         async checkAirdrop(): Promise<any> {
+            const accountStore = useAccountStore();
             this.isLoadingAirdropAllocations = true;
-            if (accountModule.profile) {
+            if (accountStore.profile) {
                 this.aidropAllocations = new Map();
-                accountModule.profile.chainLinks.forEach(async (chainLink) => {
+                accountStore.profile.chainLinks.forEach(async (chainLink) => {
                     const allocation = (await checkAddressAirdrop(chainLink.address)) as AirdropAllocation;
                     if (allocation.dsm_allotted > 0) {
                         const found = Array.from(this.aidropAllocations.values()).find(element => JSON.stringify(element) === JSON.stringify(allocation));
-                        if (!found && accountModule.profile) {
+                        if (!found && accountStore.profile) {
                             try {
                                 // search staking_infos if the airdrop address is connected through a chain link
                                 for (let i = 0; i < allocation.staking_infos.length; i++) {
-                                    if (accountModule.profile) {
-                                        accountModule.profile.chainLinks.forEach((chainLink) => {
+                                    if (accountStore.profile) {
+                                        accountStore.profile.chainLinks.forEach((chainLink) => {
                                             if (allocation.staking_infos[i].address === chainLink.address) {
                                                 allocation.staking_infos[i].isConnected = true;
                                             }
@@ -160,8 +158,8 @@ export const useAirdropStore = defineStore({
                             try {
                                 // search lp_infos if the airdrop address is connected through a chain link
                                 for (let i = 0; i < allocation.lp_infos.length; i++) {
-                                    if (accountModule.profile) {
-                                        accountModule.profile.chainLinks.forEach((chainLink) => {
+                                    if (accountStore.profile) {
+                                        accountStore.profile.chainLinks.forEach((chainLink) => {
                                             if (allocation.lp_infos[i].address === chainLink.address) {
                                                 allocation.lp_infos[i].isConnected = true;
                                             }
@@ -183,15 +181,16 @@ export const useAirdropStore = defineStore({
          * Check the grant status of the current user (requested, received, error)
          */
         async checkGrantStatus(eligibleAddress = ''): Promise<any> {
+            const accountStore = useAccountStore();
             if (eligibleAddress) {
                 // if sent from claim button use the address, otherwise use the in-memory claim address
                 this.claimAddress = eligibleAddress;
             }
             this.grantStatus = GrantStatus.Loading;
             this.grantResponse = '';
-            if (accountModule.account && this.claimAddress) {
+            if (accountStore.account && this.claimAddress) {
                 let exit = true;
-                const endpoint = `${AIRDROP_ENDPOINT}/airdrop/grants/${accountModule.account.address}/${this.claimAddress}`
+                const endpoint = `${AIRDROP_ENDPOINT}/airdrop/grants/${accountStore.account.address}/${this.claimAddress}`
 
                 do {
                     try {
@@ -210,11 +209,11 @@ export const useAirdropStore = defineStore({
                             if (grantStatusResponse.can_claim_airdrop) {
                                 // if grant has been issued
                                 this.grantStatus = GrantStatus.GrantReceived;
-                                accountModule.loadAccount(true);
+                                accountStore.loadAccount(true);
                                 exit = true;
                             } else if (grantStatusResponse.has_requested_grant) {
                                 // if grant has been requested but not yet issued
-                                if (grantStatusResponse.used_desmos_address === accountModule.account.address || grantStatusResponse.used_desmos_address === '') {
+                                if (grantStatusResponse.used_desmos_address === accountStore.account.address || grantStatusResponse.used_desmos_address === '') {
                                     this.grantStatus = GrantStatus.GrantRequested;
                                     exit = false;
                                 } else {
@@ -225,7 +224,7 @@ export const useAirdropStore = defineStore({
                             } else if (grantStatusResponse.can_get_grant) {
                                 // the grant can be requested
                                 try {
-                                    const grantRequestResponse = await requestGrant(accountModule.account.address, this.claimAddress);
+                                    const grantRequestResponse = await requestGrant(accountStore.account.address, this.claimAddress);
                                     if (grantRequestResponse.status === 200) {
                                         this.grantStatus = GrantStatus.GrantRequested;
                                         exit = false;
@@ -256,7 +255,7 @@ export const useAirdropStore = defineStore({
                     }
 
                     if (!exit) {
-                        await sleep(checkDelay);
+                        await sleep(this.checkDelay);
                     }
                 } while (!exit);
             } else {
@@ -271,22 +270,23 @@ export const useAirdropStore = defineStore({
          * @param address 
          */
         async claimAirdrop(): Promise<any> {
+            const accountStore = useAccountStore();
             const endpoint = `${AIRDROP_ENDPOINT}/airdrop/claims`;
             try {
                 // ensure that is logged in
-                if (accountModule.account) {
+                if (accountStore.account) {
                     this.claimStatus = ClaimStatus.Loading;
                     try {
                         const request = await fetch(endpoint, {
                             method: 'POST',
                             headers: {
                             },
-                            body: JSON.stringify({ desmos_address: accountModule.account.address })
+                            body: JSON.stringify({ desmos_address: accountStore.account.address })
                         });
                         const success = request.status === 200;
                         success ? this.claimStatus = ClaimStatus.ClaimRequested : this.claimStatus = ClaimStatus.Error;
                         this.claimResponse = await request.text();
-                        accountModule.loadAccount(true);
+                        accountStore.loadAccount(true);
                     } catch (e) {
                         this.claimResponse = JSON.stringify(e)
                         this.claimStatus = ClaimStatus.Error;
