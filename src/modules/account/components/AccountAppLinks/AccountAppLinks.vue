@@ -272,8 +272,8 @@
                   <div
                     v-if="
                       !generatedProof &&
-                      $store.state.AuthModule._account.isUsingKeplr === false &&
-                      $store.state.AuthModule._account.isUsingWalletConnect === false
+                      authStore.account.isUsingKeplr === false &&
+                      authStore.account.isUsingWalletConnect === false
                     "
                     class="col-span-2 py-2"
                   >
@@ -301,13 +301,13 @@
                   </span>
                   <div
                     v-if="
-                      ($store.state.AuthModule._account.isUsingKeplr === false &&
-                        $store.state.AuthModule._account.isUsingWalletConnect === false &&
+                      (authStore.account.isUsingKeplr === false &&
+                        authStore.account.isUsingWalletConnect === false &&
                         applicationUsername.length > 1 &&
                         mPassword.length > 0 &&
                         !generatedProof) ||
-                      ($store.state.AuthModule._account.isUsingKeplr === true && applicationUsername.length > 1 ) ||
-                      ($store.state.AuthModule._account.isUsingWalletConnect === true && applicationUsername.length > 1)
+                      (authStore.account.isUsingKeplr === true && applicationUsername.length > 1 ) ||
+                      (authStore.account.isUsingWalletConnect === true && applicationUsername.length > 1)
                     "
                     class="col-span-2 py-2"
                   >
@@ -326,7 +326,7 @@
                         disabled
                         class="py-2 w-full px-4 bg-gray-600 hover:bg-gray-700 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md rounded-lg"
                       >
-                        <span v-if="!$store.state.AuthModule._account.isUsingWalletConnect">
+                        <span v-if="!authStore.account.isUsingWalletConnect">
                           Generating...
                         </span>
                         <span v-else> Waiting DPM... </span>
@@ -457,8 +457,6 @@ import {
   Wallet,
 } from "desmosjs";
 import CryptoUtils from "@/utils/CryptoUtils";
-import { getModule } from "vuex-module-decorators";
-import AuthModule from "@/store/modules/AuthModule";
 import Clipboard from "@/ui/components/Clipboard.vue";
 import AccountApplicationLinkTutorialDiscord from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialDiscord.vue";
 import AccountApplicationLinkTutorialDiscordVerify from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialDiscordVerify.vue";
@@ -474,8 +472,8 @@ import {
   useTransactionStore,
   TransactionStatus,
 } from "@/stores/TransactionModule";
-
-const authModule = getModule(AuthModule);
+import { useAuthStore } from "@/stores/AuthModule";
+import { WalletConnectSigner } from "@/core/signer/WalletConnectSigner";
 
 export default defineComponent({
   components: {
@@ -496,6 +494,7 @@ export default defineComponent({
   },
   data() {
     return {
+      authStore: useAuthStore(),
       accountStore: useAccountStore(),
       transactionStore: useTransactionStore(),
       desmosNetworkStore: useDesmosNetworkStore(),
@@ -602,11 +601,11 @@ export default defineComponent({
      * @param applicationLink applicationLink to delete
      */
     deleteApplicationLink(applicationLink: ApplicationLink): void {
-      if (authModule.account) {
+      if (this.authStore.account) {
         const msgUnlink: DesmosMsgUnlinkApplication = {
           application: applicationLink.name,
           username: applicationLink.username,
-          signer: authModule.account.address,
+          signer: this.authStore.account.address,
         };
         const txBody: CosmosTxBody = {
           memo: "App unlink | Go-find",
@@ -645,7 +644,7 @@ export default defineComponent({
         this.isUploadingProof = false;
         this.proofUrl = "";
         let generatedProof = null as any;
-        if (authModule.account?.isUsingKeplr) {
+        if (this.authStore.account?.isUsingKeplr) {
           const keplrAccount = await window.keplr?.getKey(
             this.desmosNetworkStore.chainId
           );
@@ -703,7 +702,7 @@ export default defineComponent({
 
           // Wallet Connect custom flow
           // FIXME: actually not works
-        } else if (authModule.account?.isUsingWalletConnect) {
+        } else if (this.authStore.account?.isUsingWalletConnect) {
           const tx = {
             extensionOptions: [],
             memo: "Proof",
@@ -711,9 +710,9 @@ export default defineComponent({
             nonCriticalExtensionOptions: [],
             timeoutHeight: 0,
           };
-          const res = await AuthModule.signAppLinkWithWalletConenct(
+          const res = await WalletConnectSigner.signAppLinkWithWalletConenct(
             tx,
-            authModule.account.address
+            this.authStore.account.address
           );
           const signedTxRaw = res.signedTxRaw;
           const doc = res.doc;
@@ -741,7 +740,7 @@ export default defineComponent({
         } else {
           const mPassword = CryptoUtils.sha256(this.mPassword);
           try {
-            const mKey = AuthModule.getMKey(mPassword);
+            const mKey = this.authStore.getMKey(mPassword);
             if (mKey) {
               const privKey = Buffer.from(
                 CryptoUtils.decryptAes(mPassword, mKey),

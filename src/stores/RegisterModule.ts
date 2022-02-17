@@ -1,14 +1,12 @@
 import { defineStore } from 'pinia'
 import { registerModuleHMR } from '.';
-import { getModule } from 'vuex-module-decorators'
 import { Profile } from '@/core/types/Profile';
 import * as bip39 from "bip39";
 import CryptoUtils from '@/utils/CryptoUtils';
-import AuthModule from '@/store/modules/AuthModule';
 import Api from '@/core/api/Api';
 import AuthAccount from '@/core/types/AuthAccount';
 import { Transaction, Wallet } from 'desmosjs';
-const authModule = getModule(AuthModule);
+import { useAuthStore } from './AuthModule';
 
 
 /**
@@ -102,6 +100,7 @@ export const useRegisterStore = defineStore({
          * Complete the registration finalizing all the data and sending it to the backend
          */
         async completeRegistration(): Promise<void> {
+            const authStore = useAuthStore();
             const wallet = new Wallet(this.mnemonic.join(' ')); // generate the wallet from the given mnemonic
             const privateKeyHex = Buffer.from(wallet.privateKey).toString('hex'); // convert the wallet private key to hex
 
@@ -125,8 +124,8 @@ export const useRegisterStore = defineStore({
             }
 
             if (success) {
-                authModule.saveMKey({ mKey, mPassword }); // store mKey on localStorage
-                authModule.saveAuthAccount({ account: new AuthAccount(this.dtag, this.address, false) });
+                authStore.saveMKey({ mKey, mPassword }); // store mKey on localStorage
+                authStore.saveAuthAccount({ account: new AuthAccount(this.dtag, this.address, false) });
                 this.currentState = RegisterState.StateRegistrationSuccess;
             } else {
                 this.currentState = RegisterState.StateRegistrationFail;

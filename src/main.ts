@@ -1,6 +1,5 @@
 import { createApp, h } from 'vue'
 import App from './App.vue'
-import store from '@/store/'
 import router from './router'
 import './ui/tailwind.css'
 import '/node_modules/bootstrap-icons/font/bootstrap-icons.css'
@@ -12,7 +11,6 @@ const app = createApp({
 });
 app.use(createPinia())
 
-app.use(store);
 app.use(router);
 app.use(apolloProvider);
 app.mount('#app');

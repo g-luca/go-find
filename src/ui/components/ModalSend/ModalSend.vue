@@ -123,9 +123,9 @@ import {
   CosmosTxBody,
   DesmosJS,
 } from "desmosjs";
-import AuthModule from "@/store/modules/AuthModule";
 import { useTransactionStore } from "@/stores/TransactionModule";
 import { useAccountStore } from "@/stores/AccountModule";
+import { useAuthStore } from "@/stores/AuthModule";
 
 export default defineComponent({
   components: { Dialog, DialogOverlay, DialogTitle },
@@ -140,7 +140,7 @@ export default defineComponent({
       amount: ref(1),
       isValidAddress: ref(false),
       isValidAmount: ref(true),
-      feeAmount: ref(Number(AuthModule.DEFAULT_FEE_AMOUNT) / 1000000),
+      feeAmount: ref(Number(useAuthStore().DEFAULT_FEE_AMOUNT) / 1000000),
     };
   },
   methods: {

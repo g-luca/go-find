@@ -159,7 +159,6 @@ import { defineComponent } from "vue";
 import { Profile } from "@/core/types/Profile";
 import Api from "@/core/api/Api";
 import { Field, Form } from "vee-validate";
-import AuthModule from "@/store/modules/AuthModule";
 import QRCodeModal from "@walletconnect/qrcode-modal";
 import { useWalletConnectStore } from "@/stores/WalletConnectModule";
 import { useRegisterStore } from "@/stores/RegisterModule";
@@ -190,7 +189,10 @@ export default defineComponent({
   },
   methods: {
     openWalletConnect(): void {
-      QRCodeModal.open(AuthModule.walletConnectClient.uri, QRCodeModal.close);
+      QRCodeModal.open(
+        this.walletConnectStore.walletConnectClient.uri,
+        QRCodeModal.close
+      );
       this.walletConnectStore.connect();
     },
     validateDtag() {

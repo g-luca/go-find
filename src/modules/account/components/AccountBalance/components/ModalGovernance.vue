@@ -227,8 +227,6 @@ import { defineComponent } from "vue";
 import { ref } from "vue";
 import { Dialog, DialogOverlay, DialogTitle } from "@headlessui/vue";
 import { useApolloClient } from "@vue/apollo-composable";
-import { getModule } from "vuex-module-decorators";
-import AuthModule from "@/store/modules/AuthModule";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import { GovernanceQuery } from "@/gql/GovernanceQuery";
 import DOMPurify from "dompurify";
@@ -242,7 +240,7 @@ import {
   CosmosVoteOption,
 } from "desmosjs";
 import { useTransactionStore } from "@/stores/TransactionModule";
-const authModule = getModule(AuthModule);
+import { useAuthStore } from "@/stores/AuthModule";
 
 Chart.register(...registerables);
 
@@ -284,6 +282,7 @@ export default defineComponent({
       },
     };
     return {
+      authStore: useAuthStore(),
       transactionStore: useTransactionStore(),
       isOpen: ref(false),
       isLoadinGovernance: ref(false),
@@ -310,7 +309,7 @@ export default defineComponent({
         const governanceRaw = await apollo.client.query({
           query: GovernanceQuery,
           variables: {
-            address: authModule.account?.address,
+            address: this.authStore.account?.address,
           },
           fetchPolicy: "no-cache",
         });
@@ -405,11 +404,11 @@ export default defineComponent({
     async onVote(proposalIdRaw: string, voteString: string) {
       const proposalId = Number(proposalIdRaw);
       const vote: CosmosVoteOption = (<any>CosmosVoteOption)[voteString]; // cast the vote from string to enum
-      if (authModule.account) {
+      if (this.authStore.account) {
         const msgVote: CosmosMsgVote = {
           option: vote,
           proposalId: Number(proposalId),
-          voter: authModule.account?.address,
+          voter: this.authStore.account?.address,
         };
         const txBody: CosmosTxBody = {
           memo: "Vote | Go-find",

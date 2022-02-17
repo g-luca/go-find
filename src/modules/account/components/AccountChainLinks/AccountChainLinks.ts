@@ -1,3 +1,4 @@
+import { useAuthStore } from '@/stores/AuthModule';
 import { useKeplrStore } from '@/stores/KeplrModule';
 import { useAccountStore } from '@/stores/AccountModule';
 import { defineComponent, ref, watchEffect } from "vue";
@@ -17,14 +18,11 @@ import { supportedChainLinks } from "@/core/types/SupportedChainLinks";
 import Blockchain from "@/core/types/Blockchain";
 import { Wallet, } from "desmosjs";
 import CryptoUtils from "@/utils/CryptoUtils";
-import { getModule } from "vuex-module-decorators";
-import AuthModule from "@/store/modules/AuthModule";
 import ChainLink from "@/core/types/ChainLink";
 import { Key } from "@keplr-wallet/types";
 import { Extension as TerraExtension, MsgSend as TerraMsgSend, Fee as TerraFee, LCDClient as TerraLCDClient, TxBody as TerraTxBody, AuthInfo as TerraAuthInfo, SignDoc as TerraSignDoc } from "@terra-money/terra.js";
 import { useTransactionStore, TransactionStatus } from '@/stores/TransactionModule';
 import { useLedgerStore } from "@/stores/LedgerModule";
-const authModule = getModule(AuthModule);
 
 class ChainLinkConnectionMethod {
     public id: string;
@@ -55,6 +53,7 @@ export default defineComponent({
     },
     data() {
         return {
+            authStore: useAuthStore(),
             accountStore: useAccountStore(),
             transactionStore: useTransactionStore(),
             ledgerStore: useLedgerStore(),
@@ -149,10 +148,10 @@ export default defineComponent({
          * @param chainLink chainLink to delete
          */
         deleteChainLink(chainLink: ChainLink): void {
-            if (authModule.account) {
+            if (this.authStore.account) {
                 const msgUnlink: DesmosMsgUnlinkChainAccount = {
                     chainName: chainLink.chain,
-                    owner: authModule.account?.address,
+                    owner: this.authStore.account?.address,
                     target: chainLink.address,
                 }
                 const txBody: CosmosTxBody = {
@@ -186,7 +185,7 @@ export default defineComponent({
                 this.inputMnemonic[i] = word.trim();
             });
             const mnemonic = this.inputMnemonic.join(' ');
-            if (mnemonic.trimEnd().split(' ').length >= 12 && authModule.account && this.selectedChain) {
+            if (mnemonic.trimEnd().split(' ').length >= 12 && this.authStore.account && this.selectedChain) {
                 try {
                     const destWallet = new Wallet(mnemonic, this.customHdPath, this.customBechPrefix);
 
@@ -213,12 +212,12 @@ export default defineComponent({
                                     key: destWallet.publicKey.value
                                 }).finish()
                             },
-                            signature: Buffer.from(Transaction.signBytes(Buffer.from(CryptoUtils.sha256Buffer(Buffer.from(authModule.account.address))), destWallet.privateKey)).toString('hex'),
-                            plainText: Buffer.from(authModule.account.address).toString('hex'),
+                            signature: Buffer.from(Transaction.signBytes(Buffer.from(CryptoUtils.sha256Buffer(Buffer.from(this.authStore.account.address))), destWallet.privateKey)).toString('hex'),
+                            plainText: Buffer.from(this.authStore.account.address).toString('hex'),
                         }, chainConfig: {
                             name: this.selectedChain?.id.toLowerCase(),
                         },
-                        signer: authModule.account?.address,
+                        signer: this.authStore.account?.address,
                     }
                     const txBody: CosmosTxBody = {
                         memo: "Chain link",
@@ -290,7 +289,7 @@ export default defineComponent({
                             }],
                             gas: "1"
                         },
-                        memo: `${authModule.account?.address}`,
+                        memo: `${this.authStore.account?.address}`,
                         msgs: [],
                         sequence: "0"
                     }
@@ -299,7 +298,7 @@ export default defineComponent({
                     const plainText = JSON.stringify(proofObj, null, 0); // convert to string to be used as plain_text
 
                     // create the chain link transaction
-                    if (signedTx && authModule.account) {
+                    if (signedTx && this.authStore.account) {
                         const msgLinkChain: DesmosMsgLinkChainAccount = {
                             chainAddress: {
                                 typeUrl: "/desmos.profiles.v1beta1.Bech32Address",
@@ -320,7 +319,7 @@ export default defineComponent({
                             }, chainConfig: {
                                 name: this.selectedChain?.id.toLowerCase(),
                             },
-                            signer: authModule.account?.address,
+                            signer: this.authStore.account?.address,
                         }
                         const txBody: CosmosTxBody = {
                             memo: "Chain link",
@@ -382,10 +381,10 @@ export default defineComponent({
         async verifyChainLinkRequirements(extAddress: string, chain: string): Promise<boolean> {
             let profileExists = false;
             let chainLinkExists = false;
-            if (authModule.account) {
+            if (this.authStore.account) {
 
                 // parse new data to ensure that the profile exists
-                const profile = await this.accountStore.getProfile(authModule.account.dtag);
+                const profile = await this.accountStore.getProfile(this.authStore.account.dtag);
                 if (profile) {
                     profileExists = true;
                     try {
@@ -451,7 +450,7 @@ export default defineComponent({
                             // Request transaction sign
                             this.terraExtension!.sign({
                                 msgs: [new TerraMsgSend(address, address, { uluna: 0 })],
-                                memo: `${authModule.account?.address}`,
+                                memo: `${this.authStore.account?.address}`,
                                 fee: TerraFee.fromAmino({
                                     amount: [{
                                         amount: '0',
@@ -523,7 +522,7 @@ export default defineComponent({
                                                     ],
                                                     gas: '1',
                                                 },
-                                                memo: `${authModule.account?.address}`,
+                                                memo: `${this.authStore.account?.address}`,
                                                 msgs: (payload.result.body.messages || []).map((m: any) => TerraMsgSend.fromData(m).toAmino()),
                                                 sequence: String(terraSequence),
                                             }
@@ -541,7 +540,7 @@ export default defineComponent({
 
                                         if (finalProof) {
                                             // create the chain link transaction
-                                            if (finalProof && authModule.account && this.selectedChain) {
+                                            if (finalProof && this.authStore.account && this.selectedChain) {
                                                 const msgLinkChain: DesmosMsgLinkChainAccount = {
                                                     chainAddress: {
                                                         typeUrl: "/desmos.profiles.v1beta1.Bech32Address",
@@ -554,7 +553,7 @@ export default defineComponent({
                                                     chainConfig: {
                                                         name: this.selectedChain?.id.toLowerCase(),
                                                     },
-                                                    signer: authModule.account?.address,
+                                                    signer: this.authStore.account?.address,
                                                 }
                                                 const txBody: CosmosTxBody = {
                                                     memo: "Chain link | Go-find",
@@ -627,7 +626,7 @@ export default defineComponent({
                         ],
                         gas: '1',
                     },
-                    memo: `${authModule.account?.address}`,
+                    memo: `${this.authStore.account?.address}`,
                     msgs: [],
                     sequence: '0',
                 }
@@ -641,7 +640,7 @@ export default defineComponent({
                 watchEffect(async () => {
                     if (this.ledgerStore.actionSignature !== null) {
                         setTimeout(async () => {
-                            if (selectedChain && authModule.account) {
+                            if (selectedChain && this.authStore.account) {
                                 await this.ledgerStore.toggleModal();
                                 await this.ledgerStore.setLedgerAction({ app: selectedChain, ledgerAppName: ledgerAppName, message: '' });
                                 const finalProof: DesmosProof = {
@@ -655,7 +654,7 @@ export default defineComponent({
                                     plainText: Buffer.from(JSON.stringify(proofObj, null, 0)).toString('hex'),
                                 }
 
-                                await this.sendChainLink(selectedChain, this.ledgerStore.ledgerAddress, authModule.account?.address, finalProof);
+                                await this.sendChainLink(selectedChain, this.ledgerStore.ledgerAddress, this.authStore.account?.address, finalProof);
                             }
                         }, 2000)
                     }

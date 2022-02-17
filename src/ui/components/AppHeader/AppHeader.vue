@@ -27,7 +27,7 @@
             <!-- Search bar -->
             <SearchUser class="" />
 
-            <span v-if="$store.state.AuthModule._authLevel>0">
+            <span v-if="authStore.authLevel>0">
               <Menu
                 as="div"
                 class="block relative pl-2 pt-1 inline-block text-left"
@@ -104,12 +104,10 @@ import { defineComponent } from "vue";
 import ToggleTheme from "@/ui/components/ToggleTheme/ToggleTheme.vue";
 import SearchUser from "../SearchUser/SearchUser.vue";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
-import { getModule } from "vuex-module-decorators";
-import AuthModule from "@/store/modules/AuthModule";
 import router from "@/router";
 import { useWalletConnectStore } from "@/stores/WalletConnectModule";
 import { useAccountStore } from "@/stores/AccountModule";
-const authModule = getModule(AuthModule);
+import { useAuthStore } from "@/stores/AuthModule";
 
 export default defineComponent({
   components: {
@@ -124,6 +122,7 @@ export default defineComponent({
   data() {
     const isTestnet = import.meta.env.VITE_APP_IS_TESTNET === "true";
     return {
+      authStore: useAuthStore(),
       accountStore: useAccountStore(),
       walletConnectStore: useWalletConnectStore(),
       isTestnet,
@@ -131,10 +130,10 @@ export default defineComponent({
   },
   methods: {
     logout() {
-      if (authModule.account?.isUsingWalletConnect) {
+      if (this.authStore.account?.isUsingWalletConnect) {
         this.walletConnectStore.logout();
       }
-      authModule.logout();
+      this.authStore.logout();
       router.push("/");
     },
   },

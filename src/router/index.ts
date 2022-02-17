@@ -1,4 +1,3 @@
-import { useKeplrStore } from './../stores/KeplrModule';
 import { useDesmosNetworkStore } from './../stores/DesmosNetworkModule';
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import 'vue-router';
@@ -9,12 +8,9 @@ import ViewProfile from "../views/ViewProfile/ViewProfile.vue";
 import ViewAccount from "../views/ViewAccount/ViewAccount.vue";
 import ViewKeplr from "../views/ViewKeplr.vue";
 import ViewWalletConnect from "../views/ViewWalletConnect.vue";
-
 import ViewError404 from "../views/errors/ViewError404/ViewError404.vue";
-
-import { getModule } from "vuex-module-decorators";
-import AuthModule, { AuthLevel } from "@/store/modules/AuthModule";
-const authModule = getModule(AuthModule);
+import { useKeplrStore } from './../stores/KeplrModule';
+import { AuthLevel, useAuthStore } from '@/stores/AuthModule';
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -84,16 +80,17 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore();
   const requiresAuth = to.meta.requiresAuth;
   const hiddenWithAuth = to.meta.hiddenWithAuth;
 
   // check authentication
-  authModule.authenticate();
+  authStore.authenticate();
   useKeplrStore().init();
 
-  if (requiresAuth && authModule.authLevel === AuthLevel.None) {
+  if (requiresAuth && authStore.authLevel === AuthLevel.None) {
     next('/login');
-  } else if (hiddenWithAuth && authModule.authLevel > AuthLevel.None) {
+  } else if (hiddenWithAuth && authStore.authLevel > AuthLevel.None) {
     next('/me');
   } else {
     next();

@@ -31,7 +31,7 @@
           </DialogTitle>
           <section v-if="transactionStore.transactionStatus!==2">
             <!-- Registered user Transaction -->
-            <span v-if="!$store.state.AuthModule._account.isUsingKeplr&&!$store.state.AuthModule._account.isUsingWalletConnect">
+            <span v-if="!authStore.account.isUsingKeplr&&!authStore.account.isUsingWalletConnect">
               <label
                 class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
                 for="inputMPassword"
@@ -63,7 +63,7 @@
               <span v-if="accountStore.account.balance>0">
                 <div class="pt-4">
                   <button
-                    v-if="(!$store.state.AuthModule._account.isUsingKeplr&&!$store.state.AuthModule._account.isUsingWalletConnect&&inputMPassword.length>0)||$store.state.AuthModule._account.isUsingKeplr||$store.state.AuthModule._account.isUsingWalletConnect"
+                    v-if="(!authStore.account.isUsingKeplr&&!authStore.account.isUsingWalletConnect&&inputMPassword.length>0)||authStore.account.isUsingKeplr||authStore.account.isUsingWalletConnect"
                     :disabled="transactionStore.transactionStatus===1"
                     type="button"
                     :class="{'bg-gray-500 hover:bg-gray-500': transactionStore.transactionStatus===1, 'bg-indigo-600 hover:bg-indigo-700': transactionStore.transactionStatus!==1}"
@@ -101,7 +101,7 @@
                   </button>
 
                   <div
-                    v-if="$store.state.AuthModule._account.isUsingWalletConnect && transactionStore.transactionStatus===1"
+                    v-if="authStore.account.isUsingWalletConnect && transactionStore.transactionStatus===1"
                     class="pt-3 text-gray-700 dark:text-gray-200 text-center"
                   >
                     Approve the Transaction from your DPM App.
@@ -123,7 +123,7 @@
                 </p>
               </div>
               <div
-                v-if="!$store.state.AuthModule._account.isUsingKeplr&&!$store.state.AuthModule._account.isUsingWalletConnect"
+                v-if="!authStore.account.isUsingKeplr&&!authStore.account.isUsingWalletConnect"
                 class="pt-2 text-gray-400"
               >
                 <i class="bi bi-wifi-off text-md " />
@@ -152,6 +152,7 @@ import { defineComponent } from "vue";
 import { Dialog, DialogTitle } from "@headlessui/vue";
 import { useTransactionStore } from "@/stores/TransactionModule";
 import { useAccountStore } from "@/stores/AccountModule";
+import { useAuthStore } from "@/stores/AuthModule";
 
 export default defineComponent({
   components: {
@@ -161,6 +162,7 @@ export default defineComponent({
   data() {
     return {
       inputMPassword: "",
+      authStore: useAuthStore(),
       accountStore: useAccountStore(),
       transactionStore: useTransactionStore(),
     };

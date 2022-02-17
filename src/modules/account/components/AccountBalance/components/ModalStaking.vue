@@ -630,8 +630,6 @@ import { ref } from "vue";
 import { Dialog, DialogOverlay, DialogTitle } from "@headlessui/vue";
 import { ValidatorsQuery } from "@/gql/ValidatorsQuery";
 import { useApolloClient } from "@vue/apollo-composable";
-import { getModule } from "vuex-module-decorators";
-import AuthModule from "@/store/modules/AuthModule";
 import { ProfileQuery } from "@/gql/ProfileQuery";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import DOMPurify from "dompurify";
@@ -646,7 +644,7 @@ import {
 } from "desmosjs";
 import { useTransactionStore } from "@/stores/TransactionModule";
 import { useAccountStore } from "@/stores/AccountModule";
-const authModule = getModule(AuthModule);
+import { useAuthStore } from "@/stores/AuthModule";
 
 enum StakingOperations {
   None = "none",
@@ -660,6 +658,7 @@ export default defineComponent({
   components: { Dialog, DialogOverlay, DialogTitle, SkeletonLoader },
   setup() {
     return {
+      authStore: useAuthStore(),
       accountStore: useAccountStore(),
       transactionStore: useTransactionStore(),
       isOpen: ref(false),
@@ -713,7 +712,7 @@ export default defineComponent({
         const validatorsRaw = await apollo.client.query({
           query: ValidatorsQuery,
           variables: {
-            address: authModule.account?.address,
+            address: this.authStore.account?.address,
           },
           fetchPolicy: "no-cache",
         });
@@ -886,7 +885,7 @@ export default defineComponent({
           this.stakingOperation !== StakingOperations.Unbond &&
           this.stakingOperation !== StakingOperations.Redelegate
         ) {
-          maxAmount -= Number(AuthModule.DEFAULT_FEE_AMOUNT) / 1000000;
+          maxAmount -= Number(this.authStore.DEFAULT_FEE_AMOUNT) / 1000000;
         }
       }
       this.stakingOperationMaxAmount = maxAmount;

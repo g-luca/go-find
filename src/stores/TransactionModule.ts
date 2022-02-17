@@ -1,10 +1,8 @@
 import { CosmosBroadcastMode, CosmosTxBody, CosmosTxResponse, Transaction } from 'desmosjs';
 import { defineStore } from 'pinia'
 import { registerModuleHMR } from '.';
-import { getModule } from "vuex-module-decorators";
-import AuthModule from '../store/modules/AuthModule';
+import { useAuthStore } from './AuthModule';
 import { useDesmosNetworkStore } from './DesmosNetworkModule';
-const authModule = getModule(AuthModule);
 
 export enum TransactionStatus {
     Error = -1,
@@ -34,6 +32,7 @@ export const useTransactionStore = defineStore({
          * @param payload payload containing the TxBody and the mPassword
          */
         async send(payload: { mPassword: string }): Promise<void> {
+            const authStore = useAuthStore();
             // check if is not already performing a transaction
             if (this.transactionStatus !== TransactionStatus.Loading) {
                 this.isOpen = true;
@@ -55,7 +54,7 @@ export const useTransactionStore = defineStore({
                             this.detailedErrorMessage = broadcastResult.error;
                         }
                     } else {
-                        if (authModule.account?.isUsingKeplr) {
+                        if (authStore.account?.isUsingKeplr) {
                             this.errorMessage = "Transaction error";
                         } else {
                             this.errorMessage = "Transaction error or wrong password";
@@ -105,8 +104,9 @@ export const useTransactionStore = defineStore({
  * @returns the signed tx if succeeded, null otherwise
  */
 async function handleSign(tx: CosmosTxBody, mPassword: string): Promise<Transaction | null> {
-    if (authModule.account) {
-        const signedTx = await AuthModule.signTx(tx, authModule.account.address, mPassword, authModule.account.isUsingKeplr, authModule.account.isUsingWalletConnect);
+    const authStore = useAuthStore();
+    if (authStore.account) {
+        const signedTx = await authStore.signTx(tx, authStore.account.address, mPassword, authStore.account.isUsingKeplr, authStore.account.isUsingWalletConnect);
         if (signedTx) {
             return signedTx;
         }

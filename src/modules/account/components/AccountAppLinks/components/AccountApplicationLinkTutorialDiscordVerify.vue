@@ -82,14 +82,12 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { getModule } from "vuex-module-decorators";
-import AuthModule from "@/store/modules/AuthModule";
 import { ApplicationLinkQuery } from "@/gql/ApplicationLinkQuery";
 import { useApolloClient } from "@vue/apollo-composable";
 import { useClipboardStore } from "@/stores/ClipboardModule";
 import { useDesmosNetworkStore } from "@/stores/DesmosNetworkModule";
 import { useAccountStore } from "@/stores/AccountModule";
-const authModule = getModule(AuthModule);
+import { useAuthStore } from "@/stores/AuthModule";
 
 export default defineComponent({
   components: {},
@@ -103,6 +101,7 @@ export default defineComponent({
     const net = useDesmosNetworkStore().isTestnet ? "testnet" : "mainnet";
     const cmdVerify = `!verify ${net}`;
     return {
+      authStore: useAuthStore(),
       accountStore: useAccountStore(),
       cmdVerify,
       isVerifyingAppConnection: false,
@@ -126,7 +125,7 @@ export default defineComponent({
             query: ApplicationLinkQuery,
             fetchPolicy: "no-cache",
             variables: {
-              dtag: authModule.account?.dtag,
+              dtag: this.authStore.account?.dtag,
               appName: "discord",
               appUsername: this.username,
             },

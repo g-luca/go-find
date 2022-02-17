@@ -1,16 +1,12 @@
+import { useAuthStore } from './AuthModule';
 import { defineStore } from 'pinia'
 import { registerModuleHMR } from '.';
-import { getModule } from 'vuex-module-decorators';
-import AuthModule from '@/store/modules/AuthModule';
 import { Window as KeplrWindow } from "@keplr-wallet/types";
 import AuthAccount from '@/core/types/AuthAccount';
 import router from '@/router';
 import { useDesmosNetworkStore } from './DesmosNetworkModule';
 import { ProfileQuery } from '@/gql/ProfileQuery';
 import { useLazyQuery } from '@vue/apollo-composable';
-
-
-const authModule = getModule(AuthModule);
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -35,15 +31,16 @@ export const useKeplrStore = defineStore({
          * Inizialize Keplr global listeners
          */
         async init(): Promise<void> {
-            if (window.keplr && (authModule.account?.isUsingKeplr || router.currentRoute.value.path === '/login/keplr')) {
+            const authStore = useAuthStore();
+            if (window.keplr && (authStore.account?.isUsingKeplr || router.currentRoute.value.path === '/login/keplr')) {
                 // listen account changes if the user is currently logged with a Keplr account or in the Keplr auth page
                 window.addEventListener("keplr_keystorechange", () => {
-                    authModule.logout();
+                    authStore.logout();
                     router.push('/')
                 });
 
                 // suggest fresh new configuration
-                if (authModule.account?.isUsingKeplr) {
+                if (authStore.account?.isUsingKeplr) {
                     if (import.meta.env.VITE_APP_IS_TESTNET === "true") {
                         await this.setupDesmosTestnet();
                     } else {
@@ -65,6 +62,7 @@ export const useKeplrStore = defineStore({
          * Initialize Keplr Authentication process
          */
         async auth(): Promise<void> {
+            const authStore = useAuthStore();
             if (window.keplr) {
                 this.isInstalled = true;
                 this.isWaitingAuthentication = true;
@@ -94,8 +92,8 @@ export const useKeplrStore = defineStore({
                         if (result.data && result.data.profile[0] && result.data.profile[0].dtag) {
                             const dtag = result.data.profile[0].dtag;
                             this.hasProfile = true;
-                            authModule.saveAuthAccount({ account: new AuthAccount(dtag, this.address, true) });
-                            authModule.authenticate();
+                            authStore.saveAuthAccount({ account: new AuthAccount(dtag, this.address, true) });
+                            authStore.authenticate();
                             router.push('/me')
                         } else {
                             this.hasProfile = false;
@@ -113,8 +111,9 @@ export const useKeplrStore = defineStore({
          * Set the choosen dtag for the Keplr Account
          */
         async setupProfile(payload: { dtag: string }): Promise<void> {
-            authModule.saveAuthAccount({ account: new AuthAccount(payload.dtag, this.address, true) });
-            authModule.authenticate();
+            const authStore = useAuthStore();
+            authStore.saveAuthAccount({ account: new AuthAccount(payload.dtag, this.address, true) });
+            authStore.authenticate();
             router.push('/me')
         },
 

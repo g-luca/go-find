@@ -9,11 +9,9 @@ import { AccountQuery } from '@/gql/AccountQuery';
 import { apolloClient } from '@/gql/Apollo';
 import { ApplicationLinkSubscription } from '@/gql/ApplicationLinkSubscription';
 import { useLazyQuery, useApolloClient } from '@vue/apollo-composable';
-import { getModule } from 'vuex-module-decorators';
-import AuthModule, { AuthLevel } from '@/store/modules/AuthModule';
 import ChainLink from '@/core/types/ChainLink';
 import { useApplicationLinkStore } from './ApplicationLinkModule';
-const authModule = getModule(AuthModule);
+import { AuthLevel, useAuthStore } from './AuthModule';
 
 
 export const useAccountStore = defineStore({
@@ -32,28 +30,29 @@ export const useAccountStore = defineStore({
          * @param force force the reload of the profile data
          */
         async loadAccount(force = false): Promise<void> {
+            const authStore = useAuthStore();
             this.isNewProfile = false;
             this.profile = false;
             this.account = false;
             this.profileLoadingStatus = LoadingStatus.Loading;
             if (this.profile === false || force) {
                 this.profileLoadingStatus = LoadingStatus.Loading;
-                if (authModule.authLevel > AuthLevel.None && authModule.account) {
+                if (authStore.authLevel > AuthLevel.None && authStore.account) {
                     const getAccountQuery = useLazyQuery(
                         AccountQuery, {
-                        dtag: authModule.account?.dtag,
-                        address: authModule.account?.address,
+                        dtag: authStore.account?.dtag,
+                        address: authStore.account?.address,
                     });
                     const accountSubscription = apolloClient.subscribe({
                         query: AccountSubscription,
                         variables: {
-                            address: authModule.account?.address,
+                            address: authStore.account?.address,
                         }
                     });
                     const profileSubscription = apolloClient.subscribe({
                         query: ProfileSubscription,
                         variables: {
-                            dtag: authModule.account?.dtag,
+                            dtag: authStore.account?.dtag,
                         }
                     });
 
@@ -61,7 +60,7 @@ export const useAccountStore = defineStore({
                     const applicationLinkObserver = apolloClient.subscribe({
                         query: ApplicationLinkSubscription,
                         variables: {
-                            dtag: authModule.account?.dtag,
+                            dtag: authStore.account?.dtag,
                         },
                     })
                     applicationLinkObserver.subscribe((response) => {
@@ -76,7 +75,7 @@ export const useAccountStore = defineStore({
                         if (result.loading) {
                             this.profileLoadingStatus = LoadingStatus.Loading;
                         }
-                        if (result.data && !result.loading && authModule.account) {
+                        if (result.data && !result.loading && authStore.account) {
                             // Manage Acccount info
                             if (result.data.profile[0]) {
                                 // The profile exists
@@ -84,7 +83,7 @@ export const useAccountStore = defineStore({
                             } else {
                                 // The profile doesn't exists
                                 this.isNewProfile = true;
-                                this.profile = new Profile(authModule.account?.dtag, authModule.account?.address, "", "", "", "", [], []);
+                                this.profile = new Profile(authStore.account?.dtag, authStore.account?.address, "", "", "", "", [], []);
                             }
 
                             // Manage acccount data
@@ -92,7 +91,7 @@ export const useAccountStore = defineStore({
                                 this.account = parseGqlAccountResult(result.data.account[0]);
                             } else {
                                 // The user hasn't done any transaction on chain, completelly new account
-                                this.account = new Account(authModule.account.address, 0, 0, 0, 0);
+                                this.account = new Account(authStore.account.address, 0, 0, 0, 0);
                             }
                             this.profileLoadingStatus = LoadingStatus.Loaded;
                         } else {

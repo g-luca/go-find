@@ -320,8 +320,6 @@ import { defineComponent, ref, watchEffect } from "vue";
 import { Form, Field } from "vee-validate";
 import { Dialog, DialogTitle } from "@headlessui/vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
-import { getModule } from "vuex-module-decorators";
-import AuthModule from "@/store/modules/AuthModule";
 import {
   CosmosBroadcastMode,
   CosmosTxBody,
@@ -335,7 +333,7 @@ import {
   useTransactionStore,
 } from "@/stores/TransactionModule";
 import { useAccountStore } from "@/stores/AccountModule";
-const authModule = getModule(AuthModule);
+import { useAuthStore } from "@/stores/AuthModule";
 
 enum UploadImageType {
   "profilePic" = "profilePic",
@@ -369,6 +367,7 @@ export default defineComponent({
       };
     }
     return {
+      authStore: useAuthStore(),
       transactionStore: useTransactionStore(),
       accountStore: useAccountStore(),
       initialValues,
@@ -397,7 +396,7 @@ export default defineComponent({
     };
   },
   async beforeMount() {
-    const account = authModule.account;
+    const account = this.authStore.account;
     if (account) {
       await this.accountStore.loadAccount();
 
@@ -612,7 +611,7 @@ export default defineComponent({
     },
     async deleteProfile() {
       const msgDeleteProfile: DesmosMsgDeleteProfile = {
-        creator: authModule.account!.address,
+        creator: this.authStore.account!.address,
       };
       const txBody: CosmosTxBody = {
         memo: "Profile delete",

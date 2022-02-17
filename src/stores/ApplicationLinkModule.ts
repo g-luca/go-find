@@ -1,3 +1,4 @@
+import { useAuthStore } from './AuthModule';
 import { defineStore } from 'pinia'
 import { registerModuleHMR } from '.';
 import ApplicationLink from '@/core/types/ApplicationLink';
@@ -7,9 +8,6 @@ import ApplicationLinkGithub from '@/core/types/ApplicationLinks/ApplicationLink
 import ApplicationLinkTwitch from '@/core/types/ApplicationLinks/ApplicationLinkTwitch';
 import ApplicationLinkTwitter from '@/core/types/ApplicationLinks/ApplicationLinkTwitter';
 import { CosmosTxBody, DesmosMsgLinkApplication } from 'desmosjs';
-import { getModule } from 'vuex-module-decorators'
-import AuthModule from '@/store/modules/AuthModule';
-const authModule = getModule(AuthModule);
 
 
 export const useApplicationLinkStore = defineStore({
@@ -28,10 +26,11 @@ export const useApplicationLinkStore = defineStore({
          * @returns 
          */
         generateApplicationLinkTxBody(application: string, username: string, callData: string): CosmosTxBody | null {
-            if (authModule.account) {
+            const authStore = useAuthStore();
+            if (authStore.account) {
                 const msgLinkApplication: DesmosMsgLinkApplication = {
                     callData: callData,
-                    sender: authModule.account?.address,
+                    sender: authStore.account?.address,
                     sourceChannel: import.meta.env.VITE_APP_IBC_PROFILES_CHANNEL || "",
                     sourcePort: "ibc-profiles",
                     linkData: {

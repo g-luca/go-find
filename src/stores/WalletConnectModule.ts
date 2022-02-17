@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import { registerModuleHMR } from '.';
-import { getModule } from "vuex-module-decorators";
-import AuthModule from '../store/modules/AuthModule';
 import router from '@/router';
 import AuthAccount from '@/core/types/AuthAccount';
-const authModule = getModule(AuthModule);
+import WalletConnect from '@walletconnect/client';
+import QRCodeModal from "@walletconnect/qrcode-modal";
+import { useAuthStore } from './AuthModule';
 
 
 export const useWalletConnectStore = defineStore({
@@ -12,27 +12,31 @@ export const useWalletConnectStore = defineStore({
     state: () => ({
         hasProfile: false,
         connectedAddress: '',
+        walletConnectClient: new WalletConnect({
+            bridge: "https://bridge.walletconnect.org",
+        }),
     }),
     getters: {
     },
     actions: {
         async logout(): Promise<void> {
-            await AuthModule.walletConnectClient.killSession();
-            authModule.resetWalletConnectClient();
+            await this.walletConnectClient.killSession();
+            this.resetWalletConnectClient();
         },
         async init(): Promise<void> {
-            authModule.resetWalletConnectClient();
+            this.resetWalletConnectClient();
         },
 
         /**
          * Inizialize WalletConenct connection & listeners
          */
         async connect(): Promise<void> {
+            const authStore = useAuthStore();
             const auth = async () => {
                 let address = '';
-                if (AuthModule.walletConnectClient.accounts[0]) {
+                if (this.walletConnectClient.accounts[0]) {
                     // try to retrieve address from session
-                    address = AuthModule.walletConnectClient.accounts[0];
+                    address = this.walletConnectClient.accounts[0];
                 }
                 // if the address exists, check if has a Desmos Profile
                 if (address) {
@@ -41,8 +45,8 @@ export const useWalletConnectStore = defineStore({
                     if (result.account && result.account.dtag) {
                         const dtag = result.account.dtag;
                         this.hasProfile = true;
-                        authModule.saveAuthAccount({ account: new AuthAccount(dtag, address, false, true) });
-                        authModule.authenticate();
+                        authStore.saveAuthAccount({ account: new AuthAccount(dtag, address, false, true) });
+                        authStore.authenticate();
                         router.push('/me')
                     } else {
                         this.hasProfile = false;
@@ -54,26 +58,26 @@ export const useWalletConnectStore = defineStore({
 
 
             // Check if connection is already established
-            if (!AuthModule.walletConnectClient.connected) {
+            if (!this.walletConnectClient.connected) {
                 // create new session
-                await AuthModule.walletConnectClient.createSession();
+                await this.walletConnectClient.createSession();
             }
 
             // Subscribe to connection events
-            AuthModule.walletConnectClient.on("connect", (error, payload) => {
+            this.walletConnectClient.on("connect", (error, payload) => {
                 this.connectedAddress = payload.params[0].accounts[0];
                 auth();
             });
-            AuthModule.walletConnectClient.on("session_update", (error, payload) => {
+            this.walletConnectClient.on("session_update", (error, payload) => {
                 this.connectedAddress = payload.params[0].accounts[0];
                 auth();
             });
 
 
-            AuthModule.walletConnectClient.on("disconnect", (error, payload) => {
+            this.walletConnectClient.on("disconnect", (error, payload) => {
                 localStorage.removeItem('walletconnect');
-                authModule.resetWalletConnectClient();
-                authModule.logout();
+                this.resetWalletConnectClient();
+                authStore.logout();
                 if (error) {
                     throw error;
                 }
@@ -86,11 +90,23 @@ export const useWalletConnectStore = defineStore({
 
 
         /**
+         * Reset WalletConenct connection & listeners
+         */
+        async resetWalletConnectClient(): Promise<void> {
+            this.walletConnectClient = new WalletConnect({
+                bridge: "https://bridge.walletconnect.org",
+                qrcodeModal: QRCodeModal,
+            });
+        },
+
+
+        /**
          * Set the choosen dtag for the WalletConnect Account
          */
         async setupProfileWalletConnect(payload: { dtag: string }): Promise<void> {
-            authModule.saveAuthAccount({ account: new AuthAccount(payload.dtag, this.connectedAddress, false, true) });
-            authModule.authenticate();
+            const authStore = useAuthStore();
+            authStore.saveAuthAccount({ account: new AuthAccount(payload.dtag, this.connectedAddress, false, true) });
+            authStore.authenticate();
             router.push('/me')
         }
 

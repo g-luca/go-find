@@ -1,4 +1,6 @@
 import Crypto from "crypto"
+import Long from 'long';
+
 export default class CryptoUtils {
 
 
@@ -61,7 +63,7 @@ export default class CryptoUtils {
 
 
     //https://github.com/cosmos/cosmjs/blob/79396bfaa49831127ccbbbfdbb1185df14230c63/packages/amino/src/signdoc.ts
-    private static sortedObject(obj: any): any {
+    public static sortedObject(obj: any): any {
         if (typeof obj !== "object" || obj === null) {
             return obj;
         }
@@ -81,6 +83,51 @@ export default class CryptoUtils {
     public static sortedJsonStringify(obj: any): string {
         return JSON.stringify(CryptoUtils.sortedObject(obj));
     }
+
+
+
+
+    public static parseSignDocValues(signDoc: any) {
+        return {
+            ...signDoc,
+            bodyBytes: this.fromHex(signDoc.bodyBytes),
+            authInfoBytes: this.fromHex(signDoc.authInfoBytes),
+            accountNumber: Long.fromNumber(parseInt(signDoc.accountNumber, 16)),
+        };
+    }
+
+
+    public static fromHex(hexstring: string): Uint8Array {
+        if (hexstring.length % 2 !== 0) {
+            throw new Error("hex string length must be a multiple of 2");
+        }
+
+        const listOfInts: number[] = [];
+        for (let i = 0; i < hexstring.length; i += 2) {
+            const hexByteAsString = hexstring.substr(i, 2);
+            if (!hexByteAsString.match(/[0-9a-f]{2}/i)) {
+                throw new Error("hex string contains invalid characters");
+            }
+            listOfInts.push(parseInt(hexByteAsString, 16));
+        }
+        return new Uint8Array(listOfInts);
+    }
+    public static stringifySignDocValues(signDoc: any) {
+        return {
+            ...signDoc,
+            bodyBytes: this.toHex(signDoc.bodyBytes),
+            authInfoBytes: this.toHex(signDoc.authInfoBytes),
+            accountNumber: signDoc.accountNumber.toString(16),
+        };
+    }
+    public static toHex(data: Uint8Array): string {
+        let out = "";
+        for (const byte of data) {
+            out += ("0" + byte.toString(16)).slice(-2);
+        }
+        return out;
+    }
+
 }
 
 

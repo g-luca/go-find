@@ -2,7 +2,7 @@
   <div>
     <AppHeader />
     <!-- Temporary Alert -->
-    <span v-if="$store.state.AuthModule._account._isUsingKeplr&&!isAlertDismissed">
+    <span v-if="authStore.account._isUsingKeplr&&!isAlertDismissed">
       <div class="bg-red-500 bg-opacity-90 text-white p-2">
         <div class="font-bold text-xl text-center">
           Manual Keplr action required
@@ -105,8 +105,6 @@ import AppFooter from "@/ui/components/AppFooter/AppFooter.vue";
 import AppHeader from "@/ui/components/AppHeader/AppHeader.vue";
 
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
-import { getModule } from "vuex-module-decorators";
-import AuthModule from "@/store/modules/AuthModule";
 import Error404 from "@/ui/components/errors/Error404.vue";
 import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
 import AccountBalance from "@/modules/account/components/AccountBalance/AccountBalance.vue";
@@ -115,7 +113,7 @@ import AccountProfileEdit from "@/modules/account/components/AccountProfileEdit/
 import AccountAppLinks from "@/modules/account/components/AccountAppLinks/AccountAppLinks.vue";
 import ModalLedger from "@/ui/components/ModalLedger/ModalLedger.vue";
 import { useAccountStore } from "@/stores/AccountModule";
-const authModule = getModule(AuthModule);
+import { useAuthStore } from "@/stores/AuthModule";
 
 export default defineComponent({
   components: {
@@ -132,12 +130,13 @@ export default defineComponent({
   },
   data() {
     return {
+      authStore: useAuthStore(),
       accountStore: useAccountStore(),
       isAlertDismissed: false,
     };
   },
   async mounted() {
-    const account = authModule.account;
+    const account = this.authStore.account;
     if (account) {
       await this.accountStore.loadAccount();
     }
