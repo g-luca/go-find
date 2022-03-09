@@ -1,3 +1,4 @@
+import { DesmosClient } from '@desmoslabs/desmjs';
 import Account from '@/core/types/Account';
 import { LoadingStatus } from '@/core/types/LoadingStatus';
 import { Profile } from '@/core/types/Profile';
@@ -26,15 +27,17 @@ export const useAccountStore = defineStore({
     },
     actions: {
         /**
-         * Retrieve the account Desmos profile. If already loaded, returns the cached value if not forced
+         * Retrieve the Desmos profile account. If already loaded, returns the cached value if not forced
          * @param force force the reload of the profile data
          */
         async loadAccount(force = false): Promise<void> {
             const authStore = useAuthStore();
-            this.isNewProfile = false;
-            this.profile = false;
-            this.account = false;
-            this.profileLoadingStatus = LoadingStatus.Loading;
+
+            if (!this.isNewProfile) {
+                this.isNewProfile = false;
+                this.profile = false;
+                this.account = false;
+            }
             if (this.profile === false || force) {
                 this.profileLoadingStatus = LoadingStatus.Loading;
                 if (authStore.authLevel > AuthLevel.None && authStore.account) {
@@ -146,14 +149,22 @@ export const useAccountStore = defineStore({
             this.isNewProfile = false;
         },
 
-        setIsNewProfile(): void {
+        /**
+         * Set a profile as new
+         * @param dtag optional new dtag to set
+         */
+        setIsNewProfile(dtag: string = ''): void {
             this.isNewProfile = true;
+            if (this.profile && dtag) {
+                this.profile.dtag = dtag;
+            }
         },
 
         /**
          * Reset the AccountModule state
          */
         reset(): void {
+            console.log('reset')
             this.profile = false;
             this.account = false;
             this.profileLoadingStatus = LoadingStatus.Loading;

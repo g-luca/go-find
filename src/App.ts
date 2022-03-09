@@ -1,8 +1,8 @@
 import { useAuthStore } from './stores/AuthModule';
-import { useAccountStore } from './stores/AccountModule';
 import { useThemeStore } from './stores/ThemeModule';
 import { defineComponent } from "vue";
 import loadFormValidators from "./utils/FormValidators";
+import { useWalletStore } from './stores/WalletModule';
 
 export default defineComponent({
     components: {},
@@ -11,9 +11,9 @@ export default defineComponent({
     },
     async created() {
         // init operations
-        useAuthStore().authenticate(); // check auth status
-        useAccountStore().loadAccount(); // if logged will load the account profile
-        useThemeStore().loadThemeConfiguration();
+        useAuthStore().authenticate(); // check the authentication status by recovering auth data from the local storage
+        useWalletStore().retrievCurrentWallet(); // try to reconnect to the current account wallet signer (Keplr/WalletConnect/etc) if still available
+        useThemeStore().loadThemeConfiguration(); // load theme UI configuration
         loadFormValidators(); // load the vee-validate Form validators
     },
 });

@@ -5,8 +5,9 @@ import { Window as KeplrWindow } from "@keplr-wallet/types";
 import AuthAccount from '@/core/types/AuthAccount';
 import router from '@/router';
 import { useDesmosNetworkStore } from './DesmosNetworkModule';
-import { ProfileQuery } from '@/gql/ProfileQuery';
-import { useLazyQuery } from '@vue/apollo-composable';
+import { KeplrSigner } from '@/core/signer/KeplrSigner';
+import { SigningMode } from '@desmoslabs/desmjs';
+import { SupportedSigner, useWalletStore } from './WalletModule';
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -21,90 +22,32 @@ export const useKeplrStore = defineStore({
         isWaitingAuthentication: false,
         address: "",
         hasProfile: false,
+
     }),
     getters: {
     },
     actions: {
 
-
-        /**
-         * Inizialize Keplr global listeners
-         */
-        async init(): Promise<void> {
-            const authStore = useAuthStore();
-            if (window.keplr && (authStore.account?.isUsingKeplr || router.currentRoute.value.path === '/login/keplr')) {
-                // listen account changes if the user is currently logged with a Keplr account or in the Keplr auth page
-                window.addEventListener("keplr_keystorechange", () => {
-                    authStore.logout();
-                    router.push('/')
-                });
-
-                // suggest fresh new configuration
-                if (authStore.account?.isUsingKeplr) {
-                    if (import.meta.env.VITE_APP_IS_TESTNET === "true") {
-                        await this.setupDesmosTestnet();
-                    } else {
-                        await this.setupDesmosMainnet();
-                    }
-                }
-
-                (window.keplr as any).defaultOptions = {
-                    sign: {
-                        preferNoSetFee: true,
-                        preferNoSetMemo: true,
-                    }
-                }
-            }
-        },
-
-
         /**
          * Initialize Keplr Authentication process
+         * Get the Keplr Signer from the window, and connect it to the wallet
          */
-        async auth(): Promise<void> {
-            const authStore = useAuthStore();
-            if (window.keplr) {
-                this.isInstalled = true;
-                this.isWaitingAuthentication = true;
-                if (import.meta.env.VITE_APP_IS_TESTNET === "true") {
-                    await this.setupDesmosTestnet();
-                } else {
-                    await this.setupDesmosMainnet();
-                }
-                const desmosNetworkStore = useDesmosNetworkStore();
-                const keplrAccount = await window.keplr.getKey(desmosNetworkStore.chainId)
-                if ((await window.keplr.getKey(desmosNetworkStore.chainId) as any).isNanoLedger) {
-                    alert('Keplr does not support Desmos when used with a Ledger. You can either use your mnemonic, or if you want to use the Ledger use Forbole X instead (https://x.forbole.com/)');
-                    this.isWaitingAuthentication = false;
-                    this.hasProfile = false;
-                    router.push('/')
-                    return;
-                }
-                this.address = keplrAccount.bech32Address;
-
-                const getProfileQuery = useLazyQuery(
-                    ProfileQuery, {
-                    dtag: "",
-                    address: this.address
-                });
-                getProfileQuery.onResult((result: any) => {
-                    if (result.loading === false) {
-                        if (result.data && result.data.profile[0] && result.data.profile[0].dtag) {
-                            const dtag = result.data.profile[0].dtag;
-                            this.hasProfile = true;
-                            authStore.saveAuthAccount({ account: new AuthAccount(dtag, this.address, true) });
-                            authStore.authenticate();
-                            router.push('/me')
-                        } else {
-                            this.hasProfile = false;
-                        }
-                        this.isWaitingAuthentication = false;
-                    }
-                })
-                getProfileQuery.load();
-            } else {
-                this.isInstalled = false;
+        async connect(): Promise<void> {
+            if (!window.keplr) {
+                return;
             }
+            this.isInstalled = true;
+
+            // Create the Keplr Signer with the currrent configuration
+            const keplrSigner = new KeplrSigner(window.keplr!, {
+                signingMode: SigningMode.AMINO,
+                preferNoSetFee: true,
+                preferNoSetMemo: true,
+                chainId: useDesmosNetworkStore().chainId,
+            });
+
+            const walletStore = useWalletStore();
+            walletStore.connect(keplrSigner, SupportedSigner.KEPLR);
         },
 
         /**

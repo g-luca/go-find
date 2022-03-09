@@ -104,8 +104,6 @@ import { defineComponent } from "vue";
 import ToggleTheme from "@/ui/components/ToggleTheme/ToggleTheme.vue";
 import SearchUser from "../SearchUser/SearchUser.vue";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
-import router from "@/router";
-import { useWalletConnectStore } from "@/stores/WalletConnectModule";
 import { useAccountStore } from "@/stores/AccountModule";
 import { useAuthStore } from "@/stores/AuthModule";
 
@@ -124,17 +122,12 @@ export default defineComponent({
     return {
       authStore: useAuthStore(),
       accountStore: useAccountStore(),
-      walletConnectStore: useWalletConnectStore(),
       isTestnet,
     };
   },
   methods: {
     logout() {
-      if (this.authStore.account?.isUsingWalletConnect) {
-        this.walletConnectStore.logout();
-      }
       this.authStore.logout();
-      router.push("/");
     },
   },
 });

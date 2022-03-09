@@ -208,7 +208,7 @@ export default defineComponent({
           messages: [
             {
               typeUrl: "/cosmos.bank.v1beta1.MsgSend",
-              value: CosmosMsgSend.encode(msgSend).finish(),
+              value: msgSend as any,
             },
           ],
           extensionOptions: [],

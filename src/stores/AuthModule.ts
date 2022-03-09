@@ -1,3 +1,5 @@
+import { StdSignDoc, StdFee } from '@cosmjs/amino';
+import { useWalletConnectStore } from '@/stores/WalletConnectModule';
 import { DefaultSigner } from './../core/signer/DefaultSigner';
 import { WalletConnectSigner } from './../core/signer/WalletConnectSigner';
 import { KeplrSigner } from './../core/signer/KeplrSigner';
@@ -7,6 +9,7 @@ import { CosmosTxBody, Transaction } from 'desmosjs';
 import { defineStore } from 'pinia'
 import { registerModuleHMR } from '.';
 import { useAccountStore } from './AccountModule';
+import { useWalletStore } from './WalletModule';
 
 export enum AuthLevel {
     None,
@@ -44,20 +47,16 @@ export const useAuthStore = defineStore({
             mPassword = null;
             this.authLevel = AuthLevel.None;
             useAccountStore().reset();
+            useWalletStore().disconnect(); // disconnect wallet client & signer
         },
         /**
          * Authenticate the user
          */
         authenticate(): void {
+            // retrieve the account from localStorage
             if (localStorage.getItem('account')) {
                 this.authLevel = AuthLevel.AuthAccount;
                 this.account = getAccount();
-
-                // enforce auth check to avoid blank dtags
-                if (this.account?.dtag === '') {
-                    cleanAuthStorage();
-                    this.authLevel = AuthLevel.None;
-                }
 
                 // check if there is a mPassword stored in memory for Wallet authentication
                 if (mPassword) {
@@ -68,6 +67,23 @@ export const useAuthStore = defineStore({
                 }
             } else {
                 cleanAuthStorage();
+            }
+        },
+        /**
+         * Set new AuthAccount Dtag
+         * @param payload 
+         */
+        setDtag(dtag: string) {
+            const accountStore = useAccountStore();
+            // ensure that the signer account exists
+            if (this.account && accountStore.profile) {
+                // update the AuthAccount with the new chosen dtag
+                this.account = new AuthAccount(dtag, this.account.address, this.account.isUsingKeplr, this.account.isUsingWalletConnect);
+                // update the AuthAccount in the localStorage
+                this.saveAuthAccount({ account: this.account as AuthAccount });
+                // set as new profile
+                accountStore.setIsNewProfile(dtag);
+                console.log('c')
             }
         },
         /**
@@ -122,10 +138,18 @@ export const useAuthStore = defineStore({
          * @returns 
          */
         async signTx(tx: CosmosTxBody, adddress: string, mPasswordClear = "", isUsingKeplr = false, isUsingWalletConnect = false): Promise<Transaction | false> {
+            const walletStore = useWalletStore();
             if (mPasswordClear) {
                 return await DefaultSigner.signTxWithPassword(tx, adddress, mPasswordClear);
             } else if (isUsingKeplr) {
-                return await KeplrSigner.signTxWithKeplr(tx, adddress);
+                const defaultFee: StdFee = {
+                    amount: [{
+                        amount: this.DEFAULT_FEE_AMOUNT,
+                        denom: import.meta.env.VITE_APP_COIN_FEE_DENOM,
+                    }],
+                    gas: this.DEFAULT_GAS_LIMIT.toString(),
+                }
+                return (await walletStore.wallet.client).signAndBroadcast(adddress, tx.messages, defaultFee, tx.memo);
             } else if (isUsingWalletConnect) {
                 return await WalletConnectSigner.signWithWalletConenct(tx, adddress);
             }

@@ -15,11 +15,7 @@ export class Profile {
     private _applicationLinks: ApplicationLink[] = [];
     private _chainLinks: ChainLink[] = []
 
-    private _postLinks: PostLink[] = [
-        new PostLink(0, 'Link 1', 'addasdad'),
-        new PostLink(0, 'Link 2', 'addasdad'),
-        new PostLink(0, 'Link 3', 'addasdad'),
-    ]
+    private _postLinks: PostLink[] = []
 
 
     static DTAG_REGEX = /^[A-Za-z0-9_]{6,30}$/;

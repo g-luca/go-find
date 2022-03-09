@@ -8,7 +8,6 @@
             <img
               class="max-h-28 w-auto"
               src="@/assets/brands/go-find/logo.svg"
-              alt="Workflow"
             >
           </div>
 
@@ -17,7 +16,6 @@
               <img
                 class="max-h-16"
                 src="@/assets/brands/keplr/logo.svg"
-                alt=""
               >
               <span class="pl-3 text-5xl xl:text-7xl font-extrabold text-gray-900 dark:text-white">
                 Keplr
@@ -43,102 +41,8 @@
             <!-- Keplr installed & unlocked -->
             <span v-if="keplrStore.isInstalled&&!keplrStore.isWaitingAuthentication&&!keplrStore.hasProfile">
               <div class="text-center">
-                <!-- Dtag -->
-                <div>
-                  <label
-                    class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
-                    for="dtag"
-                  > <span v-if="!registerStore.hasDesmosProfile">
-                      Choose your
-                    </span>
-                    <span v-else>
-                      Your Desmos
-                    </span>
-                    <span class="text-brand">dtag</span>
-                  </label>
-
-                  <Form
-                    v-slot="{ errors, meta }"
-                    :validation-schema="formSchema"
-                  >
-                    <div class="mt-1 relative rounded-md shadow-sm">
-                      <Field
-                        id="dtag"
-                        v-model="inputDtag"
-                        :class="{'border-red-700 dark:border-red-700': meta.dirty && (errors.dtag || !isDtagAvailable),
-                       'focus:border-brand dark:border-gray-700 ': !errors.dtag}"
-                        type="text"
-                        name="dtag"
-                        class="text-xl md:text-2xl rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
-                        placeholder="Dtag"
-                        @input="validateDtag()"
-                      />
-                      <div
-                        v-if="isValidDtag"
-                        class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none z-10"
-                      >
-                        <div v-if="isVerifyingDtagAvailability">
-                          <svg
-                            class="animate-spin -ml-1 mr-3 h-5 w-5 text-brand"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              class="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              stroke-width="4"
-                            />
-                            <path
-                              class="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            />
-                          </svg>
-                        </div>
-                        <div v-if="isDtagAvailable&&!isVerifyingDtagAvailability">
-                          <i class="bi bi-check-circle text-green-700" />
-                        </div>
-                        <div v-else-if="!isVerifyingDtagAvailability">
-                          <!-- Dtag already taken-->
-                          <i class="bi bi-x-circle text-red-700" />
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      v-if="errors.dtag"
-                      class="text-red-700 text-sm px-2 pt-2 font-light"
-                    >
-                      <p>Dtags must be 6-30 characters, can contains numbers and underscores.</p>
-                    </div>
-                    <div
-                      v-if="isValidDtag&&!isDtagAvailable&&!isVerifyingDtagAvailability"
-                      class="text-red-700 text-sm px-2 pt-2 font-light"
-                    >
-                      <p>This dtag is already taken.</p>
-                    </div>
-                  </Form>
-
-                  <div
-                    v-if="!isVerifyingDtagAvailability&&isValidDtag&&isDtagAvailable"
-                    class="pt-4"
-                  >
-                    <button
-                      type="button"
-                      class="relative block w-full justify-center py-2 px-4 border border-transparent text-md rounded-md font-extrabold
-               text-white bg-brand opacity-90 hover:opacity-100 focus:outline-none focus:ring-2 dark:ring-offset-denim-900 focus:ring-offset-2 focus:ring-brand"
-                      @click="setDtag()"
-                    >
-                      Continue
-                      <span class="absolute right-0 inset-y-0 flex items-center pr-3">
-                        <i class="bi bi-arrow-right" />
-                      </span>
-                    </button>
-                  </div>
-                </div>
+                <!-- TODO: improve Loading UX -->
+                <p class="text-xl text-yellow-500">Loading...</p>
               </div>
             </span>
           </div>
@@ -182,7 +86,7 @@ export default defineComponent({
     };
   },
   mounted() {
-    this.keplrStore.auth();
+    this.keplrStore.connect();
   },
   methods: {
     validateDtag() {

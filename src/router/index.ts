@@ -86,7 +86,6 @@ router.beforeEach((to, from, next) => {
 
   // check authentication
   authStore.authenticate();
-  useKeplrStore().init();
 
   if (requiresAuth && authStore.authLevel === AuthLevel.None) {
     next('/login');

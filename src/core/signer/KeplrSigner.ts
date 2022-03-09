@@ -1,86 +1,160 @@
-import { useAuthStore } from '@/stores/AuthModule';
-import { useDesmosNetworkStore } from "@/stores/DesmosNetworkModule";
-import { CosmosAuthInfo, CosmosFee, CosmosPubKey, CosmosSignerInfo, CosmosSignMode, CosmosTxBody, CosmosTxRaw, Transaction } from 'desmosjs';
-import Long from 'long';
+import { AccountData, DirectSignResponse } from "@cosmjs/proto-signing";
+import { Keplr } from "@keplr-wallet/types"
+import { SignDoc } from "cosmjs-types/cosmos/tx/v1beta1/tx";
+import { AminoSignResponse, StdSignDoc, Algo } from "@cosmjs/amino";
+import { assert } from "@cosmjs/utils";
+import { Signer, SignerStatus, SigningMode } from "@desmoslabs/desmjs";
 
 
-export class KeplrSigner {
-    /**
-     * Sign a Tx object with Keplr
-     * @param tx Transaction body object to sign
-     * @param address address of the signer
-     * @returns A signed Traansaction object or the string error
-     */
-    public static async signTxWithKeplr(txBody: CosmosTxBody, address: string): Promise<Transaction | false> {
-        const authStore = useAuthStore();
-        const desmosNetworkStore = useDesmosNetworkStore();
-        let account = null;
-        if (!authStore.granterAddress) {
-            account = await desmosNetworkStore.network.getAccount(address);
+export interface KeplrSignerOptions {
+    signingMode: SigningMode;
+    preferNoSetFee: boolean;
+    preferNoSetMemo: boolean;
+    chainId: string;
+}
+
+/**
+ * Signer that use Keplr to sign a transaction.
+ */
+export class KeplrSigner extends Signer {
+    public readonly chainId: string = 'desmos-mainnet';
+    public readonly signingMode: SigningMode = SigningMode.AMINO;
+    public readonly preferNoSetFee: boolean = false;
+    public readonly preferNoSetMemo: boolean = false;
+
+    private readonly client: Keplr;
+
+    private accountData: AccountData | undefined;
+
+    constructor(
+        keplrClient: Keplr,
+        options: KeplrSignerOptions
+    ) {
+        super(SignerStatus.NotConnected);
+        this.signingMode = options.signingMode;
+        this.preferNoSetFee = options.preferNoSetFee;
+        this.preferNoSetMemo = options.preferNoSetMemo;
+        this.chainId = options.chainId;
+        this.client = keplrClient;
+
+        // If the client is already connected, populate the data
+        if (this.client) {
+            this.updateStatus(SignerStatus.Connected);
+            this.subscribeToEvents();
         }
-        const pubKey = await window.keplr?.getKey(desmosNetworkStore.chainId);
-        if ((account || account === null && authStore.granterAddress) && pubKey) {
-            try {
-
-                // avoid keplr custom values
-                (window.keplr as any).defaultOptions = {
-                    sign: {
-                        preferNoSetFee: true,
-                        preferNoSetMemo: true,
-                    }
-                };
-                // Get Keplr signer
-                const signer = window.keplr?.getOfflineSigner(desmosNetworkStore.chainId);
-                const signerInfo: CosmosSignerInfo = {
-                    publicKey: {
-                        typeUrl: "/cosmos.crypto.secp256k1.PubKey",
-                        value: CosmosPubKey.encode({
-                            key: pubKey.pubKey,
-                        }).finish(),
-                    },
-                    modeInfo: { single: { mode: CosmosSignMode.SIGN_MODE_DIRECT } },
-                    sequence: account?.sequence || 0
-                };
-                const feeValue: CosmosFee = {
-                    amount: [{ denom: `${import.meta.env.VITE_APP_COIN_FEE_DENOM}`, amount: authStore.DEFAULT_FEE_AMOUNT }],
-                    gasLimit: authStore.DEFAULT_GAS_LIMIT,
-                    payer: '',
-                    granter: authStore.granterAddress
-                };
-
-                const authInfo: CosmosAuthInfo = { signerInfos: [signerInfo], fee: feeValue };
-
-
-                const bodyBytes = CosmosTxBody.encode(txBody).finish();
-                const authInfoBytes = CosmosAuthInfo.encode(authInfo).finish();
-                const accountNumber = account?.accountNumber || 0;
-                console.log(accountNumber)
-                const signedTx = await signer?.signDirect(address, {
-                    accountNumber: Long.fromNumber(accountNumber),
-                    authInfoBytes: authInfoBytes,
-                    bodyBytes: bodyBytes,
-                    chainId: desmosNetworkStore.chainId,
-                });
-
-
-
-                if (signedTx) {
-                    const broadcastTx: CosmosTxRaw = {
-                        bodyBytes: signedTx.signed.bodyBytes,
-                        authInfoBytes: signedTx.signed.authInfoBytes,
-                        signatures: [Buffer.from(signedTx.signature.signature, 'base64')],
-                    };
-                    const broadcastBytes = CosmosTxRaw.encode(broadcastTx).finish();
-                    return broadcastBytes;
-                }
-
-                return false;
-            } catch (e) {
-                console.log(e);
-                //return new Error("Error signing the transaction");
-            }
-        }
-        return false;
     }
 
+
+    /**
+     * Callback called when a client terminates a wallet connect session.
+     */
+    private async onDisconnect() {
+        await this.disconnect();
+    }
+
+
+    /**
+     * Subscribes to all the WalletConnect events.
+     * @private
+     */
+    private subscribeToEvents() {
+        // Subscribe to the Keplr Storage events
+        window.addEventListener("keplr_keystorechange", () => {
+            console.log("keplr_keystorechange")
+
+            // disconnect from the current wallet
+            this.onDisconnect();
+
+            // connect to the new wallet
+            this.connect();
+        });
+    }
+
+    /**
+     * Implements Signer.
+     */
+    async connect(): Promise<void> {
+        const account = await this.client.getKey(this.chainId);
+        this.accountData = {
+            address: account.bech32Address,
+            algo: account.algo as Algo,
+            pubkey: account.pubKey,
+        };
+
+        //TODO: necessary with Keplr?
+        if (this.status !== SignerStatus.NotConnected) {
+            return;
+        }
+
+        this.subscribeToEvents();
+
+        this.updateStatus(SignerStatus.Connecting);
+
+        // Connect Keplr client to the current chainId
+        await this.client.enable(this.chainId);
+
+        this.updateStatus(SignerStatus.Connected);
+    }
+
+    /**
+     * Implements Signer.
+     */
+    async disconnect(): Promise<void> {
+        if (this.status !== SignerStatus.Connected) {
+            return;
+        }
+
+        this.updateStatus(SignerStatus.Disconnecting);
+        this.accountData = undefined;
+        this.updateStatus(SignerStatus.NotConnected);
+    }
+
+    /**
+     * Implements Signer.
+     */
+    async getCurrentAccount(): Promise<AccountData | undefined> {
+        return this.accountData;
+    }
+
+    /**
+     * Implements Signer.
+     *
+     */
+    async getAccounts(): Promise<readonly AccountData[]> {
+        this.assertConnected();
+        const result = await this.client!.getKey(this.chainId);
+
+        return [{
+            address: result.bech32Address,
+            algo: result.algo as Algo,
+            pubkey: result.pubKey,
+        }];
+    }
+
+    /**
+     * Implements OfflineDirectSigner.
+     */
+    async signDirect(
+        signerAddress: string,
+        signDoc: SignDoc
+    ): Promise<DirectSignResponse> {
+        this.assertConnected();
+        assert(this.accountData);
+
+        const result = await this.client!.signDirect(this.chainId, signerAddress, signDoc);
+
+        return result
+    }
+
+    /**
+     * Implements OfflineDirectSigner.
+     */
+    async signAmino(
+        signerAddress: string,
+        signDoc: StdSignDoc
+    ): Promise<AminoSignResponse> {
+        this.assertConnected();
+        assert(this.accountData);
+        return await this.client!.signAmino(this.chainId, signerAddress, signDoc);
+    }
 }
