@@ -415,7 +415,7 @@ export default defineComponent({
           messages: [
             {
               typeUrl: "/cosmos.gov.v1beta1.MsgVote",
-              value: CosmosMsgVote.encode(msgVote).finish(),
+              value: msgVote as any,
             },
           ],
           extensionOptions: [],

@@ -475,11 +475,11 @@ export default defineComponent({
           creator: this.accountStore.profile.address,
         };
         const txBody: CosmosTxBody = {
-          memo: "Profile update",
+          memo: "Profile update | Go-find",
           messages: [
             {
               typeUrl: "/desmos.profiles.v1beta1.MsgSaveProfile",
-              value: DesmosMsgSaveProfile.encode(msgSaveProfile).finish(),
+              value: msgSaveProfile as any,
             },
           ],
           extensionOptions: [],
@@ -618,7 +618,7 @@ export default defineComponent({
         messages: [
           {
             typeUrl: "/desmos.profiles.v1beta1.MsgDeleteProfile",
-            value: DesmosMsgDeleteProfile.encode(msgDeleteProfile).finish(),
+            value: msgDeleteProfile as any,
           },
         ],
         extensionOptions: [],

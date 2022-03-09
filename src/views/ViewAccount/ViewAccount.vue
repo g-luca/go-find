@@ -3,7 +3,10 @@
     <AppHeader />
     <div class="w-full dark:bg-denim-900 bg-gray-50">
       <span>
-        <section v-if="accountStore.profile && accountStore.profile.dtag!==''">
+        <section v-if="accountStore.profile && accountStore.profile.dtag=='' && accountStore.profileLoadingStatus>0">
+          <AccountSetupDtag></AccountSetupDtag>
+        </section>
+        <section v-else>
 
           <!-- Profile Heading -->
           <section>
@@ -65,10 +68,6 @@
           <!-- Application Links -->
           <AccountAppLinks v-if="!accountStore.isNewProfile" />
 
-        </section>
-
-        <section v-else>
-          <AccountSetupDtag></AccountSetupDtag>
         </section>
 
       </span>

@@ -118,9 +118,6 @@ export default defineComponent({
       }
       return this.isValidDtag;
     },
-    setDtag() {
-      this.keplrStore.setupProfile({ dtag: this.inputDtag });
-    },
   },
 });
 </script>

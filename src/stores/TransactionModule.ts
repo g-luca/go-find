@@ -1,8 +1,9 @@
-import { CosmosBroadcastMode, CosmosTxBody, CosmosTxResponse, Transaction } from 'desmosjs';
+import { CosmosBroadcastMode, CosmosTxBody, CosmosTxRaw, Transaction } from 'desmosjs';
 import { defineStore } from 'pinia'
 import { registerModuleHMR } from '.';
 import { useAuthStore } from './AuthModule';
-import { useDesmosNetworkStore } from './DesmosNetworkModule';
+import { useWalletStore } from './WalletModule';
+import { StdFee, StdTx } from "@cosmjs/amino";
 
 export enum TransactionStatus {
     Error = -1,
@@ -34,32 +35,22 @@ export const useTransactionStore = defineStore({
         async send(payload: { mPassword: string }): Promise<void> {
             const authStore = useAuthStore();
             // check if is not already performing a transaction
-            if (this.transactionStatus !== TransactionStatus.Loading) {
+            if (this.transactionStatus !== TransactionStatus.Loading && authStore.account) {
                 this.isOpen = true;
                 this.transactionStatus = TransactionStatus.Loading;
                 if (this.tx) {
-                    const signedTx = await handleSign(this.tx, payload.mPassword);
-                    if (signedTx) {
-                        const broadcastResult = await handleBroadcast(signedTx, this.broadcastMode);
-                        //const broadcastResult = { success: true, error: "" }; // only for development test
-                        if (broadcastResult.success) {
-                            setTimeout(() => {
-                                this.isOpen = false;
-                                this.transactionStatus = TransactionStatus.Success;
-                                this.errorMessage = "";
-                            }, 500)
-                        } else {
-                            this.transactionStatus = TransactionStatus.Error;
-                            this.errorMessage = "Ops, the chain refused the message, retry."
-                            this.detailedErrorMessage = broadcastResult.error;
-                        }
+                    const broadcastResult = await handleBroadcast(this.tx, this.broadcastMode);
+                    //const broadcastResult = { success: true, error: "" }; // only for development test
+                    if (broadcastResult.success) {
+                        setTimeout(() => {
+                            this.isOpen = false;
+                            this.transactionStatus = TransactionStatus.Success;
+                            this.errorMessage = "";
+                        }, 500)
                     } else {
-                        if (authStore.account?.isUsingKeplr) {
-                            this.errorMessage = "Transaction error";
-                        } else {
-                            this.errorMessage = "Transaction error or wrong password";
-                        }
                         this.transactionStatus = TransactionStatus.Error;
+                        this.errorMessage = "Ops, the chain refused the message, retry."
+                        this.detailedErrorMessage = broadcastResult.error;
                     }
                 } else {
                     this.errorMessage = "Ops, something went wrong"
@@ -98,41 +89,37 @@ export const useTransactionStore = defineStore({
 
 
 /**
- * Handle the sign process of the tx
- * @param tx Tx Body to sign
- * @param mPassword clear Wallet mPassword
- * @returns the signed tx if succeeded, null otherwise
- */
-async function handleSign(tx: CosmosTxBody, mPassword: string): Promise<Transaction | null> {
-    const authStore = useAuthStore();
-    if (authStore.account) {
-        const signedTx = await authStore.signTx(tx, authStore.account.address, mPassword, authStore.account.isUsingKeplr, authStore.account.isUsingWalletConnect);
-        if (signedTx) {
-            return signedTx;
-        }
-    }
-    return null;
-}
-
-
-/**
  * Handle the broadcast of a signed tx
  * @param signedTx the signed tx to broadcast
  * @returns true if succeeded, false otherwise
  */
-async function handleBroadcast(signedTx: Transaction, broadcastMode = CosmosBroadcastMode.BROADCAST_MODE_ASYNC): Promise<{ success: boolean, error: string }> {
+async function handleBroadcast(tx: CosmosTxBody, broadcastMode = CosmosBroadcastMode.BROADCAST_MODE_ASYNC): Promise<{ success: boolean, error: string }> {
+    const authStore = useAuthStore();
+    const walletStore = useWalletStore();
     try {
-        const broadcastRawResult = await useDesmosNetworkStore().network.broadcast(signedTx, broadcastMode);
-        const broadcastResult = CosmosTxResponse.fromJSON(broadcastRawResult.tx_response);
-        console.log(`tx hash: ${broadcastResult.txhash}`);
-        if (broadcastResult.txhash && broadcastResult.code === 0) {
-            return { success: true, error: "" };
-        } else {
-            return { success: false, error: broadcastRawResult.tx_response?.raw_log || "" };
+        if (authStore.account) {
+
+            const defaultFee: StdFee = {
+                amount: [{
+                    amount: authStore.DEFAULT_FEE_AMOUNT,
+                    denom: import.meta.env.VITE_APP_COIN_FEE_DENOM,
+                }],
+                gas: authStore.DEFAULT_GAS_LIMIT.toString(),
+            }
+            // sign the tx
+            const broadcastResult = await (await walletStore.wallet.client).signAndBroadcast(authStore.account.address, tx?.messages, defaultFee, tx?.memo);
+            console.log(`tx hash: ${broadcastResult.transactionHash}`);
+            if (broadcastResult.transactionHash && broadcastResult.code === 0) {
+                return { success: true, error: "" };
+            } else {
+                return { success: false, error: broadcastResult.rawLog || "" };
+            }
         }
-    } catch (e: any) {
-        return { success: false, error: e.message || "" };
+
+    } catch (e) {
+        return { success: false, error: "Operation aborted or transaction error" };
     }
+    return { success: false, error: "Transaction Error" };
 }
 
 

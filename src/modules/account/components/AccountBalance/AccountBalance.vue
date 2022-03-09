@@ -5,7 +5,7 @@
         <img
           src="@/assets/brands/desmos/logo.svg"
           alt="desmos logo"
-          class="h-24 w-24 absolute opacity-50 -right-1 pointer-events-none"
+          class="h-24 w-24 absolute opacity-50 -right-0 pointer-events-none"
         >
         <div class="px-4 pt-5 pb-2 sm:pt-6">
           <dl>

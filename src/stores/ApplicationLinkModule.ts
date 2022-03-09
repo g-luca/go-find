@@ -46,7 +46,7 @@ export const useApplicationLinkStore = defineStore({
                     messages: [
                         {
                             typeUrl: "/desmos.profiles.v1beta1.MsgLinkApplication",
-                            value: DesmosMsgLinkApplication.encode(msgLinkApplication).finish(),
+                            value: msgLinkApplication as any,
                         }
                     ],
                     extensionOptions: [],

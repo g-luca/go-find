@@ -612,7 +612,7 @@ export default defineComponent({
           messages: [
             {
               typeUrl: "/desmos.profiles.v1beta1.MsgUnlinkApplication",
-              value: DesmosMsgUnlinkApplication.encode(msgUnlink).finish(),
+              value: msgUnlink as any,
             },
           ],
           extensionOptions: [],

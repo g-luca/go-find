@@ -1,8 +1,6 @@
-import { useAuthStore } from './AuthModule';
 import { defineStore } from 'pinia'
 import { registerModuleHMR } from '.';
 import { Window as KeplrWindow } from "@keplr-wallet/types";
-import AuthAccount from '@/core/types/AuthAccount';
 import router from '@/router';
 import { useDesmosNetworkStore } from './DesmosNetworkModule';
 import { KeplrSigner } from '@/core/signer/KeplrSigner';
@@ -22,7 +20,6 @@ export const useKeplrStore = defineStore({
         isWaitingAuthentication: false,
         address: "",
         hasProfile: false,
-
     }),
     getters: {
     },
@@ -46,121 +43,16 @@ export const useKeplrStore = defineStore({
                 chainId: useDesmosNetworkStore().chainId,
             });
 
+            // If Keplr + Ledger, sign out the user
+            const isLedgerKeplrUser = await (await window.keplr.getKey(useDesmosNetworkStore().chainId)).isNanoLedger;
+            if (isLedgerKeplrUser) {
+                alert('Keplr does not support Desmos when used with a Ledger. You can either use your mnemonic, or if you want to use the Ledger use Forbole X instead (https://x.forbole.com/)')
+                router.push('/login')
+                return;
+            }
+
             const walletStore = useWalletStore();
-            walletStore.connect(keplrSigner, SupportedSigner.KEPLR);
-        },
-
-        /**
-         * Set the choosen dtag for the Keplr Account
-         */
-        async setupProfile(payload: { dtag: string }): Promise<void> {
-            const authStore = useAuthStore();
-            authStore.saveAuthAccount({ account: new AuthAccount(payload.dtag, this.address, true) });
-            authStore.authenticate();
-            router.push('/me')
-        },
-
-
-
-        async setupDesmosMainnet(): Promise<void> {
-            if (await window.keplr) {
-                await window.keplr!.experimentalSuggestChain({
-                    chainId: useDesmosNetworkStore().chainId,
-                    chainName: "Desmos",
-                    rpc: `${import.meta.env.VITE_APP_RPC_ENDPOINT}`,
-                    rest: `${import.meta.env.VITE_APP_LCD_ENDPOINT}`,
-                    bip44: {
-                        coinType: 852,
-                    },
-                    bech32Config: {
-                        bech32PrefixAccAddr: "desmos",
-                        bech32PrefixAccPub: "desmos" + "pub",
-                        bech32PrefixValAddr: "desmos" + "valoper",
-                        bech32PrefixValPub: "desmos" + "valoperpub",
-                        bech32PrefixConsAddr: "desmos" + "valcons",
-                        bech32PrefixConsPub: "desmos" + "valconspub",
-                    },
-                    currencies: [
-                        {
-                            coinDenom: "DSM",
-                            coinMinimalDenom: "udsm",
-                            coinDecimals: 6,
-                            coinGeckoId: "desmos",
-                        },
-                    ],
-                    feeCurrencies: [
-                        {
-                            coinDenom: "udsm",
-                            coinMinimalDenom: "udsm",
-                            coinDecimals: 6,
-                            coinGeckoId: "desmos",
-                        },
-                    ],
-                    stakeCurrency: {
-                        coinDenom: "DSM",
-                        coinMinimalDenom: "udsm",
-                        coinDecimals: 6,
-                        coinGeckoId: "desmos",
-                    },
-                    coinType: 852,
-                    gasPriceStep: {
-                        low: 0.002,
-                        average: 0.025,
-                        high: 0.03,
-                    },
-                    features: ['no-legacy-stdTx'],
-                });
-            }
-        },
-
-        async setupDesmosTestnet(): Promise<void> {
-            if (await window.keplr) {
-                await window.keplr.experimentalSuggestChain({
-                    chainId: useDesmosNetworkStore().chainId,
-                    chainName: "Desmos Testnet",
-                    rpc: `${import.meta.env.VITE_APP_RPC_ENDPOINT}`,
-                    rest: `${import.meta.env.VITE_APP_LCD_ENDPOINT}`,
-                    bip44: {
-                        coinType: 852,
-                    },
-                    bech32Config: {
-                        bech32PrefixAccAddr: "desmos",
-                        bech32PrefixAccPub: "desmos" + "pub",
-                        bech32PrefixValAddr: "desmos" + "valoper",
-                        bech32PrefixValPub: "desmos" + "valoperpub",
-                        bech32PrefixConsAddr: "desmos" + "valcons",
-                        bech32PrefixConsPub: "desmos" + "valconspub",
-                    },
-                    currencies: [
-                        {
-                            coinDenom: "DARIC",
-                            coinMinimalDenom: "udaric",
-                            coinDecimals: 6,
-                            coinGeckoId: "desmos",
-                        },
-                    ],
-                    feeCurrencies: [
-                        {
-                            coinDenom: "udaric",
-                            coinMinimalDenom: "udaric",
-                            coinDecimals: 6,
-                            coinGeckoId: "desmos",
-                        },
-                    ],
-                    stakeCurrency: {
-                        coinDenom: "DARIC",
-                        coinMinimalDenom: "udaric",
-                        coinDecimals: 6,
-                        coinGeckoId: "udaric",
-                    },
-                    coinType: 852,
-                    gasPriceStep: {
-                        low: 0.002,
-                        average: 0.025,
-                        high: 0.03,
-                    },
-                });
-            }
+            await walletStore.connect(keplrSigner, SupportedSigner.KEPLR);
         },
 
         async setupTerraMainnet(): Promise<void> {

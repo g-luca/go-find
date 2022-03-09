@@ -81,6 +81,9 @@ export class KeplrSigner extends Signer {
             pubkey: account.pubKey,
         };
 
+        // prompt the Keplr Desmos configuration
+        await this.setupDesmosMainnetNetwork();
+
         //TODO: necessary with Keplr?
         if (this.status !== SignerStatus.NotConnected) {
             return;
@@ -157,4 +160,55 @@ export class KeplrSigner extends Signer {
         assert(this.accountData);
         return await this.client!.signAmino(this.chainId, signerAddress, signDoc);
     }
+
+
+
+    private async setupDesmosMainnetNetwork(): Promise<void> {
+        await window.keplr!.experimentalSuggestChain({
+            chainId: 'desmos-mainnet',
+            chainName: "Desmos",
+            rpc: 'https://rpc.mainnet.desmos.network',
+            rest: 'https://api.mainnet.desmos.network',
+            bip44: {
+                coinType: 852,
+            },
+            bech32Config: {
+                bech32PrefixAccAddr: "desmos",
+                bech32PrefixAccPub: "desmos" + "pub",
+                bech32PrefixValAddr: "desmos" + "valoper",
+                bech32PrefixValPub: "desmos" + "valoperpub",
+                bech32PrefixConsAddr: "desmos" + "valcons",
+                bech32PrefixConsPub: "desmos" + "valconspub",
+            },
+            currencies: [
+                {
+                    coinDenom: "DSM",
+                    coinMinimalDenom: "udsm",
+                    coinDecimals: 6,
+                    coinGeckoId: "desmos",
+                },
+            ],
+            feeCurrencies: [
+                {
+                    coinDenom: "udsm",
+                    coinMinimalDenom: "udsm",
+                    coinDecimals: 6,
+                    coinGeckoId: "desmos",
+                },
+            ],
+            stakeCurrency: {
+                coinDenom: "DSM",
+                coinMinimalDenom: "udsm",
+                coinDecimals: 6,
+                coinGeckoId: "desmos",
+            },
+            coinType: 852,
+            gasPriceStep: {
+                low: 0.002,
+                average: 0.025,
+                high: 0.03,
+            },
+            features: ['no-legacy-stdTx'],
+        });
+    };
 }

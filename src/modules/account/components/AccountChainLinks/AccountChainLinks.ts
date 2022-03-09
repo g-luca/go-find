@@ -155,11 +155,11 @@ export default defineComponent({
                     target: chainLink.address,
                 }
                 const txBody: CosmosTxBody = {
-                    memo: "Chain unlink",
+                    memo: "Chain unlink | Go-find",
                     messages: [
                         {
                             typeUrl: "/desmos.profiles.v1beta1.MsgUnlinkChainAccount",
-                            value: DesmosMsgUnlinkChainAccount.encode(msgUnlink).finish(),
+                            value: msgUnlink as any,
                         }
                     ],
                     extensionOptions: [],
@@ -220,7 +220,7 @@ export default defineComponent({
                         signer: this.authStore.account?.address,
                     }
                     const txBody: CosmosTxBody = {
-                        memo: "Chain link",
+                        memo: "Chain link | Go-find",
                         messages: [
                             {
                                 typeUrl: "/desmos.profiles.v1beta1.MsgLinkChainAccount",
@@ -322,7 +322,7 @@ export default defineComponent({
                             signer: this.authStore.account?.address,
                         }
                         const txBody: CosmosTxBody = {
-                            memo: "Chain link",
+                            memo: "Chain link | Go-find",
                             messages: [
                                 {
                                     typeUrl: "/desmos.profiles.v1beta1.MsgLinkChainAccount",

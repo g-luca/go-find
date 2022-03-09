@@ -945,7 +945,7 @@ export default defineComponent({
           messages: [
             {
               typeUrl: "/cosmos.staking.v1beta1.MsgDelegate",
-              value: CosmosMsgDelegate.encode(msgDelegate).finish(),
+              value: msgDelegate as any,
             },
           ],
           extensionOptions: [],
@@ -981,7 +981,7 @@ export default defineComponent({
           messages: [
             {
               typeUrl: "/cosmos.staking.v1beta1.MsgBeginRedelegate",
-              value: CosmosMsgBeginRedelegate.encode(msgRedelegate).finish(),
+              value: msgRedelegate as any,
             },
           ],
           extensionOptions: [],
@@ -1013,7 +1013,7 @@ export default defineComponent({
           messages: [
             {
               typeUrl: "/cosmos.staking.v1beta1.MsgUndelegate",
-              value: CosmosMsgUndelegate.encode(msgUnbond).finish(),
+              value: msgUnbond as any,
             },
           ],
           extensionOptions: [],
@@ -1039,10 +1039,7 @@ export default defineComponent({
             {
               typeUrl:
                 "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
-              value:
-                CosmosMsgWithdrawDelegatorReward.encode(
-                  msgWithdrawRewards
-                ).finish(),
+              value: msgWithdrawRewards as any,
             },
           ],
           extensionOptions: [],

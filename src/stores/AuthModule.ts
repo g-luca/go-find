@@ -141,15 +141,6 @@ export const useAuthStore = defineStore({
             const walletStore = useWalletStore();
             if (mPasswordClear) {
                 return await DefaultSigner.signTxWithPassword(tx, adddress, mPasswordClear);
-            } else if (isUsingKeplr) {
-                const defaultFee: StdFee = {
-                    amount: [{
-                        amount: this.DEFAULT_FEE_AMOUNT,
-                        denom: import.meta.env.VITE_APP_COIN_FEE_DENOM,
-                    }],
-                    gas: this.DEFAULT_GAS_LIMIT.toString(),
-                }
-                return (await walletStore.wallet.client).signAndBroadcast(adddress, tx.messages, defaultFee, tx.memo);
             } else if (isUsingWalletConnect) {
                 return await WalletConnectSigner.signWithWalletConenct(tx, adddress);
             }
