@@ -151,31 +151,6 @@
                         </div>
                       </div>
                     </div>
-                    <!-- <div
-                      class="flex-initial m-1 rounded-3xl bg-gray-100 dark:bg-denim-900 dark:hover:bg-purple-800 hover:bg-purple-200 cursor-pointer"
-                      @click="selectChain(null)"
-                    >
-                      <div class="grid grid-cols-12 w-44 md:w-60 py-3">
-                        <div class="col-span-4">
-                          <i class="p-3 pointer-events-none select-none text-4xl w-auto my-auto bi bi-link text-seagreen-500" />
-                        </div>
-                        <div class="col-span-5 my-auto">
-                          <h5 class="dark:text-white text-2xl capitalize">
-                            Other
-                          </h5>
-                        </div>
-                        <div class="col-span-3 text-right my-auto pr-4">
-                          <i
-                            v-if="isCustomChain"
-                            class="bi bi-check-circle text-xl text-seagreen-500"
-                          />
-                          <i
-                            v-else
-                            class="bi bi-circle text-xl dark:text-white"
-                          />
-                        </div>
-                      </div>
-                    </div> -->
                   </div>
 
                   <div v-if="isCustomChain">
@@ -251,23 +226,6 @@
                         </div>
                       </div>
                     </div>
-                  </div>
-
-                  <div v-if="isCustomChain">
-                    <label
-                      for="chainName"
-                      class="text-gray-700 text-sm"
-                    >
-                      Chain name
-                    </label>
-                    <input
-                      id="chainName"
-                      v-model="customChainName"
-                      type="text"
-                      class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
-                      name="chainName"
-                      placeholder="Chain name"
-                    >
                   </div>
                 </div>
               </div>

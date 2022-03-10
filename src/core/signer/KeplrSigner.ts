@@ -84,7 +84,6 @@ export class KeplrSigner extends Signer {
         // prompt the Keplr Desmos configuration
         await this.setupDesmosMainnetNetwork();
 
-        //TODO: necessary with Keplr?
         if (this.status !== SignerStatus.NotConnected) {
             return;
         }
@@ -143,9 +142,7 @@ export class KeplrSigner extends Signer {
     ): Promise<DirectSignResponse> {
         this.assertConnected();
         assert(this.accountData);
-
         const result = await this.client!.signDirect(this.chainId, signerAddress, signDoc);
-
         return result
     }
 

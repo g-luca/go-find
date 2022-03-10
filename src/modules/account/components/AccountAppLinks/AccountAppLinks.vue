@@ -753,7 +753,6 @@ export default defineComponent({
                   pubKey,
                   privKey
                 );
-                //FIXME: temporary fix, this must be done by DesmosJS
                 generatedProof.value = Buffer.from(
                   this.applicationUsername
                 ).toString("hex");
