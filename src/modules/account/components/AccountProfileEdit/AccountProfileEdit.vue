@@ -324,7 +324,6 @@ import {
   CosmosBroadcastMode,
   CosmosTxBody,
   DesmosMsgDeleteProfile,
-  DesmosMsgSaveProfile,
 } from "desmosjs";
 import marked from "marked";
 import DOMPurify from "dompurify";
@@ -334,6 +333,7 @@ import {
 } from "@/stores/TransactionModule";
 import { useAccountStore } from "@/stores/AccountModule";
 import { useAuthStore } from "@/stores/AuthModule";
+import { MsgSaveProfile } from "@desmoslabs/desmjs-types/desmos/profiles/v1beta1/msgs_profile";
 
 enum UploadImageType {
   "profilePic" = "profilePic",
@@ -388,7 +388,6 @@ export default defineComponent({
       imageUploadType: UploadImageType.profilePic,
 
       isProfileOptionDropdownVisible: false,
-
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       resetForm: (_values?: unknown) => {
         return;
@@ -454,7 +453,7 @@ export default defineComponent({
     submitEdit(_data: void, { resetForm }: unknown): void {
       if (this.accountStore.profile) {
         const doNotModify = "[do-not-modify]";
-        const msgSaveProfile: DesmosMsgSaveProfile = {
+        const msgSaveProfile: MsgSaveProfile = {
           dtag: this.accountStore.profile.dtag,
           nickname:
             this.accountStore.profile.nickname !== this.inputNickname
@@ -486,11 +485,11 @@ export default defineComponent({
           nonCriticalExtensionOptions: [],
           timeoutHeight: 0,
         };
+        this.txSent = txBody;
         this.transactionStore.start({
           tx: txBody,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
         });
-        this.txSent = txBody;
 
         // Vee Validate send as parameter the reset function, i need to save it to use for the reset after an update
         // This may be fixed by Vee itself in future https://github.com/logaretm/vee-validate/issues/3292
@@ -502,7 +501,7 @@ export default defineComponent({
      * @param bio input bio
      */
     markInputBio(bio: string) {
-      this.markedInputBio = DOMPurify.sanitize(marked(bio));
+      this.markedInputBio = marked(DOMPurify.sanitize(marked(bio)));
     },
 
     /**
@@ -514,8 +513,8 @@ export default defineComponent({
         this.inputProfilePic = this.accountStore.profile.profilePic;
         this.inputProfileCover = this.accountStore.profile.profileCover;
         this.inputBio = this.accountStore.profile.bio;
-        this.markedInputBio = DOMPurify.sanitize(
-          marked(this.accountStore.profile.bio)
+        this.markedInputBio = marked(
+          DOMPurify.sanitize(marked(this.accountStore.profile.bio))
         );
         this.resetForm({
           values: {

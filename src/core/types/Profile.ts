@@ -1,7 +1,6 @@
 import PostLink from "./PostLink";
 import ApplicationLink from "./ApplicationLink";
 import ChainLink from "./ChainLink";
-import marked from "marked";
 import DOMPurify from "dompurify";
 
 export class Profile {
@@ -26,7 +25,7 @@ export class Profile {
         this._dtag = dtag;
         this._address = address;
         this._nickname = nickname;
-        this._bio = DOMPurify.sanitize(marked(bio));
+        this._bio = DOMPurify.sanitize(bio);
         this._profilePic = profilePic;
         this._profileCover = profileCover;
         this._applicationLinks = applicationLinks;
