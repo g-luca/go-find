@@ -66,7 +66,6 @@ export const useWalletStore = defineStore({
 
             // listen for signer status changes
             this.wallet.signer.addStatusListener((status: SignerStatus) => {
-                console.log('wallet signer status changed')
                 this.onWalletUpdate();
             })
 
@@ -77,14 +76,11 @@ export const useWalletStore = defineStore({
 
             switch (this.wallet.signer.status) {
                 case SignerStatus.Connected:
-                    console.log('wallet connected')
                     this.onWalletConnected();
                     break;
                 case SignerStatus.Connecting:
-                    console.log('wallet connecting')
                     break;
                 case SignerStatus.Disconnecting:
-                    console.log('wallet disconnecting')
                     break;
                 case SignerStatus.NotConnected:
                     this.onWalletNotConnected();
@@ -117,32 +113,21 @@ export const useWalletStore = defineStore({
 
             // if the account does not exists, abort
             if (!account) {
-                console.log('account does not exists');
                 return;
             }
 
             // get account desmos profile, if exists
             const profile = await (await this.wallet.client).getProfile(account.address);
-
-
             // save authentication data
-            authStore.saveAuthAccount({ account: new AuthAccount(profile?.dtag || authStore.account?.dtag || '', account.address, this.signerId === SupportedSigner.KEPLR, this.signerId === SupportedSigner.WALLETCONNECT) });
+            authStore.saveAuthAccount({ account: new AuthAccount(profile?.dtag || '', account.address, this.signerId === SupportedSigner.KEPLR, this.signerId === SupportedSigner.WALLETCONNECT) });
             authStore.authenticate();
 
-            accountStore.setNotNewProfile();
 
             await accountStore.loadAccount(true);
-            if (!accountStore.account) {
-                console.log("warn account not found on chain")
-            }
-            if (!accountStore.profile) {
-                console.log("warn profile not found on chain")
-            }
             router.push('/me');
         },
 
         async onWalletNotConnected() {
-            console.log('wallet not connected')
             this.disconnect();
         },
 
@@ -151,7 +136,6 @@ export const useWalletStore = defineStore({
          * Disconnect from the wallet
          */
         async disconnect() {
-            console.log('disconnect')
             if (this.wallet.signer.isConnected) {
                 // disconnect the signer
                 await this.wallet.signer.disconnect();

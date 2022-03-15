@@ -32,9 +32,7 @@ export const useAccountStore = defineStore({
          */
         async loadAccount(force = false): Promise<void> {
             const authStore = useAuthStore();
-
-            if (!this.isNewProfile) {
-                this.isNewProfile = false;
+            if (force) {
                 this.profile = false;
                 this.account = false;
             }
@@ -164,9 +162,9 @@ export const useAccountStore = defineStore({
          * Reset the AccountModule state
          */
         reset(): void {
-            console.log('reset')
             this.profile = false;
             this.account = false;
+            this.isNewProfile = false;
             this.profileLoadingStatus = LoadingStatus.Loading;
         },
 

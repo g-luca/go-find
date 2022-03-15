@@ -1,211 +1,201 @@
 import { AccountData, DirectSignResponse } from "@cosmjs/proto-signing";
-import { Keplr } from "@keplr-wallet/types"
+import { Keplr, Window as KeplrWindow } from "@keplr-wallet/types";
 import { SignDoc } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { AminoSignResponse, StdSignDoc, Algo } from "@cosmjs/amino";
 import { assert } from "@cosmjs/utils";
 import { Signer, SignerStatus, SigningMode } from "@desmoslabs/desmjs";
 
+declare global {
+  interface Window extends KeplrWindow { }
+}
 
 export interface KeplrSignerOptions {
-    signingMode: SigningMode;
-    preferNoSetFee: boolean;
-    preferNoSetMemo: boolean;
-    chainId: string;
+  chainId: string;
+  signingMode: SigningMode;
+  preferNoSetFee: boolean;
+  preferNoSetMemo: boolean;
 }
 
 /**
  * Signer that use Keplr to sign a transaction.
  */
 export class KeplrSigner extends Signer {
-    public readonly chainId: string = 'desmos-mainnet';
-    public readonly signingMode: SigningMode = SigningMode.AMINO;
-    public readonly preferNoSetFee: boolean = false;
-    public readonly preferNoSetMemo: boolean = false;
+  public readonly chainId: string = "desmos-mainnet";
 
-    private readonly client: Keplr;
+  public readonly signingMode: SigningMode = SigningMode.AMINO;
 
-    private accountData: AccountData | undefined;
+  public readonly preferNoSetFee: boolean = false;
 
-    constructor(
-        keplrClient: Keplr,
-        options: KeplrSignerOptions
-    ) {
-        super(SignerStatus.NotConnected);
-        this.signingMode = options.signingMode;
-        this.preferNoSetFee = options.preferNoSetFee;
-        this.preferNoSetMemo = options.preferNoSetMemo;
-        this.chainId = options.chainId;
-        this.client = keplrClient;
+  public readonly preferNoSetMemo: boolean = false;
 
-        // If the client is already connected, populate the data
-        if (this.client) {
-            this.updateStatus(SignerStatus.Connected);
-            this.subscribeToEvents();
-        }
+  private readonly client: Keplr;
+
+  private accountData: AccountData | undefined;
+
+  constructor(keplrClient: Keplr, options: KeplrSignerOptions) {
+    super(SignerStatus.NotConnected);
+    this.signingMode = options.signingMode;
+    this.preferNoSetFee = options.preferNoSetFee;
+    this.preferNoSetMemo = options.preferNoSetMemo;
+    this.chainId = options.chainId;
+    this.client = keplrClient;
+
+    if (this.client) {
+      this.updateStatus(SignerStatus.Connected);
+      this.subscribeToEvents();
     }
+  }
 
+  /**
+   * Subscribes to all the Keplr events.
+   * @private
+   */
+  private subscribeToEvents() {
+    // Subscribe to the Keplr Storage events
+    window.addEventListener("keplr_keystorechange", async () => {
+      // disconnect from the current wallet
+      await this.disconnect();
 
-    /**
-     * Callback called when a client terminates a wallet connect session.
-     */
-    private async onDisconnect() {
-        await this.disconnect();
-    }
+      // connect to the new wallet
+      await this.connect();
+    });
+  }
 
-
-    /**
-     * Subscribes to all the WalletConnect events.
-     * @private
-     */
-    private subscribeToEvents() {
-        // Subscribe to the Keplr Storage events
-        window.addEventListener("keplr_keystorechange", () => {
-            console.log("keplr_keystorechange")
-
-            // disconnect from the current wallet
-            this.onDisconnect();
-
-            // connect to the new wallet
-            this.connect();
-        });
-    }
-
-    /**
-     * Implements Signer.
-     */
-    async connect(): Promise<void> {
-        const account = await this.client.getKey(this.chainId);
-        this.accountData = {
-            address: account.bech32Address,
-            algo: account.algo as Algo,
-            pubkey: account.pubKey,
-        };
-
-        // prompt the Keplr Desmos configuration
-        await this.setupDesmosMainnetNetwork();
-
-        if (this.status !== SignerStatus.NotConnected) {
-            return;
-        }
-
-        this.subscribeToEvents();
-
-        this.updateStatus(SignerStatus.Connecting);
-
-        // Connect Keplr client to the current chainId
-        await this.client.enable(this.chainId);
-
-        this.updateStatus(SignerStatus.Connected);
-    }
-
-    /**
-     * Implements Signer.
-     */
-    async disconnect(): Promise<void> {
-        if (this.status !== SignerStatus.Connected) {
-            return;
-        }
-
-        this.updateStatus(SignerStatus.Disconnecting);
-        this.accountData = undefined;
-        this.updateStatus(SignerStatus.NotConnected);
-    }
-
-    /**
-     * Implements Signer.
-     */
-    async getCurrentAccount(): Promise<AccountData | undefined> {
-        return this.accountData;
-    }
-
-    /**
-     * Implements Signer.
-     *
-     */
-    async getAccounts(): Promise<readonly AccountData[]> {
-        this.assertConnected();
-        const result = await this.client!.getKey(this.chainId);
-
-        return [{
-            address: result.bech32Address,
-            algo: result.algo as Algo,
-            pubkey: result.pubKey,
-        }];
-    }
-
-    /**
-     * Implements OfflineDirectSigner.
-     */
-    async signDirect(
-        signerAddress: string,
-        signDoc: SignDoc
-    ): Promise<DirectSignResponse> {
-        this.assertConnected();
-        assert(this.accountData);
-        const result = await this.client!.signDirect(this.chainId, signerAddress, signDoc);
-        return result
-    }
-
-    /**
-     * Implements OfflineDirectSigner.
-     */
-    async signAmino(
-        signerAddress: string,
-        signDoc: StdSignDoc
-    ): Promise<AminoSignResponse> {
-        this.assertConnected();
-        assert(this.accountData);
-        return await this.client!.signAmino(this.chainId, signerAddress, signDoc);
-    }
-
-
-
-    private async setupDesmosMainnetNetwork(): Promise<void> {
-        await window.keplr!.experimentalSuggestChain({
-            chainId: 'desmos-mainnet',
-            chainName: "Desmos",
-            rpc: 'https://rpc.mainnet.desmos.network',
-            rest: 'https://api.mainnet.desmos.network',
-            bip44: {
-                coinType: 852,
-            },
-            bech32Config: {
-                bech32PrefixAccAddr: "desmos",
-                bech32PrefixAccPub: "desmos" + "pub",
-                bech32PrefixValAddr: "desmos" + "valoper",
-                bech32PrefixValPub: "desmos" + "valoperpub",
-                bech32PrefixConsAddr: "desmos" + "valcons",
-                bech32PrefixConsPub: "desmos" + "valconspub",
-            },
-            currencies: [
-                {
-                    coinDenom: "DSM",
-                    coinMinimalDenom: "udsm",
-                    coinDecimals: 6,
-                    coinGeckoId: "desmos",
-                },
-            ],
-            feeCurrencies: [
-                {
-                    coinDenom: "udsm",
-                    coinMinimalDenom: "udsm",
-                    coinDecimals: 6,
-                    coinGeckoId: "desmos",
-                },
-            ],
-            stakeCurrency: {
-                coinDenom: "DSM",
-                coinMinimalDenom: "udsm",
-                coinDecimals: 6,
-                coinGeckoId: "desmos",
-            },
-            coinType: 852,
-            gasPriceStep: {
-                low: 0.002,
-                average: 0.025,
-                high: 0.03,
-            },
-            features: ['no-legacy-stdTx'],
-        });
+  /**
+   * Implements Signer.
+   */
+  async connect(): Promise<void> {
+    const account = await this.client.getKey(this.chainId);
+    this.accountData = {
+      address: account.bech32Address,
+      algo: <Algo>account.algo,
+      pubkey: account.pubKey,
     };
+
+    if (this.status !== SignerStatus.NotConnected) {
+      return;
+    }
+
+    this.subscribeToEvents();
+
+    this.updateStatus(SignerStatus.Connecting);
+
+    // prompt the Keplr Desmos network configuration
+    await this.setupDesmosMainnetNetwork();
+
+    // Connect Keplr client to the current chainId
+    await this.client.enable(this.chainId);
+
+    this.updateStatus(SignerStatus.Connected);
+  }
+
+  /**
+   * Implements Signer.
+   */
+  async disconnect(): Promise<void> {
+    if (this.status !== SignerStatus.Connected) {
+      return;
+    }
+
+    this.updateStatus(SignerStatus.Disconnecting);
+    this.accountData = undefined;
+    this.updateStatus(SignerStatus.NotConnected);
+  }
+
+  /**
+   * Implements Signer.
+   */
+  async getCurrentAccount(): Promise<AccountData | undefined> {
+    return this.accountData;
+  }
+
+  /**
+   * Implements Signer.
+   *
+   */
+  async getAccounts(): Promise<readonly AccountData[]> {
+    this.assertConnected();
+    const result = await this.client!.getKey(this.chainId);
+    return [
+      {
+        address: result.bech32Address,
+        algo: <Algo>result.algo,
+        pubkey: result.pubKey,
+      },
+    ];
+  }
+
+  /**
+   * Implements OfflineDirectSigner.
+   */
+  async signDirect(
+    signerAddress: string,
+    signDoc: SignDoc
+  ): Promise<DirectSignResponse> {
+    this.assertConnected();
+    assert(this.accountData);
+    return this.client.signDirect(this.chainId, signerAddress, signDoc);
+  }
+
+  /**
+   * Implements OfflineDirectSigner.
+   */
+  async signAmino(
+    signerAddress: string,
+    signDoc: StdSignDoc
+  ): Promise<AminoSignResponse> {
+    this.assertConnected();
+    assert(this.accountData);
+    return this.client.signAmino(this.chainId, signerAddress, signDoc);
+  }
+
+  private async setupDesmosMainnetNetwork(): Promise<void> {
+    assert(window.keplr);
+    await window.keplr.experimentalSuggestChain({
+      chainId: "desmos-mainnet",
+      chainName: "Desmos",
+      rpc: "https://rpc.mainnet.desmos.network",
+      rest: "https://api.mainnet.desmos.network",
+      bip44: {
+        coinType: 852,
+      },
+      bech32Config: {
+        bech32PrefixAccAddr: "desmos",
+        bech32PrefixAccPub: "desmospub",
+        bech32PrefixValAddr: "desmosvaloper",
+        bech32PrefixValPub: "desmosvaloperpub",
+        bech32PrefixConsAddr: "desmosvalcons",
+        bech32PrefixConsPub: "desmosvalconspub",
+      },
+      currencies: [
+        {
+          coinDenom: "DSM",
+          coinMinimalDenom: "udsm",
+          coinDecimals: 6,
+          coinGeckoId: "desmos",
+        },
+      ],
+      feeCurrencies: [
+        {
+          coinDenom: "udsm",
+          coinMinimalDenom: "udsm",
+          coinDecimals: 6,
+          coinGeckoId: "desmos",
+        },
+      ],
+      stakeCurrency: {
+        coinDenom: "DSM",
+        coinMinimalDenom: "udsm",
+        coinDecimals: 6,
+        coinGeckoId: "desmos",
+      },
+      coinType: 852,
+      gasPriceStep: {
+        low: 0.002,
+        average: 0.035,
+        high: 0.05,
+      },
+      features: ["no-legacy-stdTx"],
+    });
+  }
 }

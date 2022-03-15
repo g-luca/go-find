@@ -1,8 +1,5 @@
-import { StdSignDoc, StdFee } from '@cosmjs/amino';
-import { useWalletConnectStore } from '@/stores/WalletConnectModule';
 import { DefaultSigner } from './../core/signer/DefaultSigner';
 import { WalletConnectSigner } from './../core/signer/WalletConnectSigner';
-import { KeplrSigner } from './../core/signer/KeplrSigner';
 import AuthAccount from '@/core/types/AuthAccount';
 import CryptoUtils from '@/utils/CryptoUtils';
 import { CosmosTxBody, Transaction } from 'desmosjs';
@@ -71,7 +68,7 @@ export const useAuthStore = defineStore({
         },
         /**
          * Set new AuthAccount Dtag
-         * @param payload 
+         * @param dtag new user dtag
          */
         setDtag(dtag: string) {
             const accountStore = useAccountStore();
@@ -83,7 +80,6 @@ export const useAuthStore = defineStore({
                 this.saveAuthAccount({ account: this.account as AuthAccount });
                 // set as new profile
                 accountStore.setIsNewProfile(dtag);
-                console.log('c')
             }
         },
         /**
@@ -189,13 +185,12 @@ function getMKeyPosition(mPassword: string): number {
 
 
 /**
- * Clean Authentication Local Storage
+ * Cleans Authentication Local Storage
  */
-function cleanAuthStorage() {
+function cleanAuthStorage(): void {
     localStorage.removeItem("mKey");
     localStorage.removeItem("account");
 }
-
 
 
 
