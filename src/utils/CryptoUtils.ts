@@ -1,5 +1,6 @@
-import Crypto from "crypto"
 import Long from 'long';
+import { Buffer } from "buffer";
+import { SHA256, AES, enc, mode, format, lib } from "crypto-js"
 
 export default class CryptoUtils {
 
@@ -10,22 +11,27 @@ export default class CryptoUtils {
      * @returns Base64 hash result
      */
     public static sha256(string: string): string {
-        return Crypto.createHash('sha256').update(string).digest('hex');
+        return SHA256(string).toString(enc.Hex)
     }
 
 
     /**
-     * Hash a string with SHA256
+     * Hash a buffer with SHA256
      * @param string message or string to hash
      * @returns Base64 hash result
      */
     public static sha256Buffer(buffer: Buffer): Buffer {
-        return Crypto.createHash('sha256').update(buffer).digest();
+        return Buffer.from(SHA256(Buffer.from(buffer).toString('hex')).toString(enc.Hex), 'hex');
     }
 
 
+    /**
+     * Generate a random string of the specified length
+     * @param n string length
+     * @returns random fixed length string
+     */
     public static randomString(n: number): string {
-        return Crypto.randomBytes(n).toString('hex');
+        return [...Array(length + 10)].map((value) => (Math.random() * 1000000).toString(36).replace('.', '')).join('').substring(0, n);
     }
 
 
@@ -36,11 +42,13 @@ export default class CryptoUtils {
      * @returns encrypted hex string
      */
     public static encryptAes(password: string, text: string): string {
-        const key = password.slice(0, 32);
-        const iv = password.slice(32, 48);
-        const cipher = Crypto.createCipheriv('aes-256-cbc', Buffer.from(key), Buffer.from(iv));
-        const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
-        return encrypted.toString('hex');
+        const key = enc.Utf8.parse(password.slice(0, 32));
+        const iv = enc.Utf8.parse(password.slice(32, 48));
+        const encrypted = AES.encrypt(text, key, {
+            iv: iv,
+            mode: mode.CBC,
+        });
+        return encrypted.toString(format.Hex);
     }
 
 
@@ -51,15 +59,17 @@ export default class CryptoUtils {
      * @returns utf-8 decrypted string
      */
     public static decryptAes(password: string, encrypted: string): string {
-        const key = password.slice(0, 32);
-        const iv = password.slice(32, 48);
-        const decipher = Crypto.createDecipheriv('aes-256-cbc', key, iv);
-        const decrypted = decipher.update(encrypted, 'hex', 'utf8') + decipher.final('utf8');
-        return decrypted;
+        const key = enc.Utf8.parse(password.slice(0, 32));
+        const iv = enc.Utf8.parse(password.slice(32, 48));
+        const decrypted = AES.decrypt(lib.CipherParams.create({
+            ciphertext: enc.Hex.parse(encrypted),
+            formatter: format.Hex
+        }), key, {
+            iv: iv,
+            mode: mode.CBC,
+        })
+        return decrypted.toString(enc.Hex);
     }
-
-
-
 
 
     //https://github.com/cosmos/cosmjs/blob/79396bfaa49831127ccbbbfdbb1185df14230c63/packages/amino/src/signdoc.ts
@@ -129,6 +139,3 @@ export default class CryptoUtils {
     }
 
 }
-
-
-//window['CryptoUtils'] = CryptoUtils;
