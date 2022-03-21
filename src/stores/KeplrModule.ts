@@ -1,3 +1,4 @@
+import { useAuthStore } from './AuthModule';
 import { defineStore } from 'pinia'
 import { registerModuleHMR } from '.';
 import { Window as KeplrWindow } from "@keplr-wallet/types";
@@ -47,6 +48,7 @@ export const useKeplrStore = defineStore({
             const isLedgerKeplrUser = await (await window.keplr.getKey(useDesmosNetworkStore().chainId)).isNanoLedger;
             if (isLedgerKeplrUser) {
                 alert('Keplr does not support Desmos when used with a Ledger. You can either use your mnemonic, or if you want to use the Ledger use Forbole X instead (https://x.forbole.com/)')
+                useAuthStore().logout();
                 router.push('/login')
                 return;
             }
