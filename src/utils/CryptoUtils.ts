@@ -1,14 +1,31 @@
 import Long from 'long';
 import { Buffer } from "buffer";
-import { SHA256, AES, enc, mode, format, lib } from "crypto-js"
-
+import { SHA256, AES, RIPEMD160, enc, mode, format, lib } from "crypto-js"
 export default class CryptoUtils {
 
+    /**
+     * Hash a string with RIPEMD-160
+     * @param string 
+     * @returns Hex hash result
+     */
+    public static ripemd160(string: string): string {
+        return RIPEMD160(string).toString(enc.Hex);
+    }
+
+    /**
+     * Hash a buffer with RIPEMD-160
+     * @param string message or string to hash
+     * @returns Buffer hash result
+     */
+    public static ripemd160Buffer(buffer: Buffer): Buffer {
+        const wordArray = lib.WordArray.create(buffer as any); // convert Buffer to WordArray
+        return Buffer.from(RIPEMD160(wordArray).toString(enc.Hex), 'hex');
+    }
 
     /**
      * Hash a string with SHA256
      * @param string message or string to hash
-     * @returns Base64 hash result
+     * @returns Hex hash result
      */
     public static sha256(string: string): string {
         return SHA256(string).toString(enc.Hex)
@@ -18,10 +35,11 @@ export default class CryptoUtils {
     /**
      * Hash a buffer with SHA256
      * @param string message or string to hash
-     * @returns Base64 hash result
+     * @returns Buffer hash result
      */
     public static sha256Buffer(buffer: Buffer): Buffer {
-        return Buffer.from(SHA256(Buffer.from(buffer).toString('hex')).toString(enc.Hex), 'hex');
+        const wordArray = lib.WordArray.create(buffer as any); // convert Buffer to WordArray
+        return Buffer.from(SHA256(wordArray).toString(enc.Hex), 'hex');
     }
 
 
