@@ -176,6 +176,7 @@ import { Field, Form } from "vee-validate";
 import ApplicationLinkTwitter from "@/core/types/ApplicationLinks/ApplicationLinkTwitter";
 import { useClipboardStore } from "@/stores/ClipboardModule";
 import { useApplicationLinkStore } from "@/stores/ApplicationLinkModule";
+import { Buffer } from "buffer";
 
 class TwitterVerificationMethod {
   public id: string;

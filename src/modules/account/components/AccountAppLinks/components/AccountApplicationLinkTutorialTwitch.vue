@@ -52,6 +52,7 @@ import { defineComponent } from "vue";
 import ApplicationLinkTwitch from "@/core/types/ApplicationLinks/ApplicationLinkTwitch";
 import { useClipboardStore } from "@/stores/ClipboardModule";
 import { useApplicationLinkStore } from "@/stores/ApplicationLinkModule";
+import { Buffer } from "buffer";
 
 export default defineComponent({
   components: {},

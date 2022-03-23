@@ -88,6 +88,7 @@ import { useClipboardStore } from "@/stores/ClipboardModule";
 import { useDesmosNetworkStore } from "@/stores/DesmosNetworkModule";
 import { useAccountStore } from "@/stores/AccountModule";
 import { useAuthStore } from "@/stores/AuthModule";
+import { Buffer } from "buffer";
 
 export default defineComponent({
   components: {},

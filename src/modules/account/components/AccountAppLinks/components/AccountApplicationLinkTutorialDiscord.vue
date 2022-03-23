@@ -82,6 +82,7 @@ import ApplicationLinkDiscord from "@/core/types/ApplicationLinks/ApplicationLin
 import { useClipboardStore } from "@/stores/ClipboardModule";
 import { useDesmosNetworkStore } from "@/stores/DesmosNetworkModule";
 import { useApplicationLinkStore } from "@/stores/ApplicationLinkModule";
+import { Buffer } from "buffer";
 
 export default defineComponent({
   components: {},

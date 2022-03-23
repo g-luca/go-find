@@ -440,7 +440,7 @@ import ApplicationLinkTwitter from "@/core/types/ApplicationLinks/ApplicationLin
 import { defineComponent, ref, watchEffect } from "vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
-import ripemd160 from "ripemd160";
+import { Buffer } from "buffer";
 import {
   TransitionRoot,
   TransitionChild,
@@ -449,7 +449,6 @@ import {
   DialogTitle,
 } from "@headlessui/vue";
 import {
-  CosmosAuthInfo,
   CosmosBroadcastMode,
   CosmosTxBody,
   DesmosMsgUnlinkApplication,
@@ -474,6 +473,7 @@ import {
 } from "@/stores/TransactionModule";
 import { useAuthStore } from "@/stores/AuthModule";
 import { WalletConnectSigner } from "@/core/signer/WalletConnectSigner";
+import { useWalletStore } from "@/stores/WalletModule";
 
 export default defineComponent({
   components: {
@@ -602,17 +602,17 @@ export default defineComponent({
      */
     deleteApplicationLink(applicationLink: ApplicationLink): void {
       if (this.authStore.account) {
-        const msgUnlink: DesmosMsgUnlinkApplication = {
+        const msgUnlinkApplication: DesmosMsgUnlinkApplication = {
           application: applicationLink.name,
           username: applicationLink.username,
           signer: this.authStore.account.address,
         };
         const txBody: CosmosTxBody = {
-          memo: "App unlink | Go-find",
+          memo: "Application unlink | Go-find",
           messages: [
             {
               typeUrl: "/desmos.profiles.v1beta1.MsgUnlinkApplication",
-              value: msgUnlink as any,
+              value: msgUnlinkApplication as any,
             },
           ],
           extensionOptions: [],
@@ -624,11 +624,12 @@ export default defineComponent({
         this.deletedApplicationLink = applicationLink;
         this.transactionStore.start({
           tx: txBody,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_SYNC,
+          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
         });
       }
     },
     async generateProof(): Promise<boolean> {
+      const walletStore = useWalletStore();
       this.isValidApplicationUsername = true;
       if (
         !this.selectedApplication?.usernameRegExp.test(this.applicationUsername)
@@ -644,99 +645,73 @@ export default defineComponent({
         this.isUploadingProof = false;
         this.proofUrl = "";
         let generatedProof = null as any;
-        if (this.authStore.account?.isUsingKeplr) {
-          const keplrAccount = await window.keplr?.getKey(
-            this.desmosNetworkStore.chainId
-          );
-          if (keplrAccount) {
-            try {
-              // Get Keplr signer
-              const signer = window.keplr?.getOfflineSigner(
-                this.desmosNetworkStore.chainId
-              );
-              const address = new ripemd160()
-                .update(
-                  CryptoUtils.sha256Buffer(Buffer.from(keplrAccount.pubKey))
-                )
-                .digest("hex");
-              const pub_key = Buffer.from(keplrAccount.pubKey)
-                .toString("hex")
-                .toLowerCase();
-              const proofObj = {
-                account_number: "",
-                chain_id: this.desmosNetworkStore.chainId,
-                fee: {
-                  amount: [
-                    {
-                      amount: "0",
-                      denom: "",
-                    },
-                  ],
-                  gas: "1",
-                },
-                memo: "",
-                msgs: [],
-                sequence: "0",
+
+        const signerAccount =
+          await walletStore.wallet.signer.getCurrentAccount();
+        if (!signerAccount || !this.authStore.account) {
+          this.generateProofError = "Signer or account not available";
+          return false;
+        }
+
+        if (
+          this.authStore.account.isUsingKeplr!! ||
+          this.authStore.account.isUsingWalletConnect!!
+        ) {
+          try {
+            const pubKeyHex = Buffer.from(signerAccount.pubkey)
+              .toString("hex")
+              .toLowerCase();
+
+            // hash the pubKey Buffer with SHA256
+            const hashedPubKey = CryptoUtils.sha256Buffer(
+              Buffer.from(signerAccount.pubkey)
+            );
+            // hash the result with RIPEMD160
+            const ripedAddress =
+              CryptoUtils.ripemd160Buffer(hashedPubKey).toString("hex");
+
+            // tx to sign as proof
+            const proofTx = {
+              account_number: "",
+              chain_id: this.desmosNetworkStore.chainId,
+              fee: {
+                amount: [
+                  {
+                    amount: "1",
+                    denom: import.meta.env.VITE_APP_COIN_FEE_DENOM,
+                  },
+                ],
+                gas: "1",
+              },
+              memo: "",
+              msgs: [],
+              sequence: "0",
+            };
+
+            const signedTx = await walletStore.wallet.signer.signAmino(
+              signerAccount.address,
+              proofTx
+            );
+
+            // update the tx proof with the signed tx (memo/fees/gas may have changed), and sort the attributes in the right order
+            const proofValue = CryptoUtils.sortedJsonStringify(signedTx.signed);
+
+            if (signedTx) {
+              generatedProof = {
+                address: ripedAddress,
+                pub_key: pubKeyHex,
+                signature: Buffer.from(
+                  signedTx.signature.signature,
+                  "base64"
+                ).toString("hex"),
+                value: Buffer.from(proofValue).toString("hex"),
               };
-              const signedTx = await signer?.signAmino(
-                keplrAccount.bech32Address,
-                proofObj
-              );
-              if (signedTx) {
-                generatedProof = {
-                  address: address,
-                  pub_key: pub_key,
-                  signature: Buffer.from(
-                    signedTx.signature.signature,
-                    "base64"
-                  ).toString("hex"),
-                  value: Buffer.from(
-                    JSON.stringify(proofObj, null, 0)
-                  ).toString("hex"),
-                };
-              }
-            } catch (e) {
-              //
             }
+          } catch (e) {
+            console.log(e);
           }
 
           // Wallet Connect custom flow
-          // FIXME: actually not works
-        } else if (this.authStore.account?.isUsingWalletConnect) {
-          const tx = {
-            extensionOptions: [],
-            memo: "Proof",
-            messages: [],
-            nonCriticalExtensionOptions: [],
-            timeoutHeight: 0,
-          };
-          const res = await WalletConnectSigner.signAppLinkWithWalletConenct(
-            tx,
-            this.authStore.account.address
-          );
-          const signedTxRaw = res.signedTxRaw;
-          const doc = res.doc;
-          console.log(signedTxRaw);
-          const proofAuthInfo = CosmosAuthInfo.decode(
-            Buffer.from(signedTxRaw.authInfoBytes, "hex")
-          );
-          if (proofAuthInfo && proofAuthInfo.signerInfos[0].publicKey) {
-            const pubKeyBytes =
-              proofAuthInfo.signerInfos[0].publicKey.value.slice(2);
-            const pub_key = Buffer.from(pubKeyBytes)
-              .toString("hex")
-              .toLowerCase();
-            const address = new ripemd160()
-              .update(CryptoUtils.sha256Buffer(Buffer.from(pubKeyBytes)))
-              .digest("hex");
-
-            generatedProof = {
-              address: address,
-              pub_key: pub_key,
-              signature: signedTxRaw.signature,
-              value: Buffer.from(JSON.stringify(doc, null, 0)).toString("hex"),
-            };
-          }
         } else {
           const mPassword = CryptoUtils.sha256(this.mPassword);
           try {
@@ -816,11 +791,10 @@ export default defineComponent({
         this.newApplicationLink = payload.applicationLink;
         this.isExecutingTransaction = true;
         this.transactionStore.start({
-          tx: payload.txBody,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_SYNC,
+          tx: this.tx,
+          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
         });
       } else {
-        //TODO: replace
         console.log("payload error");
       }
     },

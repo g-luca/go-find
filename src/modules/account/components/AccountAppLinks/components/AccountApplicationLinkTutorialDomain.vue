@@ -47,6 +47,7 @@ import { defineComponent } from "vue";
 import ApplicationLinkDomain from "@/core/types/ApplicationLinks/ApplicationLinkDomain";
 import { useClipboardStore } from "@/stores/ClipboardModule";
 import { useApplicationLinkStore } from "@/stores/ApplicationLinkModule";
+import { Buffer } from "buffer";
 
 export default defineComponent({
   components: {},

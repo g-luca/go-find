@@ -91,6 +91,7 @@ import { Field, Form } from "vee-validate";
 import ApplicationLinkGithub from "@/core/types/ApplicationLinks/ApplicationLinkGithub";
 import { useClipboardStore } from "@/stores/ClipboardModule";
 import { useApplicationLinkStore } from "@/stores/ApplicationLinkModule";
+import { Buffer } from "buffer";
 
 export default defineComponent({
   components: {
