@@ -1,5 +1,4 @@
 import { DefaultSigner } from './../core/signer/DefaultSigner';
-import { WalletConnectSigner } from './../core/signer/WalletConnectSigner';
 import AuthAccount from '@/core/types/AuthAccount';
 import CryptoUtils from '@/utils/CryptoUtils';
 import { CosmosTxBody, Transaction } from 'desmosjs';
