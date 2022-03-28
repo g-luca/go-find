@@ -17,7 +17,7 @@ export class Profile {
     private _postLinks: PostLink[] = []
 
 
-    static DTAG_REGEX = /^[A-Za-z0-9_]{6,30}$/;
+    static DTAG_REGEX = import.meta.env.VITE_APP_IS_TESTNET ? /^[A-Za-z0-9_]{3,30}$/ : /^[A-Za-z0-9_]{6,30}$/;
     static PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\w\W]{10,}$/;
 
 
