@@ -7,7 +7,9 @@ import ApplicationLinkDomain from '@/core/types/ApplicationLinks/ApplicationLink
 import ApplicationLinkGithub from '@/core/types/ApplicationLinks/ApplicationLinkGithub';
 import ApplicationLinkTwitch from '@/core/types/ApplicationLinks/ApplicationLinkTwitch';
 import ApplicationLinkTwitter from '@/core/types/ApplicationLinks/ApplicationLinkTwitter';
-import { CosmosTxBody, DesmosMsgLinkApplication } from 'desmosjs';
+import { MsgLinkApplicationEncodeObject } from '@desmoslabs/desmjs';
+import Long from 'long';
+import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
 
 export const useApplicationLinkStore = defineStore({
@@ -21,41 +23,43 @@ export const useApplicationLinkStore = defineStore({
         /**
          * Generate the TxBody needed for a MsgLinkApplication
          * @param application application name (ex. "twitter")
-         * @param dtag dtag to link to the application 
+         * @param username dtag to link to the application 
          * @param callData callData related to the specific application
-         * @returns 
+         * @returns Builded ApplicationLink TxBody 
          */
-        generateApplicationLinkTxBody(application: string, username: string, callData: string): CosmosTxBody | null {
+        generateApplicationLinkTxBody(application: string, username: string, callData: string): TxBody | null {
             const authStore = useAuthStore();
-            if (authStore.account) {
-                const msgLinkApplication: DesmosMsgLinkApplication = {
+            if (!authStore.account) {
+                return null;
+            }
+
+            const msgLinkApplication: MsgLinkApplicationEncodeObject = {
+                typeUrl: "/desmos.profiles.v1beta1.MsgLinkApplication",
+                value: {
                     callData: callData,
-                    sender: authStore.account?.address,
-                    sourceChannel: import.meta.env.VITE_APP_IBC_PROFILES_CHANNEL || "",
-                    sourcePort: "ibc-profiles",
                     linkData: {
                         application: application,
                         username: username
                     },
-                    timeoutTimestamp: (Date.now() + 3600000) * 1000000,
-                    timeoutHeight: undefined,
-
+                    sender: authStore.account?.address,
+                    sourceChannel: import.meta.env.VITE_APP_IBC_PROFILES_CHANNEL || "",
+                    sourcePort: "ibc-profiles",
+                    timeoutTimestamp: Long.fromNumber((Date.now() + 3600000) * 1000000),
                 }
-                const txBody: CosmosTxBody = {
-                    memo: `Linking ${username} to ${application} | Go-find`,
-                    messages: [
-                        {
-                            typeUrl: "/desmos.profiles.v1beta1.MsgLinkApplication",
-                            value: msgLinkApplication as any,
-                        }
-                    ],
-                    extensionOptions: [],
-                    nonCriticalExtensionOptions: [],
-                    timeoutHeight: 0,
-                }
-                return txBody;
             }
-            return null;
+            const txBody: TxBody = {
+                memo: `Application link ${application} | Go-find`,
+                messages: [
+                    {
+                        typeUrl: "/desmos.profiles.v1beta1.MsgLinkApplication",
+                        value: msgLinkApplication.value as any,
+                    }
+                ],
+                extensionOptions: [],
+                nonCriticalExtensionOptions: [],
+                timeoutHeight: Long.UZERO,
+            }
+            return txBody;
         },
 
         /**
@@ -66,29 +70,32 @@ export const useApplicationLinkStore = defineStore({
         parseApplicationLinks(profileRaw: any): ApplicationLink[] {
             const applicationLinks: ApplicationLink[] = [];
             try {
-                if (profileRaw.application_links && profileRaw.application_links.length > 0) {
-                    profileRaw.application_links.forEach((applicationLinkRaw: any) => {
-                        switch (applicationLinkRaw.application) {
-                            case "discord":
-                                applicationLinks.push(new ApplicationLinkDiscord(applicationLinkRaw.username, applicationLinkRaw.state));
-                                break;
-                            case "github":
-                                applicationLinks.push(new ApplicationLinkGithub(applicationLinkRaw.username, applicationLinkRaw.state));
-                                break;
-                            case "twitter":
-                                applicationLinks.push(new ApplicationLinkTwitter(applicationLinkRaw.username, applicationLinkRaw.state));
-                                break;
-                            case "twitch":
-                                applicationLinks.push(new ApplicationLinkTwitch(applicationLinkRaw.username, applicationLinkRaw.state));
-                                break;
-                            case "domain":
-                                applicationLinks.push(new ApplicationLinkDomain(applicationLinkRaw.username, applicationLinkRaw.state));
-                                break;
-                        }
-                    })
-                }
+                if (!profileRaw.application_links && !(profileRaw.application_links.length > 0))
+                    return [];
+
+                profileRaw.application_links.forEach((applicationLinkRaw: any) => {
+                    switch (applicationLinkRaw.application) {
+                        case "discord":
+                            applicationLinks.push(new ApplicationLinkDiscord(applicationLinkRaw.username, applicationLinkRaw.state));
+                            break;
+                        case "github":
+                            applicationLinks.push(new ApplicationLinkGithub(applicationLinkRaw.username, applicationLinkRaw.state));
+                            break;
+                        case "twitter":
+                            applicationLinks.push(new ApplicationLinkTwitter(applicationLinkRaw.username, applicationLinkRaw.state));
+                            break;
+                        case "twitch":
+                            applicationLinks.push(new ApplicationLinkTwitch(applicationLinkRaw.username, applicationLinkRaw.state));
+                            break;
+                        case "domain":
+                            applicationLinks.push(new ApplicationLinkDomain(applicationLinkRaw.username, applicationLinkRaw.state));
+                            break;
+                        default:
+                            console.warn(`Application link ${applicationLinkRaw.application} not supported`);
+                    }
+                })
             } catch (e) {
-                // do nothing
+                return [];
             }
             return applicationLinks;
         }
