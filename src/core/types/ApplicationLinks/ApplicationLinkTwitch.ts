@@ -1,4 +1,4 @@
-import { DesmosApplicationLinkState } from "desmosjs";
+import { ApplicationLinkState } from "@desmoslabs/desmjs-types/desmos/profiles/v1beta1/models_app_links";
 import ApplicationLink from "../ApplicationLink";
 
 export default class ApplicationLinkTwitch extends ApplicationLink {
@@ -11,7 +11,7 @@ export default class ApplicationLinkTwitch extends ApplicationLink {
     readonly usernameRegExpError = "Invalid Twitch username. Must not start with @";
 
 
-    constructor(username: string, state = DesmosApplicationLinkState.APPLICATION_LINK_STATE_INITIALIZED_UNSPECIFIED) {
+    constructor(username: string, state = ApplicationLinkState.APPLICATION_LINK_STATE_INITIALIZED_UNSPECIFIED) {
         super(username, state);
     }
 

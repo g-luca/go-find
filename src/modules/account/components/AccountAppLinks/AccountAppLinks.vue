@@ -448,13 +448,9 @@ import {
   DialogOverlay,
   DialogTitle,
 } from "@headlessui/vue";
-import {
-  CosmosBroadcastMode,
-  CosmosTxBody,
-  DesmosMsgUnlinkApplication,
-  Transaction,
-  Wallet,
-} from "desmosjs";
+import { CosmosTxBody, Transaction, Wallet } from "desmosjs";
+import { MsgUnlinkApplication } from "@desmoslabs/desmjs-types/desmos/profiles/v1beta1/msgs_app_links";
+import { BroadcastMode } from "@cosmjs/launchpad";
 import CryptoUtils from "@/utils/CryptoUtils";
 import Clipboard from "@/ui/components/Clipboard.vue";
 import AccountApplicationLinkTutorialDiscord from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialDiscord.vue";
@@ -472,7 +468,6 @@ import {
   TransactionStatus,
 } from "@/stores/TransactionModule";
 import { useAuthStore } from "@/stores/AuthModule";
-import { WalletConnectSigner } from "@/core/signer/WalletConnectSigner";
 import { useWalletStore } from "@/stores/WalletModule";
 
 export default defineComponent({
@@ -602,7 +597,7 @@ export default defineComponent({
      */
     deleteApplicationLink(applicationLink: ApplicationLink): void {
       if (this.authStore.account) {
-        const msgUnlinkApplication: DesmosMsgUnlinkApplication = {
+        const msgUnlinkApplication: MsgUnlinkApplication = {
           application: applicationLink.name,
           username: applicationLink.username,
           signer: this.authStore.account.address,
@@ -624,7 +619,7 @@ export default defineComponent({
         this.deletedApplicationLink = applicationLink;
         this.transactionStore.start({
           tx: txBody,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+          mode: BroadcastMode.Block,
         });
       }
     },
@@ -792,7 +787,7 @@ export default defineComponent({
         this.isExecutingTransaction = true;
         this.transactionStore.start({
           tx: this.tx,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+          mode: BroadcastMode.Block,
         });
       } else {
         console.log("payload error");

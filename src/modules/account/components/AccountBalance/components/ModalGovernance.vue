@@ -233,14 +233,13 @@ import DOMPurify from "dompurify";
 import { BarChart } from "vue-chart-3";
 import { Chart, ChartOptions, registerables } from "chart.js";
 import marked from "marked";
-import {
-  CosmosBroadcastMode,
-  CosmosMsgVote,
-  CosmosTxBody,
-  CosmosVoteOption,
-} from "desmosjs";
+import { CosmosTxBody } from "desmosjs";
+import { MsgVote } from "cosmjs-types/cosmos/gov/v1beta1/tx";
+import { VoteOption } from "cosmjs-types/cosmos/gov/v1beta1/gov";
+import { BroadcastMode } from "@cosmjs/launchpad";
 import { useTransactionStore } from "@/stores/TransactionModule";
 import { useAuthStore } from "@/stores/AuthModule";
+import Long from "long";
 
 Chart.register(...registerables);
 
@@ -403,11 +402,11 @@ export default defineComponent({
     },
     async onVote(proposalIdRaw: string, voteString: string) {
       const proposalId = Number(proposalIdRaw);
-      const vote: CosmosVoteOption = (<any>CosmosVoteOption)[voteString]; // cast the vote from string to enum
+      const vote: VoteOption = (<any>VoteOption)[voteString]; // cast the vote from string to enum
       if (this.authStore.account) {
-        const msgVote: CosmosMsgVote = {
+        const msgVote: MsgVote = {
           option: vote,
-          proposalId: Number(proposalId),
+          proposalId: Long.fromNumber(proposalId),
           voter: this.authStore.account?.address,
         };
         const txBody: CosmosTxBody = {
@@ -425,7 +424,7 @@ export default defineComponent({
         await this.toggleModal();
         this.transactionStore.start({
           tx: txBody,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_SYNC,
+          mode: BroadcastMode.Block,
         });
       }
     },

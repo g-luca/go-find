@@ -320,11 +320,9 @@ import { defineComponent, ref, watchEffect } from "vue";
 import { Form, Field } from "vee-validate";
 import { Dialog, DialogTitle } from "@headlessui/vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
-import {
-  CosmosBroadcastMode,
-  CosmosTxBody,
-  DesmosMsgDeleteProfile,
-} from "desmosjs";
+import { CosmosTxBody } from "desmosjs";
+import { MsgDeleteProfile } from "@desmoslabs/desmjs-types/desmos/profiles/v1beta1/msgs_profile";
+import { BroadcastMode } from "@cosmjs/launchpad";
 import marked from "marked";
 import DOMPurify from "dompurify";
 import {
@@ -397,8 +395,6 @@ export default defineComponent({
   async beforeMount() {
     const account = this.authStore.account;
     if (account) {
-      await this.accountStore.loadAccount();
-
       //register the watcher of the accountModule user account profile
       ref(this.accountStore.profile);
       watchEffect(() => {
@@ -488,7 +484,7 @@ export default defineComponent({
         this.txSent = txBody;
         this.transactionStore.start({
           tx: txBody,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+          mode: BroadcastMode.Sync,
         });
 
         // Vee Validate send as parameter the reset function, i need to save it to use for the reset after an update
@@ -609,7 +605,7 @@ export default defineComponent({
       return false;
     },
     async deleteProfile() {
-      const msgDeleteProfile: DesmosMsgDeleteProfile = {
+      const msgDeleteProfile: MsgDeleteProfile = {
         creator: this.authStore.account!.address,
       };
       const txBody: CosmosTxBody = {
@@ -626,7 +622,7 @@ export default defineComponent({
       };
       this.transactionStore.start({
         tx: txBody,
-        mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+        mode: BroadcastMode.Async,
       });
       this.txSent = txBody;
       this.toggleProfileOptionDropdown();

@@ -1,4 +1,4 @@
-import { DesmosApplicationLinkState } from "desmosjs";
+import { ApplicationLinkState } from "@desmoslabs/desmjs-types/desmos/profiles/v1beta1/models_app_links";
 import ApplicationLink from "../ApplicationLink";
 
 export default class ApplicationLinkDomain extends ApplicationLink {
@@ -10,7 +10,7 @@ export default class ApplicationLinkDomain extends ApplicationLink {
     readonly usernamePlaceholder: string = "Domain (ex. go-find.me)";
 
 
-    constructor(domain: string, state = DesmosApplicationLinkState.APPLICATION_LINK_STATE_INITIALIZED_UNSPECIFIED) {
+    constructor(domain: string, state = ApplicationLinkState.APPLICATION_LINK_STATE_INITIALIZED_UNSPECIFIED) {
         super(domain, state,);
         if (domain !== "") {
             this.displayName = domain;

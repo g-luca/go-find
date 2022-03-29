@@ -1,9 +1,10 @@
-import { CosmosBroadcastMode, CosmosTxBody, CosmosTxRaw, Transaction } from 'desmosjs';
 import { defineStore } from 'pinia'
 import { registerModuleHMR } from '.';
 import { useAuthStore } from './AuthModule';
 import { useWalletStore } from './WalletModule';
-import { StdFee, StdTx } from "@cosmjs/amino";
+import { StdFee } from "@cosmjs/amino";
+import { BroadcastMode } from "@cosmjs/launchpad";
+import { TxBody } from "cosmjs-types/cosmos/tx/v1beta1/tx"
 
 export enum TransactionStatus {
     Error = -1,
@@ -17,11 +18,11 @@ export const useTransactionStore = defineStore({
     id: 'TransactionStore',
     state: () => ({
         isOpen: false,
-        tx: null as CosmosTxBody | null,
+        tx: null as TxBody | null,
         transactionStatus: TransactionStatus.Idle,
         errorMessage: "",
         detailedErrorMessage: "",
-        broadcastMode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+        broadcastMode: BroadcastMode.Block,
     }),
     getters: {
     },
@@ -64,7 +65,7 @@ export const useTransactionStore = defineStore({
          * Start the transaction process
          * @param tx the transaction that is going to be signed and broadcasted
          */
-        start(payload: { tx: CosmosTxBody, mode: CosmosBroadcastMode }): void {
+        start(payload: { tx: TxBody, mode: BroadcastMode }): void {
             this.broadcastMode = payload.mode;
             this.tx = payload.tx;
             this.transactionStatus = TransactionStatus.Idle;
@@ -88,12 +89,13 @@ export const useTransactionStore = defineStore({
 })
 
 
+
 /**
  * Handle the broadcast of a signed tx
  * @param signedTx the signed tx to broadcast
  * @returns true if succeeded, false otherwise
  */
-async function handleBroadcast(tx: CosmosTxBody, broadcastMode = CosmosBroadcastMode.BROADCAST_MODE_ASYNC): Promise<{ success: boolean, error: string }> {
+async function handleBroadcast(tx: CosmosTxBody, broadcastMode = BroadcastMode.Block): Promise<{ success: boolean, error: string }> {
     const authStore = useAuthStore();
     const walletStore = useWalletStore();
     try {
@@ -101,13 +103,14 @@ async function handleBroadcast(tx: CosmosTxBody, broadcastMode = CosmosBroadcast
 
             const defaultFee: StdFee = {
                 amount: [{
-                    amount: authStore.DEFAULT_FEE_AMOUNT,
+                    amount: '8750',
                     denom: import.meta.env.VITE_APP_COIN_FEE_DENOM,
                 }],
                 gas: authStore.DEFAULT_GAS_LIMIT.toString(),
             }
             // sign the tx
-            const broadcastResult = await (await walletStore.wallet.client).signAndBroadcast(authStore.account.address, tx?.messages, defaultFee, tx?.memo);
+            const client = (await walletStore.wallet.client);
+            const broadcastResult = await client.signAndBroadcast(authStore.account.address, tx?.messages, defaultFee, tx?.memo);
             console.log(`tx hash: ${broadcastResult.transactionHash}`);
             if (broadcastResult.transactionHash && broadcastResult.code === 0) {
                 return { success: true, error: "" };
@@ -117,7 +120,8 @@ async function handleBroadcast(tx: CosmosTxBody, broadcastMode = CosmosBroadcast
         }
 
     } catch (e) {
-        return { success: false, error: "Operation aborted or transaction error" };
+        console.log(e)
+        return { success: false, error: "Transaction error or aborted" };
     }
     return { success: false, error: "Transaction Error" };
 }

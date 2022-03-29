@@ -117,12 +117,9 @@
 import { defineComponent } from "vue";
 import { ref } from "vue";
 import { Dialog, DialogOverlay, DialogTitle } from "@headlessui/vue";
-import {
-  CosmosBroadcastMode,
-  CosmosMsgSend,
-  CosmosTxBody,
-  DesmosJS,
-} from "desmosjs";
+import { CosmosTxBody, DesmosJS } from "desmosjs";
+import { MsgSend } from "cosmjs-types/cosmos/bank/v1beta1/tx";
+import { BroadcastMode } from "@cosmjs/launchpad";
 import { useTransactionStore } from "@/stores/TransactionModule";
 import { useAccountStore } from "@/stores/AccountModule";
 import { useAuthStore } from "@/stores/AuthModule";
@@ -193,7 +190,7 @@ export default defineComponent({
     async send() {
       const sendAmount = this.amount * 1000000;
       if (this.accountStore.profile) {
-        const msgSend: CosmosMsgSend = {
+        const msgSend: MsgSend = {
           fromAddress: this.accountStore.profile.address,
           toAddress: this.addressTo,
           amount: [
@@ -218,7 +215,7 @@ export default defineComponent({
         await this.toggleModal();
         useTransactionStore().start({
           tx: txBody,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+          mode: BroadcastMode.Block,
         });
       }
     },

@@ -1,4 +1,4 @@
-import { DesmosApplicationLinkState } from "desmosjs";
+import { ApplicationLinkState } from "@desmoslabs/desmjs-types/desmos/profiles/v1beta1/models_app_links";
 import ApplicationLink from "../ApplicationLink";
 
 export default class ApplicationLinkDiscord extends ApplicationLink {
@@ -11,7 +11,7 @@ export default class ApplicationLinkDiscord extends ApplicationLink {
     readonly usernameRegExp = /^((?!@|#|:|```).{2,32})#\d{4}$/;
     readonly usernameRegExpError = "Invalid Discord username. Copy the full username with the tag";
 
-    constructor(username: string, state = DesmosApplicationLinkState.APPLICATION_LINK_STATE_INITIALIZED_UNSPECIFIED) {
+    constructor(username: string, state = ApplicationLinkState.APPLICATION_LINK_STATE_INITIALIZED_UNSPECIFIED) {
         super(username, state);
     }
 

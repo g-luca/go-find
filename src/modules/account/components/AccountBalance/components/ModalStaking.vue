@@ -634,14 +634,14 @@ import { ProfileQuery } from "@/gql/ProfileQuery";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import DOMPurify from "dompurify";
 import marked from "marked";
+import { CosmosTxBody } from "desmosjs";
 import {
-  CosmosBroadcastMode,
-  CosmosMsgBeginRedelegate,
-  CosmosMsgDelegate,
-  CosmosMsgUndelegate,
-  CosmosMsgWithdrawDelegatorReward,
-  CosmosTxBody,
-} from "desmosjs";
+  MsgDelegate,
+  MsgBeginRedelegate,
+  MsgUndelegate,
+} from "cosmjs-types/cosmos/staking/v1beta1/tx";
+import { MsgWithdrawDelegatorReward } from "cosmjs-types/cosmos/distribution/v1beta1/tx";
+import { BroadcastMode } from "@cosmjs/launchpad";
 import { useTransactionStore } from "@/stores/TransactionModule";
 import { useAccountStore } from "@/stores/AccountModule";
 import { useAuthStore } from "@/stores/AuthModule";
@@ -932,7 +932,7 @@ export default defineComponent({
       const toValidatorAddress =
         this.stakingOperationValidatorTo.validator_info.operator_address;
       if (this.accountStore.profile) {
-        const msgDelegate: CosmosMsgDelegate = {
+        const msgDelegate: MsgDelegate = {
           delegatorAddress: this.accountStore.profile.address,
           validatorAddress: toValidatorAddress,
           amount: {
@@ -955,7 +955,7 @@ export default defineComponent({
         await this.toggleStakingOperationModal();
         this.transactionStore.start({
           tx: txBody,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+          mode: BroadcastMode.Block,
         });
       }
     },
@@ -967,7 +967,7 @@ export default defineComponent({
       const fromValidatorAddress =
         this.stakingOperationValidatorFrom.validator_info.operator_address;
       if (this.accountStore.profile) {
-        const msgRedelegate: CosmosMsgBeginRedelegate = {
+        const msgRedelegate: MsgBeginRedelegate = {
           delegatorAddress: this.accountStore.profile.address,
           validatorSrcAddress: fromValidatorAddress,
           validatorDstAddress: toValidatorAddress,
@@ -991,7 +991,7 @@ export default defineComponent({
         await this.toggleStakingOperationModal();
         this.transactionStore.start({
           tx: txBody,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+          mode: BroadcastMode.Block,
         });
       }
     },
@@ -1000,7 +1000,7 @@ export default defineComponent({
       const fromValidatorAddress =
         this.stakingOperationValidatorFrom.validator_info.operator_address;
       if (this.accountStore.profile) {
-        const msgUnbond: CosmosMsgUndelegate = {
+        const msgUnbond: MsgUndelegate = {
           delegatorAddress: this.accountStore.profile.address,
           validatorAddress: fromValidatorAddress,
           amount: {
@@ -1023,13 +1023,13 @@ export default defineComponent({
         await this.toggleStakingOperationModal();
         this.transactionStore.start({
           tx: txBody,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+          mode: BroadcastMode.Block,
         });
       }
     },
     async withdrawRewards(validatorAddress: string) {
       if (this.accountStore.profile) {
-        const msgWithdrawRewards: CosmosMsgWithdrawDelegatorReward = {
+        const msgWithdrawRewards: MsgWithdrawDelegatorReward = {
           delegatorAddress: this.accountStore.profile.address,
           validatorAddress: validatorAddress,
         };
@@ -1048,7 +1048,7 @@ export default defineComponent({
         };
         this.transactionStore.start({
           tx: txBody,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+          mode: BroadcastMode.Block,
         });
       }
     },

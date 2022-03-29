@@ -1,4 +1,4 @@
-import { DesmosApplicationLinkState } from "desmosjs";
+import { ApplicationLinkState } from "@desmoslabs/desmjs-types/desmos/profiles/v1beta1/models_app_links";
 import ApplicationLink from "../ApplicationLink";
 
 export default class ApplicationLinkGithub extends ApplicationLink {
@@ -8,7 +8,7 @@ export default class ApplicationLinkGithub extends ApplicationLink {
     readonly url: string = "https://www.github.com/";
     readonly redirectUrl = `${this.url}${this.username}`;
 
-    constructor(username: string, state = DesmosApplicationLinkState.APPLICATION_LINK_STATE_INITIALIZED_UNSPECIFIED) {
+    constructor(username: string, state = ApplicationLinkState.APPLICATION_LINK_STATE_INITIALIZED_UNSPECIFIED) {
         super(username, state);
     }
 

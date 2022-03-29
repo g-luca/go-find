@@ -8,8 +8,13 @@ import { useAccountStore } from '@/stores/AccountModule';
 import { defineComponent, ref, watchEffect } from "vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
-import { CosmosBroadcastMode, CosmosPubKey, CosmosTxBody, DesmosBech32Address, DesmosMsgLinkChainAccount, DesmosMsgUnlinkChainAccount, DesmosProof } from "desmosjs";
+import { CosmosTxBody } from "desmosjs";
+import { PubKey } from "cosmjs-types/cosmos/crypto/secp256k1/keys";
+import { Proof, Bech32Address } from "@desmoslabs/desmjs-types/desmos/profiles/v1beta1/models_chain_links";
+import { MsgLinkChainAccount, MsgUnlinkChainAccount } from "@desmoslabs/desmjs-types/desmos/profiles/v1beta1/msgs_chain_links";
+
 import { supportedChainLinkConnectionMethods } from '@/core/types/ChainLinkConnectionMethod';
+import { BroadcastMode } from "@cosmjs/launchpad";
 
 import {
     TransitionRoot,
@@ -57,7 +62,7 @@ export default defineComponent({
             newChainLink: null as ChainLink | null,
             deletedChainLink: null as ChainLink | null,
 
-            generatedProof: null as DesmosProof | null,
+            generatedProof: null as Proof | null,
             generateProofError: "",
 
             inputMnemonic: new Array<string>(24),
@@ -126,7 +131,7 @@ export default defineComponent({
          */
         deleteChainLink(chainLink: ChainLink): void {
             if (this.authStore.account) {
-                const msgUnlink: DesmosMsgUnlinkChainAccount = {
+                const msgUnlink: MsgUnlinkChainAccount = {
                     chainName: chainLink.chain,
                     owner: this.authStore.account?.address,
                     target: chainLink.address,
@@ -148,7 +153,7 @@ export default defineComponent({
                 this.deletedChainLink = chainLink;
                 this.transactionStore.start({
                     tx: txBody,
-                    mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+                    mode: BroadcastMode.Async,
                 });
             }
         },
@@ -205,10 +210,10 @@ export default defineComponent({
                 }
 
                 // finalize the Keplr chain link proof
-                const finalProof: DesmosProof = {
+                const finalProof: Proof = {
                     pubKey: {
                         typeUrl: '/cosmos.crypto.secp256k1.PubKey',
-                        value: CosmosPubKey.encode({
+                        value: PubKey.encode({
                             key: extKeplrWallet.pubKey
                         }).finish()
                     },
@@ -329,10 +334,10 @@ export default defineComponent({
                             if (selectedChain && this.authStore.account) {
                                 await this.ledgerStore.toggleModal();
                                 await this.ledgerStore.setLedgerAction({ app: selectedChain, ledgerAppName: ledgerAppName, message: '' });
-                                const finalProof: DesmosProof = {
+                                const finalProof: Proof = {
                                     pubKey: {
                                         typeUrl: '/cosmos.crypto.secp256k1.PubKey',
-                                        value: CosmosPubKey.encode({
+                                        value: PubKey.encode({
                                             key: Buffer.from(this.ledgerStore.ledgerPubKey, 'hex')
                                         }).finish()
                                     },
@@ -355,10 +360,10 @@ export default defineComponent({
          * @param proof original raw proof object
          */
         async sendChainLink(selectedChain: Blockchain, destAdress: string, userAddress: string, proof: DesmosProof) {
-            const msgLinkChain: DesmosMsgLinkChainAccount = {
+            const msgLinkChain: MsgLinkChainAccount = {
                 chainAddress: {
                     typeUrl: "/desmos.profiles.v1beta1.Bech32Address",
-                    value: DesmosBech32Address.encode({
+                    value: Bech32Address.encode({
                         prefix: selectedChain.bechPrefix,
                         value: destAdress,
                     }).finish()
@@ -387,7 +392,7 @@ export default defineComponent({
 
             this.transactionStore.start({
                 tx: txBody,
-                mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+                mode: BroadcastMode.Block,
             });
             this.tx = txBody;
             this.generateProofError = "";
