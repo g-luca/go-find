@@ -12,8 +12,7 @@
   "dependencies": {
     "@apollo/client": "^3.5.6",
     "@cosmjs/ledger-amino": "^0.27.1",
-    "@desmoslabs/desmjs": "^2.0.0-beta.3",
-    "@desmoslabs/desmjs-types": "^2.3.1-alpha.6",
+    "@desmoslabs/desmjs": "^3.0.0-alpha.1",
     "@headlessui/vue": "^1.2.0",
     "@ledgerhq/hw-transport-webhid": "^6.20.0",
     "@tailwindcss/postcss7-compat": "^2.2.4",
@@ -52,6 +51,7 @@
     "vuex-module-decorators": "^2.0.0"
   },
   "devDependencies": {
+    "@desmoslabs/desmjs-types": "^3.0.0-alpha.1",
     "@esbuild-plugins/node-globals-polyfill": "^0.1.1",
     "@keplr-wallet/types": "^0.9.10",
     "@tailwindcss/typography": "^0.5.1",
@@ -66,6 +66,7 @@
     "@vue/eslint-config-prettier": "^6.0.0",
     "@vue/eslint-config-typescript": "^7.0.0",
     "autoprefixer": "^10.4.2",
+    "cosmjs-types": "^0.4.1",
     "eslint": "^8.8.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier-vue": "^3.0.0",

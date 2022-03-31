@@ -1,13 +1,14 @@
 import { useAuthStore } from '@/stores/AuthModule';
 import CryptoUtils from "@/utils/CryptoUtils";
 import { Extension as TerraExtension, MsgSend as TerraMsgSend, Fee as TerraFee, LCDClient as TerraLCDClient, TxBody as TerraTxBody, AuthInfo as TerraAuthInfo, SignDoc as TerraSignDoc } from "@terra-money/terra.js";
-import { CosmosPubKey, DesmosProof } from 'desmosjs';
+import { PubKey } from "cosmjs-types/cosmos/crypto/secp256k1/keys";
+import { Proof } from "@desmoslabs/desmjs-types/desmos/profiles/v2/models_chain_links";
 import Blockchain from '../types/Blockchain';
 import { Buffer } from "buffer";
 
 export type TerraChainLinkSignerResponse = {
     address: string;
-    proof: DesmosProof | null;
+    proof: Proof | null;
     error: string;
 }
 
@@ -78,7 +79,7 @@ export class TerraSigner {
                                 const auth = await terraLCDClient.auth.accountInfo(terraAddress)
                                 const terraAccountNumber = auth.getAccountNumber() || 0;
 
-                                let finalProof = null as DesmosProof | null;
+                                let finalProof = null as Proof | null;
 
                                 // Terra Station sign
                                 if (terraSignMode === 'SIGN_MODE_DIRECT') {
@@ -93,7 +94,7 @@ export class TerraSigner {
                                     finalProof = {
                                         pubKey: {
                                             typeUrl: '/cosmos.crypto.secp256k1.PubKey',
-                                            value: CosmosPubKey.encode({
+                                            value: PubKey.encode({
                                                 key: terraPubkey,
                                             }).finish(),
                                         },
@@ -122,7 +123,7 @@ export class TerraSigner {
                                         plainText: Buffer.from(CryptoUtils.sortedJsonStringify(tmpProof)).toString('hex'),
                                         pubKey: {
                                             typeUrl: '/cosmos.crypto.secp256k1.PubKey',
-                                            value: CosmosPubKey.encode({
+                                            value: PubKey.encode({
                                                 key: terraPubkey,
                                             }).finish(),
                                         },

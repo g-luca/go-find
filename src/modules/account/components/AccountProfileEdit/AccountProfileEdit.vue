@@ -320,8 +320,8 @@ import { defineComponent, ref, watchEffect } from "vue";
 import { Form, Field } from "vee-validate";
 import { Dialog, DialogTitle } from "@headlessui/vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
-import { CosmosTxBody } from "desmosjs";
-import { MsgDeleteProfile } from "@desmoslabs/desmjs-types/desmos/profiles/v1beta1/msgs_profile";
+import { TxBody } from "cosmjs-types/cosmos/tx/v1beta1/tx";
+import { MsgDeleteProfile } from "@desmoslabs/desmjs-types/desmos/profiles/v2/msgs_profile";
 import { BroadcastMode } from "@cosmjs/launchpad";
 import marked from "marked";
 import DOMPurify from "dompurify";
@@ -331,7 +331,8 @@ import {
 } from "@/stores/TransactionModule";
 import { useAccountStore } from "@/stores/AccountModule";
 import { useAuthStore } from "@/stores/AuthModule";
-import { MsgSaveProfile } from "@desmoslabs/desmjs-types/desmos/profiles/v1beta1/msgs_profile";
+import { MsgSaveProfile } from "@desmoslabs/desmjs-types/desmos/profiles/v2/msgs_profile";
+import Long from "long";
 
 enum UploadImageType {
   "profilePic" = "profilePic",
@@ -370,7 +371,7 @@ export default defineComponent({
       accountStore: useAccountStore(),
       initialValues,
       formSchema,
-      txSent: null as CosmosTxBody | null,
+      txSent: null as TxBody | null,
       inputNickname: "",
       inputProfilePic: "",
       inputProfileCover: "",
@@ -469,7 +470,7 @@ export default defineComponent({
               : doNotModify,
           creator: this.accountStore.profile.address,
         };
-        const txBody: CosmosTxBody = {
+        const txBody: TxBody = {
           memo: "Profile update | Go-find",
           messages: [
             {
@@ -479,7 +480,7 @@ export default defineComponent({
           ],
           extensionOptions: [],
           nonCriticalExtensionOptions: [],
-          timeoutHeight: 0,
+          timeoutHeight: Long.ZERO,
         };
         this.txSent = txBody;
         this.transactionStore.start({
@@ -608,7 +609,7 @@ export default defineComponent({
       const msgDeleteProfile: MsgDeleteProfile = {
         creator: this.authStore.account!.address,
       };
-      const txBody: CosmosTxBody = {
+      const txBody: TxBody = {
         memo: "Profile delete",
         messages: [
           {
@@ -618,7 +619,7 @@ export default defineComponent({
         ],
         extensionOptions: [],
         nonCriticalExtensionOptions: [],
-        timeoutHeight: 0,
+        timeoutHeight: Long.ZERO,
       };
       this.transactionStore.start({
         tx: txBody,

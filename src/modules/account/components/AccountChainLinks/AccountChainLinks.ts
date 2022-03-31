@@ -8,10 +8,10 @@ import { useAccountStore } from '@/stores/AccountModule';
 import { defineComponent, ref, watchEffect } from "vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
-import { CosmosTxBody } from "desmosjs";
+import { TxBody } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { PubKey } from "cosmjs-types/cosmos/crypto/secp256k1/keys";
-import { Proof, Bech32Address } from "@desmoslabs/desmjs-types/desmos/profiles/v1beta1/models_chain_links";
-import { MsgLinkChainAccount, MsgUnlinkChainAccount } from "@desmoslabs/desmjs-types/desmos/profiles/v1beta1/msgs_chain_links";
+import { Proof, Bech32Address } from "@desmoslabs/desmjs-types/desmos/profiles/v2/models_chain_links";
+import { MsgLinkChainAccount, MsgUnlinkChainAccount } from "@desmoslabs/desmjs-types/desmos/profiles/v2/msgs_chain_links";
 
 import { supportedChainLinkConnectionMethods } from '@/core/types/ChainLinkConnectionMethod';
 import { BroadcastMode } from "@cosmjs/launchpad";
@@ -30,6 +30,7 @@ import { Key } from "@keplr-wallet/types";
 import { useTransactionStore, TransactionStatus } from '@/stores/TransactionModule';
 import { useLedgerStore } from "@/stores/LedgerModule";
 import { ChainLinkConnectionMethod } from '@/core/types/ChainLinkConnectionMethod';
+import Long from 'long';
 
 
 
@@ -58,7 +59,7 @@ export default defineComponent({
             isSigningProof: false,
             isLinkingWithKeplr: false,
             isExecutingTransaction: false,
-            tx: null as CosmosTxBody | null,
+            tx: null as TxBody | null,
             newChainLink: null as ChainLink | null,
             deletedChainLink: null as ChainLink | null,
 
@@ -136,7 +137,7 @@ export default defineComponent({
                     owner: this.authStore.account?.address,
                     target: chainLink.address,
                 }
-                const txBody: CosmosTxBody = {
+                const txBody: TxBody = {
                     memo: "Chain unlink | Go-find",
                     messages: [
                         {
@@ -146,7 +147,7 @@ export default defineComponent({
                     ],
                     extensionOptions: [],
                     nonCriticalExtensionOptions: [],
-                    timeoutHeight: 0,
+                    timeoutHeight: Long.ZERO,
                 }
                 this.tx = txBody;
                 this.newChainLink = null;
@@ -359,7 +360,7 @@ export default defineComponent({
          * @param userAddress signer address
          * @param proof original raw proof object
          */
-        async sendChainLink(selectedChain: Blockchain, destAdress: string, userAddress: string, proof: DesmosProof) {
+        async sendChainLink(selectedChain: Blockchain, destAdress: string, userAddress: string, proof: Proof) {
             const msgLinkChain: MsgLinkChainAccount = {
                 chainAddress: {
                     typeUrl: "/desmos.profiles.v1beta1.Bech32Address",
@@ -374,7 +375,7 @@ export default defineComponent({
                 },
                 signer: userAddress,
             }
-            const txBody: CosmosTxBody = {
+            const txBody: TxBody = {
                 memo: "Chain link | Go-find",
                 messages: [
                     {
@@ -384,7 +385,7 @@ export default defineComponent({
                 ],
                 extensionOptions: [],
                 nonCriticalExtensionOptions: [],
-                timeoutHeight: 0,
+                timeoutHeight: Long.ZERO,
             }
 
             this.newChainLink = new ChainLink(destAdress, selectedChain.id);
