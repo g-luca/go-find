@@ -16,6 +16,7 @@ export const AccountSubscription = gql`
         }
         delegation_rewards: action_delegation_reward(address:$address){
             coins
+            validator_address
         }
     }
 `;

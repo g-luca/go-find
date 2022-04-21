@@ -19,6 +19,7 @@ export const AccountQuery = gql`
         }
         delegation_rewards: action_delegation_reward(address:$address){
             coins
+            validator_address
         }
     }
 `;

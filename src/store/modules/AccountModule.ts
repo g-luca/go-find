@@ -1,3 +1,4 @@
+import { AccountDelegation, AccountDelegations } from './../../core/types/Account';
 import { ProfileQuery } from '@/gql/ProfileQuery';
 import { Profile } from '@/core/types/Profile';
 import store from '@/store';
@@ -30,7 +31,6 @@ export default class AccountModule extends VuexModule {
      */
     @Mutation
     async loadAccount(force = false): Promise<void> {
-        console.log('loadAccount')
         this.isNewProfile = false;
         this.profile = false;
         this.account = false;
@@ -57,7 +57,7 @@ export default class AccountModule extends VuexModule {
                     this.account = AccountModule.parseGqlAccountResult(accountRaw.data);
                 } else {
                     // The user hasn't done any transaction on chain, completelly new account
-                    this.account = new Account(authModule.account.address, 0, 0, 0, 0);
+                    this.account = new Account(authModule.account.address, 0, { delegations: [], totalAmount: 0, totalRewards: 0, totalUnbonding: 0 });
                 }
 
                 /* Load Profile */
@@ -187,26 +187,53 @@ export default class AccountModule extends VuexModule {
         let delegationsTot = 0;
         let rewardsTot = 0;
         let unbondingTot = 0;
+        let finalDelegations: AccountDelegations = {
+            delegations: [],
+            totalAmount: 0,
+            totalRewards: 0,
+            totalUnbonding: 0,
+        }
+
+        const table = new Map<string, AccountDelegation>();
         try {
             accountRaw.delegations?.delegations?.forEach((delegation: any) => {
-                delegationsTot += Number(delegation?.coins[0]?.amount);
+                table.set(delegation.validator_address, { amount: Number(delegation?.coins[0]?.amount), validator_address: delegation?.validator_address, rewards: 0 / 1000000, unbonding: 0 / 1000000 })
+                delegationsTot += Number(delegation?.coins[0]?.amount / 1000000);
             });
+            finalDelegations.totalAmount = delegationsTot;
         } catch { null }
 
         try {
             accountRaw.delegation_rewards?.forEach((reward: any) => {
+                let tmp = table.get(reward.validator_address)
+                tmp!.rewards = Number(reward.coins[0].amount);
+                table.set(reward.validator_address, tmp!);
                 rewardsTot += Number(reward.coins[0].amount);
             });
+            finalDelegations.totalRewards = rewardsTot / 1000000;
         } catch { null }
 
         try {
             accountRaw.unbonding_delegations?.unbonding_delegations?.forEach((unbond: any) => {
                 unbond.entries.forEach((unbondEntry: any) => {
+                    let tmp = table.get(unbond.validator_address)
+                    tmp!.unbonding = Number(unbondEntry.balance);
+                    table.set(unbond.validator_address, tmp!);
                     unbondingTot += Number(unbondEntry.balance);
                 });
             });
+            finalDelegations.totalUnbonding = unbondingTot / 1000000;
         } catch { null }
-        return new Account(accountRaw.account[0].address, Number(accountRaw.account_balances?.coins[0]?.amount || 0) / 1000000, delegationsTot / 1000000, rewardsTot / 1000000, unbondingTot / 1000000);
+
+        table.forEach((entry, key) => {
+            finalDelegations.delegations.push({
+                validator_address: key,
+                amount: entry.amount,
+                rewards: entry.rewards,
+                unbonding: entry.unbonding,
+            });
+        })
+        return new Account(accountRaw.account[0].address, Number(accountRaw.account_balances?.coins[0]?.amount || 0) / 1000000, finalDelegations);
     }
 
 
