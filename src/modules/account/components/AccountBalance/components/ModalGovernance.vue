@@ -226,7 +226,6 @@
 import { defineComponent } from "vue";
 import { ref } from "vue";
 import { Dialog, DialogOverlay, DialogTitle } from "@headlessui/vue";
-import { useApolloClient } from "@vue/apollo-composable";
 import { getModule } from "vuex-module-decorators";
 import AuthModule from "@/store/modules/AuthModule";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
@@ -242,6 +241,7 @@ import {
   CosmosTxBody,
   CosmosVoteOption,
 } from "desmosjs";
+import { apolloClientForbole } from "@/gql/ApolloForbole";
 const authModule = getModule(AuthModule);
 const transactionModule = getModule(TransactionModule);
 
@@ -304,10 +304,9 @@ export default defineComponent({
      */
     async loadGovernance() {
       this.isLoadinGovernance = true;
-      const apollo = useApolloClient();
       this.proposals = [];
       try {
-        const governanceRaw = await apollo.client.query({
+        const governanceRaw = await apolloClientForbole.query({
           query: GovernanceQuery,
           variables: {
             address: authModule.account?.address,
