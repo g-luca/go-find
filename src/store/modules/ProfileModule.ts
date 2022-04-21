@@ -3,13 +3,13 @@ import store from '@/store';
 import { Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { LoadingStatus } from '@/core/types/LoadingStatus';
 import { provideApolloClient, useLazyQuery } from '@vue/apollo-composable';
-import { apolloClient } from '@/gql/Apollo';
+import { apolloClientDesmos } from '@/gql/ApolloDesmos';
 import { ProfileQuery } from '@/gql/ProfileQuery';
 import ChainLink from '@/core/types/ChainLink';
 import ApplicationLinkModule from './ApplicationLinkModule';
 
 
-provideApolloClient(apolloClient)
+provideApolloClient(apolloClientDesmos)
 
 @Module({ store, name: 'ProfileModule', dynamic: true })
 export default class ProfileModule extends VuexModule {

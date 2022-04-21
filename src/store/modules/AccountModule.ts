@@ -1,3 +1,4 @@
+import { ProfileQuery } from '@/gql/ProfileQuery';
 import { Profile } from '@/core/types/Profile';
 import store from '@/store';
 import { getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
@@ -7,7 +8,8 @@ import { useLazyQuery, useApolloClient } from '@vue/apollo-composable';
 import { AccountQuery } from '@/gql/AccountQuery';
 import Account from '@/core/types/Account';
 import ChainLink from '@/core/types/ChainLink';
-import { apolloClient } from '@/gql/Apollo';
+import { apolloClientDesmos } from '@/gql/ApolloDesmos';
+import { apolloClientForbole } from '@/gql/ApolloForbole';
 import { ApplicationLinkSubscription } from '@/gql/ApplicationLinkSubscription';
 import ApplicationLinkModule from './ApplicationLinkModule';
 import { AccountSubscription } from '@/gql/AccountSubscription';
@@ -28,6 +30,7 @@ export default class AccountModule extends VuexModule {
      */
     @Mutation
     async loadAccount(force = false): Promise<void> {
+        console.log('loadAccount')
         this.isNewProfile = false;
         this.profile = false;
         this.account = false;
@@ -35,84 +38,98 @@ export default class AccountModule extends VuexModule {
         if (this.profile === false || force) {
             this.profileLoadingStatus = LoadingStatus.Loading;
             if (authModule.authLevel > AuthLevel.None && authModule.account) {
-                const getAccountQuery = useLazyQuery(
-                    AccountQuery, {
-                    dtag: authModule.account?.dtag,
-                    address: authModule.account?.address,
-                });
-                const accountSubscription = apolloClient.subscribe({
-                    query: AccountSubscription,
-                    variables: {
+                this.profileLoadingStatus = LoadingStatus.Loading; // set loading
+
+
+                /* Load Account data */
+                const getAccountQuery = apolloClientForbole.query({
+                    query: AccountQuery, variables: {
                         address: authModule.account?.address,
                     }
                 });
-                const profileSubscription = apolloClient.subscribe({
+                const accountRaw = await getAccountQuery;
+                if (accountRaw.error) {
+                    this.account = false;
+                    this.profileLoadingStatus = LoadingStatus.Error;
+                }
+
+                if (accountRaw.data) {
+                    this.account = AccountModule.parseGqlAccountResult(accountRaw.data);
+                } else {
+                    // The user hasn't done any transaction on chain, completelly new account
+                    this.account = new Account(authModule.account.address, 0, 0, 0, 0);
+                }
+
+                /* Load Profile */
+                const getProfileQuery = apolloClientDesmos.query({
+                    query: ProfileQuery, variables: {
+                        dtag: authModule.account?.dtag,
+                        address: authModule.account?.address,
+                    }
+                });
+                const profileRaw = await getProfileQuery;
+                if (profileRaw.error) {
+                    this.profile = false;
+                    this.profileLoadingStatus = LoadingStatus.Error;
+                }
+
+                if (accountRaw.data) {
+                    // The profile exists
+                    this.profile = AccountModule.parseGqlProfileResult(profileRaw.data.profile[0]);
+                } else {
+                    // The profile doesn't exists
+                    this.isNewProfile = true;
+                    this.profile = new Profile(authModule.account?.dtag, authModule.account?.address, "", "", "", "", [], []);
+                }
+
+
+                this.profileLoadingStatus = LoadingStatus.Loaded;
+
+
+
+                // subscribe to profile changes
+                const profileSubscription = apolloClientDesmos.subscribe({
                     query: ProfileSubscription,
                     variables: {
                         dtag: authModule.account?.dtag,
                     }
                 });
-
-
-                const applicationLinkObserver = apolloClient.subscribe({
-                    query: ApplicationLinkSubscription,
-                    variables: {
-                        dtag: authModule.account?.dtag,
-                    },
-                })
-                applicationLinkObserver.subscribe((response) => {
-                    const newApplicationLinks = ApplicationLinkModule.parseApplicationLinks(response['data']['profile'][0]);
-                    if (this.profile) {
-                        this.profile.applicationLinks = newApplicationLinks;
-                    }
-                })
-
-                // parse account result query/subscription
-                getAccountQuery.onResult((result) => {
-                    if (result.loading) {
-                        this.profileLoadingStatus = LoadingStatus.Loading;
-                    }
-                    if (result.data && !result.loading && authModule.account) {
-                        // Manage Acccount info
-                        if (result.data.profile[0]) {
-                            // The profile exists
-                            this.profile = AccountModule.parseGqlProfileResult(result.data.profile[0]);
-                        } else {
-                            // The profile doesn't exists
-                            this.isNewProfile = true;
-                            this.profile = new Profile(authModule.account?.dtag, authModule.account?.address, "", "", "", "", [], []);
-                        }
-
-                        // Manage acccount data
-                        if (result.data.account[0]) {
-                            this.account = AccountModule.parseGqlAccountResult(result.data.account[0]);
-                        } else {
-                            // The user hasn't done any transaction on chain, completelly new account
-                            this.account = new Account(authModule.account.address, 0, 0, 0, 0);
-                        }
-                        this.profileLoadingStatus = LoadingStatus.Loaded;
-                    } else {
-                        // Connection / graphQL issues
-                        this.profile = false;
-                        this.account = false;
-                        this.profileLoadingStatus = LoadingStatus.Error;
-                    }
-                })
-                getAccountQuery.load();
-
-                // subscribe to balance changes
-                accountSubscription.subscribe((response) => {
-                    if (response && response.data.account[0]) {
-                        this.account = AccountModule.parseGqlAccountResult(response.data.account[0]);
-                    }
-                });
-
-                // subscribe to profile changes
                 profileSubscription.subscribe((response) => {
                     if (response && response.data.profile[0]) {
                         this.profile = AccountModule.parseGqlProfileResult(response.data.profile[0]);
                     }
                 });
+
+                /* 
+                                // subscribe to application links changes
+                                const applicationLinkObserver = apolloClientDesmos.subscribe({
+                                    query: ApplicationLinkSubscription,
+                                    variables: {
+                                        dtag: authModule.account?.dtag,
+                                    },
+                                })
+                                applicationLinkObserver.subscribe((response) => {
+                                    const newApplicationLinks = ApplicationLinkModule.parseApplicationLinks(response['data']['profile'][0]);
+                                    if (this.profile) {
+                                        this.profile.applicationLinks = newApplicationLinks;
+                                    }
+                                })
+                 */
+
+                // subscribe to balance changes
+                //TODO: FIX
+                /*const accountSubscription = apolloClientForbole.subscribe({
+                    query: AccountSubscription,
+                    variables: {
+                        address: authModule.account?.address,
+                    }
+                });
+                accountSubscription.subscribe((response) => {
+                    if (response && response.data.account[0]) {
+                        this.account = AccountModule.parseGqlAccountResult(response.data.account[0]);
+                    }
+                }); */
+
             }
         }
     }
@@ -171,23 +188,25 @@ export default class AccountModule extends VuexModule {
         let rewardsTot = 0;
         let unbondingTot = 0;
         try {
-            accountRaw.delegations?.forEach((delegation: any) => {
-                delegationsTot += Number(delegation.amount?.amount);
+            accountRaw.delegations?.delegations?.forEach((delegation: any) => {
+                delegationsTot += Number(delegation?.coins[0]?.amount);
             });
         } catch { null }
 
         try {
             accountRaw.delegation_rewards?.forEach((reward: any) => {
-                rewardsTot += Number(reward.amount[0].amount);
+                rewardsTot += Number(reward.coins[0].amount);
             });
         } catch { null }
 
         try {
-            accountRaw.unbonding_delegations?.forEach((unbond: any) => {
-                unbondingTot += Number(unbond.amount[0].amount);
+            accountRaw.unbonding_delegations?.unbonding_delegations?.forEach((unbond: any) => {
+                unbond.entries.forEach((unbondEntry: any) => {
+                    unbondingTot += Number(unbondEntry.balance);
+                });
             });
         } catch { null }
-        return new Account(accountRaw.address, Number(accountRaw.account_balances[0]?.coins[0]?.amount || 0) / 1000000, delegationsTot / 1000000, rewardsTot / 1000000, unbondingTot / 1000000);
+        return new Account(accountRaw.account[0].address, Number(accountRaw.account_balances?.coins[0]?.amount || 0) / 1000000, delegationsTot / 1000000, rewardsTot / 1000000, unbondingTot / 1000000);
     }
 
 

@@ -4,7 +4,7 @@ import store from '@/store/'
 import router from './router'
 import './ui/tailwind.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
-import { apolloProvider } from './gql/Apollo'
+import { apolloProviderDesmos } from './gql/ApolloDesmos'
 
 const app = createApp({
     render: () => h(App),
@@ -12,5 +12,5 @@ const app = createApp({
 
 app.use(store);
 app.use(router);
-app.use(apolloProvider);
+app.use(apolloProviderDesmos);
 app.mount('#app');

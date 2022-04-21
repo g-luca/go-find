@@ -3,10 +3,10 @@ import store from '@/store';
 import { Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { LoadingStatus } from '@/core/types/LoadingStatus';
 import { provideApolloClient } from '@vue/apollo-composable';
-import { apolloClient } from '@/gql/Apollo';
+import { apolloClientForbole } from '@/gql/ApolloForbole';
 import { StatusSubscription } from '@/gql/StatusSubscription';
 
-provideApolloClient(apolloClient)
+provideApolloClient(apolloClientForbole)
 
 
 enum Status {
@@ -38,7 +38,7 @@ export default class StatusModule extends VuexModule {
      */
     @Mutation
     async startStatusListening(): Promise<void> {
-        const statusObserver = apolloClient.subscribe({
+        const statusObserver = apolloClientForbole.subscribe({
             query: StatusSubscription,
         })
         statusObserver.subscribe((response) => {

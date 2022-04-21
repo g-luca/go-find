@@ -94,7 +94,6 @@ export default defineComponent({
     async beforeMount() {
         const account = authModule.account;
         if (account) {
-            await accountModule.loadAccount();
 
             //register the watcher of the accountModule user account profile
             ref(accountModule.profile);
