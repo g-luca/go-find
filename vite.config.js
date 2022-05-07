@@ -2,11 +2,9 @@ import {
     defineConfig
 } from 'vite'
 import vue from '@vitejs/plugin-vue'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require("path");
 import NodeGlobalsPolyfillPlugin from '@esbuild-plugins/node-globals-polyfill'
-import rollupNodePolyFill from 'rollup-plugin-node-polyfills'
-
-
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -20,24 +18,14 @@ export default defineConfig({
         },
     },
     optimizeDeps: {
-        define: {
-            global: 'globalThis'
-        },
         esbuildOptions: {
+            // Node.js global to browser globalThis
+            define: {
+                global: 'globalThis',
+            },
             // Enable esbuild polyfill plugins
             plugins: [
-                NodeGlobalsPolyfillPlugin({
-                    buffer: true,
-                }),
-            ]
-        }
-    },
-    build: {
-        rollupOptions: {
-            plugins: [
-                // Enable rollup polyfills plugin
-                // used during production bundling
-                rollupNodePolyFill()
+                NodeGlobalsPolyfillPlugin()
             ]
         }
     },

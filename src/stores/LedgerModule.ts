@@ -6,6 +6,7 @@ import { LedgerSigner } from '@cosmjs/ledger-amino';
 import { stringToPath } from '@cosmjs/crypto'
 import { supportedChainLinks } from '@/core/types/SupportedChainLinks';
 import Blockchain from '@/core/types/Blockchain';
+import { Buffer } from 'buffer';
 
 
 export const useLedgerStore = defineStore({

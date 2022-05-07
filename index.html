@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="" class="">
+<html lang="en" class="">
 
 <head>
   <meta charset="utf-8">
@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <meta name="robots" content="index, follow">
   <meta name="language" content="English">
-  <link rel="canonical" href="<%= BASE_URL %>">
   <link rel="icon" href="/favicon.ico">
   <title>Go-find.me | One Profile for Everything</title>
   <meta name="keywords" content="desmos, social, blockchain, decentralized, profile, link, nft, share, dsm">
@@ -27,6 +26,13 @@
   <meta property="twitter:description"
     content="Go-find.me, create your decentralized profile and connect your socials, addresses, NFTs, links all in one place. The first social on Desmos blockchain.">
 
+  <script>
+    window.global = window;
+  </script>
+  <script type="module">
+    import { Buffer } from "buffer";
+    window.Buffer = Buffer;
+  </script>
 </head>
 
 <body>
@@ -35,13 +41,7 @@
       continue.</strong>
   </noscript>
   <div id="app"></div>
-  <!-- built files will be auto injected -->
   <script type="module" src="/src/main.ts"></script>
-
 </body>
 
 </html>
-
-<script>
-  var global = global || window;
-</script>

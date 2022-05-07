@@ -2,7 +2,7 @@ import CryptoUtils from '@/utils/CryptoUtils';
 import { useAuthStore } from '@/stores/AuthModule';
 import { useDesmosNetworkStore } from "@/stores/DesmosNetworkModule";
 import { CosmosAuthInfo, CosmosFee, CosmosPubKey, CosmosSignDoc, CosmosSignerInfo, CosmosSignMode, CosmosTxBody, CosmosTxRaw, Transaction, Wallet } from 'desmosjs';
-
+import { Buffer } from 'buffer';
 
 
 export class DefaultSigner {

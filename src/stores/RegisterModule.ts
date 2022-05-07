@@ -7,6 +7,7 @@ import Api from '@/core/api/Api';
 import AuthAccount from '@/core/types/AuthAccount';
 import { Transaction, Wallet } from 'desmosjs';
 import { useAuthStore } from './AuthModule';
+import { Buffer } from 'buffer';
 
 
 /**
