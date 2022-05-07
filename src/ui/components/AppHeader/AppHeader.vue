@@ -11,7 +11,7 @@
             >
               <div class="flex">
                 <img
-                  src="@/assets/brands/go-find/logo.svg"
+                  src="public/assets/brands/go-find/logo.svg"
                   class="mx-auto object-cover h-10 w-10 rounded-full"
                 >
                 <span class=" hidden md:block my-auto ml-1 px-2 md:px-4 py-0.5 text-white font-medium text-lg rounded-xl bg-gradient-to-r from-indigo-900 via-indigo-800 to-indigo-700">

@@ -7,7 +7,7 @@
       <div class="w-full bg-gradient-to-br to-purple-600 via-royalblue-800 from-royalblue-900 pt-14">
         <div class="min-h-screen h-screen">
           <img
-            src="@/assets/illustrations/user/link-loading.svg"
+            src="public/assets/illustrations/user/link-loading.svg"
             class="h-1/2 mx-auto"
           >
           <div class="pt-10">

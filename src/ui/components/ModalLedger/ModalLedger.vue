@@ -15,7 +15,7 @@
                   <div class="text-left my-auto flex">
                     <img
                       class="h-8 w-8 flex-1 pt-1"
-                      src="@/assets/brands/ledger/logo.svg"
+                      src="public/assets/brands/ledger/logo.svg"
                       alt=""
                     >
                     <h1 class="dark:text-white text-4xl flex-grow pl-3">Ledger</h1>

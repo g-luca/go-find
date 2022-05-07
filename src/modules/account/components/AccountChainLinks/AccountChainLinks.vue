@@ -28,7 +28,7 @@
                   <div class="w-14 sm:w-16 md:w-20 m-auto col-span-2">
                     <img
                       class="p-4 pointer-events-none select-none text-left"
-                      :src="'src/assets/brands/' + chainLink.chain + '/logo.svg'"
+                      :src="'public/assets/brands/' + chainLink.chain + '/logo.svg'"
                       alt=""
                     >
                   </div>
@@ -127,7 +127,7 @@
                         <div class="col-span-4">
                           <img
                             class="p-3 pointer-events-none select-none h-16 w-16"
-                            :src="'src/assets/brands/' + chain.id + '/logo.svg'"
+                            :src="'public/assets/' + chain.id + '/logo.svg'"
                             alt=""
                           >
                         </div>
@@ -205,7 +205,7 @@
                         <div class="col-span-4">
                           <img
                             class="p-3 pointer-events-none select-none h-16 w-16"
-                            :src="'src/assets/brands/' + connectionMethod.logo + '/logo.svg'"
+                            :src="'public/assets/' + connectionMethod.logo + '/logo.svg'"
                             alt=""
                           >
                         </div>
@@ -278,7 +278,7 @@
                         @click="connectWithLedger(ledgerAppName)"
                       >
                         <img
-                          :src="'src/assets/brands/' + ledgerAppName + '/logo.svg'"
+                          :src="'public/assets/' + ledgerAppName + '/logo.svg'"
                           class="w-8 h-8 inline-flex"
                           alt=""
                         >

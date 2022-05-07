@@ -4,7 +4,7 @@ import ApplicationLink from "../ApplicationLink";
 export default class ApplicationLinkTwitter extends ApplicationLink {
     readonly name: string = 'twitter';
     readonly displayName: string = 'Twitter';
-    readonly logo: string = 'src/assets/brands/twitter/logo.svg';
+    readonly logo: string = 'public/assets/brands/twitter/logo.svg';
     readonly url: string = "https://www.twitter.com/";
     readonly redirectUrl = `${this.url}${this.username}`;
     readonly usernameRegExp = /^(\w){1,15}$/;

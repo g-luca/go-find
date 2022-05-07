@@ -63,7 +63,7 @@
                 @click="shareTweet()"
               >
                 <img
-                  src="@/assets/brands/twitter/logo.svg"
+                  src="public/assets/brands/twitter/logo.svg"
                   class="w-10 h-10"
                   alt=""
                 />

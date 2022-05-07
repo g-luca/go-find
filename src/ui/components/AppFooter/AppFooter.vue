@@ -21,7 +21,7 @@
 
       <div class="col-span-12 md:col-span-4 text-center my-auto hidden md:inline">
         <img
-          src="@/assets/brands/go-find/logo.svg"
+          src="public/assets/brands/go-find/logo.svg"
           class="mx-auto object-cover h-10 w-10 rounded-md"
         >
       </div>
@@ -49,7 +49,7 @@
         <h5 class="px-4  text-lg">
           <span class="flex justify-center font-semibold pb-1">
             <img
-              src="@/assets/brands/go-find/logo.svg"
+              src="public/assets/brands/go-find/logo.svg"
               class="object-cover h-6 w-6 rounded-md"
             >o-find.me <span class="text-gray-500 font-extralight"> &nbsp; | &nbsp; © 2021 </span></span>
           <span class="px-4 py-0.5 text-white font-medium text-md rounded-xl bg-gradient-to-r from-indigo-900 via-indigo-800 to-indigo-700">

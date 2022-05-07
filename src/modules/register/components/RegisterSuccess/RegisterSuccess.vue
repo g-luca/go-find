@@ -3,7 +3,7 @@
     <div class="flex justify-center">
       <img
         class="max-h-44 xl:max-h-64"
-        src="@/assets/illustrations/register/register-success.svg"
+        src="public/assets/illustrations/register/register-success.svg"
         alt="Success"
       >
     </div>
