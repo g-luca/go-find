@@ -1,14 +1,14 @@
 import ChainLink from '@/core/types/ChainLink';
 import { LoadingStatus } from '@/core/types/LoadingStatus';
 import { Profile } from '@/core/types/Profile';
-import { apolloClient } from '@/gql/Apollo';
+import { apolloClientDesmos } from '@/gql/ApolloDesmos';
 import { ProfileQuery } from '@/gql/ProfileQuery';
 import { provideApolloClient, useLazyQuery } from '@vue/apollo-composable';
 import { defineStore } from 'pinia'
 import { registerModuleHMR } from '.';
 import { useApplicationLinkStore } from './ApplicationLinkModule';
 
-provideApolloClient(apolloClient)
+provideApolloClient(apolloClientDesmos)
 
 
 export const useProfileStore = defineStore({

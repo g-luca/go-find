@@ -1,17 +1,27 @@
+export type AccountDelegation = {
+    amount: number;
+    rewards: number;
+    unbonding: number;
+    validator_address: string;
+}
+
+export type AccountDelegations = {
+    totalAmount: number;
+    totalRewards: number;
+    totalUnbonding: number;
+    delegations: AccountDelegation[];
+}
+
 export default class Account {
     private _address: string;
     private _balance: number;
-    private _delegations: number;
-    private _rewards: number;
-    private _unbonding: number;
+    private _delegations: AccountDelegations;
 
 
-    constructor(address: string, balance: number, delegations = 0, rewards = 0, unbonding = 0) {
+    constructor(address: string, balance: number, delegations: AccountDelegations) {
         this._address = address;
         this._balance = balance;
         this._delegations = delegations;
-        this._rewards = rewards;
-        this._unbonding = unbonding
     }
 
     /**
@@ -32,29 +42,10 @@ export default class Account {
 
     /**
      * Getter delegations
-     * @return {number}
+     * @return {AccountDelegations}
      */
-    public get delegations(): number {
+    public get delegations(): AccountDelegations {
         return this._delegations;
     }
-
-    /**
-     * Getter rewards
-     * @return {number}
-     */
-    public get rewards(): number {
-        return this._rewards;
-    }
-
-
-    /**
-     * Getter unbonding
-     * @return {number}
-     */
-    public get unbonding(): number {
-        return this._unbonding;
-    }
-
-
 
 }

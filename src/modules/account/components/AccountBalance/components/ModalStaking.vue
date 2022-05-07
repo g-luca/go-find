@@ -40,9 +40,8 @@
               <DialogOverlay />
               <div class="dark:text-white pt-3 pb-1 md:px-4">
                 <section class="pb-4">
-
                   <!-- Totals -->
-                  <span v-if="accountStore.account.delegations>0">
+                  <span v-if="accountStore.account.totalAmount>0">
                     <div class="grid grid-cols-12 pt-4 text-xl">
                       <!-- Delegations -->
                       <div class="col-span-12 md:col-span-4">
@@ -58,9 +57,9 @@
                           <div class="flex flex-col justify-start">
                             <p class="text-gray-700 dark:text-gray-100 text-4xl text-left font-bold my-4">
                               <span class="text-yellow-600 font-bold py-1">
-                                {{ splitNumberLeft(accountStore.account.delegations,".") }}
+                                {{ splitNumberLeft(accountStore.account.delegations.totalAmount,".") }}
                                 <span class="text-lg">
-                                  .{{ splitNumberRight(accountStore.account.delegations,".") }}
+                                  .{{ splitNumberRight(accountStore.account.delegations.totalDelegations,".") }}
                                 </span>
                                 <span class="text-gray-700 dark:text-gray-300 pl-2 text-sm">
                                   {{coinDenom}}
@@ -85,9 +84,9 @@
                           <div class="flex flex-col justify-start">
                             <p class="text-gray-700 dark:text-gray-100 text-4xl text-left font-bold my-4">
                               <span class="text-seagreen-600 font-bold py-1">
-                                {{ splitNumberLeft(accountStore.account.unbonding,".") }}
+                                {{ splitNumberLeft(accountStore.account.delegations.totalUnbonding,".") }}
                                 <span class="text-lg">
-                                  .{{ splitNumberRight(accountStore.account.unbonding,".") }}
+                                  .{{ splitNumberRight(accountStore.account.delegations.totalUnbonding,".") }}
                                 </span>
                                 <span class="text-gray-700 dark:text-gray-300 pl-2 text-sm">
                                   {{coinDenom}}
@@ -112,9 +111,9 @@
                           <div class="flex flex-col justify-start">
                             <p class="text-gray-700 dark:text-gray-100 text-4xl text-left font-bold my-4">
                               <span class="text-blue-600 font-bold py-1">
-                                {{ splitNumberLeft(accountStore.account.rewards,".") }}
+                                {{ splitNumberLeft(accountStore.account.delegations.totalRewards,".") }}
                                 <span class="text-lg">
-                                  .{{ splitNumberRight(accountStore.account.rewards,".") }}
+                                  .{{ splitNumberRight(accountStore.account.delegations.totalRewards,".") }}
                                 </span>
                                 <span class="text-gray-700 dark:text-gray-300 pl-2 text-sm">
                                   {{coinDenom}}
@@ -152,10 +151,10 @@
                           <div class="col-span-2 py-3 border-b border-indigo-700 dark:text-white text-gray-800  text-center text-sm uppercase font-normal my-auto">
                             Commission
                           </div>
-                          <div class="col-span-1 py-3 border-b border-indigo-700 dark:text-white text-gray-800  text-center text-sm uppercase font-normal my-auto">
+                          <!-- <div class="col-span-1 py-3 border-b border-indigo-700 dark:text-white text-gray-800  text-center text-sm uppercase font-normal my-auto">
                             Delegators
-                          </div>
-                          <div class="col-span-2 py-3 border-b border-indigo-700 dark:text-white text-gray-800  text-center text-sm uppercase font-normal my-auto">
+                          </div> -->
+                          <div class="col-span-3 py-3 border-b border-indigo-700 dark:text-white text-gray-800  text-center text-sm uppercase font-normal my-auto">
                             Uptime
                           </div>
                         </div>
@@ -164,7 +163,7 @@
                         <div
                           v-for="(validator) in validators"
                           class="text-black dark:bg-gray-800 bg-gray-100 hover:bg-white dark:hover:bg-denim-900 hover:scale-x-105 duration-500 group grid grid-cols-12 hover:rounded-3xl rounded-sm mb-0.5 hover:shadow-xl py-3"
-                          :class="{'border-l-2 border-brand ': validator.delegations.length>0}"
+                          :class="{'border-l-2 border-brand ': validator.delegation?.amount>0}"
                         >
                           <!-- Moniker & icon -->
                           <div class="col-span-12 md:col-span-5 border-gray-300 dark:border-gray-700 text-sm text-center my-auto pl-3">
@@ -235,18 +234,18 @@
                           </div>
 
                           <!-- Delegators -->
-                          <div class="col-span-6 md:col-span-1 border-gray-300 dark:border-gray-700 text-sm text-center my-auto">
+                          <!-- <div class="col-span-6 md:col-span-1 border-gray-300 dark:border-gray-700 text-sm text-center my-auto">
                             <div class="md:hidden text-gray-700 dark:text-gray-400">
                               Delegators
                             </div>
                             <p class="text-gray-900 whitespace-no-wrap dark:text-white">
                               {{validator.delegations_aggregate.aggregate.count}}
                             </p>
-                          </div>
+                          </div> -->
 
                           <!-- Uptime -->
                           <div
-                            class="col-span-12 md:col-span-2 border-gray-300 dark:border-gray-700 text-sm text-center my-auto"
+                            class="col-span-12 md:col-span-3 border-gray-300 dark:border-gray-700 text-sm text-center my-auto"
                             :set="uptime=toDigitsFormat((15000-(validator.validator_signing_infos[0]?.missed_blocks_counter || 0)) / 15000 * 100,0)"
                           >
                             <span
@@ -281,10 +280,8 @@
                           </div>
 
                           <!-- Actions -->
-                          <div
-                            class="col-span-12 hidden group-hover:block py-2"
-                            :class="validator.delegations[0]?.amount||0?'block':'hidden'"
-                          >
+                          <!-- :class="validator.delegations[0]?.amount||0?'block':'hidden'" -->
+                          <div class="col-span-12 hidden group-hover:block py-2">
                             <div class="grid grid-cols-12 pt-4">
                               <!-- Delegated -->
                               <div class="col-span-12 md:col-span-4 dark:border-gray-700 text-sm text-center my-auto py-2 md:py-0">
@@ -294,7 +291,7 @@
                                 </div>
                                 <h6
                                   class="text-gray-900 whitespace-no-wrap dark:text-white pl-2 py-1.5 text-xl"
-                                  :set="userDelegation=validator.delegations[0]?.amount.amount||0"
+                                  :set="userDelegation=validator.delegation?.amount||0"
                                 >
                                   {{toDigitsFormat(userDelegation/1000000,6)}} {{coinDenom}}
                                 </h6>
@@ -307,7 +304,7 @@
                                   Delegate
                                 </button>
                                 <button
-                                  v-if="validator.delegations[0]?.amount.amount>0"
+                                  v-if="validator.delegation?.amount>0"
                                   class="px-4 py-1 bg-purple-500 hover:bg-purple-600 rounded-lg text-white ml-1"
                                   type="button"
                                   @click="onRedelegate(validator)"
@@ -319,7 +316,7 @@
                               <!-- Unbonding -->
                               <div
                                 class="col-span-12 md:col-span-4 dark:border-gray-700 text-sm my-auto text-center py-2 md:py-0"
-                                :set="userUnbonding=validator.unbonding_delegations[0]?.amount.amount||0"
+                                :set="userUnbonding=validator.delegation?.unbonding||0"
                               >
                                 <div class="text-md text-seagreen-800 dark:text-green-600 pt-1">
                                   <i class="bi bi-hourglass-split text-base text-seagreen-700 dark:text-green-300 p-2 bg-seagreen-400 rounded-full bg-opacity-50" />
@@ -331,7 +328,7 @@
                                   </span>
                                 </h6>
                                 <button
-                                  v-if="validator.delegations[0]?.amount.amount>0"
+                                  v-if="validator.delegation?.amount>0"
                                   class="px-4 py-1 bg-seagreen-400 hover:bg-green-600 rounded-lg text-white"
                                   type="button"
                                   @click="onUnbond(validator)"
@@ -343,7 +340,7 @@
                               <!-- Rewards -->
                               <div
                                 class="col-span-12 md:col-span-4 dark:border-gray-700 text-sm my-auto text-center bg-opacity-50 py-2 md:py-0"
-                                :set="userRewards=validator.delegation_rewards[0]?.amount[0]?.amount||0"
+                                :set="userRewards=validator.delegation?.rewards||0"
                               >
                                 <div class="text-md text-blue-700 pt-1">
                                   <i class="bi bi-stars text-base text-blue-700 p-2 bg-blue-300 rounded-full" />
@@ -645,6 +642,9 @@ import { BroadcastMode } from "@cosmjs/launchpad";
 import { useTransactionStore } from "@/stores/TransactionModule";
 import { useAccountStore } from "@/stores/AccountModule";
 import { useAuthStore } from "@/stores/AuthModule";
+import { apolloClientDesmos } from "@/gql/ApolloDesmos";
+import { apolloClientForbole } from "@/gql/ApolloForbole";
+import { AccountDelegation } from "@/core/types/Account";
 
 enum StakingOperations {
   None = "none",
@@ -709,7 +709,7 @@ export default defineComponent({
       const apollo = useApolloClient();
       this.validators = [];
       try {
-        const validatorsRaw = await apollo.client.query({
+        const validatorsRaw = await apolloClientForbole.query({
           query: ValidatorsQuery,
           variables: {
             address: this.authStore.account?.address,
@@ -723,6 +723,7 @@ export default defineComponent({
             this.totalVotingPower += Number(
               this.validators[i]["validator_voting_powers"][0]["voting_power"]
             );
+
             try {
               apollo.client
                 .query({
@@ -776,6 +777,19 @@ export default defineComponent({
                 });
             } catch (e) {
               // skip
+            }
+
+            if (accountModule.account && accountModule.account.delegations) {
+              accountModule.account.delegations.delegations.forEach(
+                (del: AccountDelegation) => {
+                  if (
+                    del.validator_address ===
+                    this.validators[i]["validator_info"]["operator_address"]
+                  ) {
+                    (this.validators[i]["delegation"] as any) = del;
+                  }
+                }
+              );
             }
           }
         }
@@ -869,8 +883,8 @@ export default defineComponent({
           this.stakingOperation === StakingOperations.Redelegate
         ) {
           maxAmount =
-            this.stakingOperationValidatorFrom.delegations[0]?.amount.amount /
-              1000000 || 0;
+            this.stakingOperationValidatorFrom.delegation?.amount / 1000000 ||
+            0;
         } else {
           if (this.accountStore.account) {
             maxAmount = this.accountStore.account.balance;

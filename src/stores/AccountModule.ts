@@ -7,7 +7,10 @@ import { registerModuleHMR } from '.';
 import { AccountSubscription } from '@/gql/AccountSubscription';
 import { ProfileSubscription } from '@/gql/ProfileSubscription';
 import { AccountQuery } from '@/gql/AccountQuery';
-import { apolloClient } from '@/gql/Apollo';
+import { ProfileQuery } from '@/gql/ProfileQuery';
+import { apolloClientDesmos } from '@/gql/ApolloDesmos';
+import { apolloClientForbole } from '@/gql/ApolloForbole';
+import { AccountDelegation, AccountDelegations } from '@/core/types/Account';
 import { ApplicationLinkSubscription } from '@/gql/ApplicationLinkSubscription';
 import { useLazyQuery, useApolloClient } from '@vue/apollo-composable';
 import ChainLink from '@/core/types/ChainLink';
@@ -39,18 +42,60 @@ export const useAccountStore = defineStore({
             if (this.profile === false || force) {
                 this.profileLoadingStatus = LoadingStatus.Loading;
                 if (authStore.authLevel > AuthLevel.None && authStore.account) {
-                    const getAccountQuery = useLazyQuery(
-                        AccountQuery, {
-                        dtag: authStore.account?.dtag,
-                        address: authStore.account?.address,
+
+                    /* Load Account data */
+                    const getAccountQuery = apolloClientForbole.query({
+                        query: AccountQuery, variables: {
+                            address: authStore.account.address,
+                        }
                     });
-                    const accountSubscription = apolloClient.subscribe({
+                    const accountRaw = await getAccountQuery;
+                    if (accountRaw.error) {
+                        this.account = false;
+                        this.profileLoadingStatus = LoadingStatus.Error;
+                    }
+                    if (accountRaw.data) {
+                        this.account = parseGqlAccountResult(accountRaw.data);
+                    } else {
+                        // The user hasn't done any transaction on chain, completelly new account
+                        this.account = new Account(authStore.account.address, 0, { delegations: [], totalAmount: 0, totalRewards: 0, totalUnbonding: 0 });
+                    }
+
+
+                    /* Load Profile */
+                    const getProfileQuery = apolloClientDesmos.query({
+                        query: ProfileQuery, variables: {
+                            dtag: authStore.account?.dtag,
+                            address: authStore.account?.address,
+                        }
+                    });
+                    const profileRaw = await getProfileQuery;
+                    if (profileRaw.error) {
+                        this.profile = false;
+                        this.profileLoadingStatus = LoadingStatus.Error;
+                    }
+
+                    if (accountRaw.data) {
+                        // The profile exists
+                        this.profile = parseGqlProfileResult(profileRaw.data.profile[0]);
+                    } else {
+                        // The profile doesn't exists
+                        this.isNewProfile = true;
+                        this.profile = new Profile(authStore.account?.dtag, authStore.account?.address, "", "", "", "", [], []);
+                    }
+
+
+                    this.profileLoadingStatus = LoadingStatus.Loaded;
+
+
+
+                    const accountSubscription = apolloClientForbole.subscribe({
                         query: AccountSubscription,
                         variables: {
                             address: authStore.account?.address,
                         }
                     });
-                    const profileSubscription = apolloClient.subscribe({
+                    const profileSubscription = apolloClientDesmos.subscribe({
                         query: ProfileSubscription,
                         variables: {
                             dtag: authStore.account?.dtag,
@@ -58,7 +103,7 @@ export const useAccountStore = defineStore({
                     });
 
 
-                    const applicationLinkObserver = apolloClient.subscribe({
+                    const applicationLinkObserver = apolloClientDesmos.subscribe({
                         query: ApplicationLinkSubscription,
                         variables: {
                             dtag: authStore.account?.dtag,
@@ -70,39 +115,6 @@ export const useAccountStore = defineStore({
                             this.profile.applicationLinks = newApplicationLinks;
                         }
                     })
-
-                    // parse account result query/subscription
-                    getAccountQuery.onResult((result) => {
-                        if (result.loading) {
-                            this.profileLoadingStatus = LoadingStatus.Loading;
-                        }
-                        if (result.data && !result.loading && authStore.account) {
-                            // Manage Acccount info
-                            if (result.data.profile[0]) {
-                                // The profile exists
-                                this.profile = parseGqlProfileResult(result.data.profile[0]);
-                            } else {
-                                // The profile doesn't exists
-                                this.isNewProfile = true;
-                                this.profile = new Profile(authStore.account?.dtag, authStore.account?.address, "", "", "", "", [], []);
-                            }
-
-                            // Manage acccount data
-                            if (result.data.account[0]) {
-                                this.account = parseGqlAccountResult(result.data.account[0]);
-                            } else {
-                                // The user hasn't done any transaction on chain, completelly new account
-                                this.account = new Account(authStore.account.address, 0, 0, 0, 0);
-                            }
-                            this.profileLoadingStatus = LoadingStatus.Loaded;
-                        } else {
-                            // Connection / graphQL issues
-                            this.profile = false;
-                            this.account = false;
-                            this.profileLoadingStatus = LoadingStatus.Error;
-                        }
-                    })
-                    getAccountQuery.load();
 
                     // subscribe to balance changes
                     accountSubscription.subscribe((response) => {
@@ -151,7 +163,7 @@ export const useAccountStore = defineStore({
          * Set a profile as new
          * @param dtag optional new dtag to set
          */
-        setIsNewProfile(dtag: string = ''): void {
+        setIsNewProfile(dtag = ''): void {
             this.isNewProfile = true;
             if (this.profile && dtag) {
                 this.profile.dtag = dtag;
@@ -180,27 +192,57 @@ export const useAccountStore = defineStore({
  */
 function parseGqlAccountResult(accountRaw: any): Account {
     // calculate the total of the delegations/rewards/unbonding (if they exists)
+    // calculate the total of the delegations/rewards/unbonding (if they exists)
     let delegationsTot = 0;
     let rewardsTot = 0;
     let unbondingTot = 0;
+    const finalDelegations: AccountDelegations = {
+        delegations: [],
+        totalAmount: 0,
+        totalRewards: 0,
+        totalUnbonding: 0,
+    }
+
+    const table = new Map<string, AccountDelegation>();
     try {
-        accountRaw.delegations?.forEach((delegation: any) => {
-            delegationsTot += Number(delegation.amount?.amount);
+        accountRaw.delegations?.delegations?.forEach((delegation: any) => {
+            table.set(delegation.validator_address, { amount: Number(delegation?.coins[0]?.amount), validator_address: delegation?.validator_address, rewards: 0 / 1000000, unbonding: 0 / 1000000 })
+            delegationsTot += Number(delegation?.coins[0]?.amount / 1000000);
         });
+        finalDelegations.totalAmount = delegationsTot;
     } catch { null }
 
     try {
         accountRaw.delegation_rewards?.forEach((reward: any) => {
-            rewardsTot += Number(reward.amount[0].amount);
+            const tmp = table.get(reward.validator_address)
+            tmp!.rewards = Number(reward.coins[0].amount);
+            table.set(reward.validator_address, tmp!);
+            rewardsTot += Number(reward.coins[0].amount);
         });
+        finalDelegations.totalRewards = rewardsTot / 1000000;
     } catch { null }
 
     try {
-        accountRaw.unbonding_delegations?.forEach((unbond: any) => {
-            unbondingTot += Number(unbond.amount[0].amount);
+        accountRaw.unbonding_delegations?.unbonding_delegations?.forEach((unbond: any) => {
+            unbond.entries.forEach((unbondEntry: any) => {
+                const tmp = table.get(unbond.validator_address)
+                tmp!.unbonding = Number(unbondEntry.balance);
+                table.set(unbond.validator_address, tmp!);
+                unbondingTot += Number(unbondEntry.balance);
+            });
         });
+        finalDelegations.totalUnbonding = unbondingTot / 1000000;
     } catch { null }
-    return new Account(accountRaw.address, Number(accountRaw.account_balances[0]?.coins[0]?.amount || 0) / 1000000, delegationsTot / 1000000, rewardsTot / 1000000, unbondingTot / 1000000);
+
+    table.forEach((entry, key) => {
+        finalDelegations.delegations.push({
+            validator_address: key,
+            amount: entry.amount,
+            rewards: entry.rewards,
+            unbonding: entry.unbonding,
+        });
+    })
+    return new Account(accountRaw.account[0].address, Number(accountRaw.account_balances?.coins[0]?.amount || 0) / 1000000, finalDelegations);
 }
 
 
@@ -223,6 +265,7 @@ function parseGqlProfileResult(profileRaw: any): Profile {
     return new Profile(profileRaw.dtag, profileRaw.address, profileRaw.nickname, profileRaw.bio, profileRaw.profile_pic, profileRaw.cover_pic, applicationLinks, chainLinks);
 
 }
+
 
 
 // Register the store to enable HMR

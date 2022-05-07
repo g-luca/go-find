@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import { registerModuleHMR } from '.';
 import { provideApolloClient } from '@vue/apollo-composable';
-import { apolloClient } from '@/gql/Apollo';
+import { apolloClientForbole } from '@/gql/ApolloForbole';
 import { StatusSubscription } from '@/gql/StatusSubscription';
 
-provideApolloClient(apolloClient)
+provideApolloClient(apolloClientForbole)
 
 
 enum Status {
@@ -36,7 +36,7 @@ export const useStatusStore = defineStore({
     },
     actions: {
         async startStatusListening(): Promise<void> {
-            const statusObserver = apolloClient.subscribe({
+            const statusObserver = apolloClientForbole.subscribe({
                 query: StatusSubscription,
             })
             statusObserver.subscribe((response) => {

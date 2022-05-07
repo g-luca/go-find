@@ -117,7 +117,8 @@ export const useWalletStore = defineStore({
             }
 
             // get account desmos profile, if exists
-            const profile = await (await this.wallet.client).getProfile(account.address);
+            const walletClient = await this.wallet.client;
+            const profile = await walletClient.getProfile(account.address);
             // save authentication data
             authStore.saveAuthAccount({ account: new AuthAccount(profile?.dtag || '', account.address, this.signerId === SupportedSigner.KEPLR, this.signerId === SupportedSigner.WALLETCONNECT) });
             authStore.authenticate();

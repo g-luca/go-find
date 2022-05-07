@@ -6,11 +6,11 @@ import { getMainDefinition } from 'apollo-utilities'
 // HTTP connection to the API
 const httpLink = createHttpLink({
     // You should use an absolute URL here
-    uri: `https://${import.meta.env.VITE_APP_GRAPH_ENDPOINT}`,
+    uri: `https://${import.meta.env.VITE_APP_GRAPH_FORBOLE_ENDPOINT}`,
 })
 
 const wsLink = new WebSocketLink({
-    uri: `wss://${import.meta.env.VITE_APP_GRAPH_WS_ENDPOINT}`,
+    uri: `wss://${import.meta.env.VITE_APP_GRAPH_WS_FORBOLE_ENDPOINT}`,
     options: {
         reconnect: true,
         timeout: 30000,
@@ -32,11 +32,7 @@ const link = split(
 const cache = new InMemoryCache()
 
 // Create the apollo client
-export const apolloClient = new ApolloClient({
+export const apolloClientForbole = new ApolloClient({
     link: link,
     cache,
-})
-
-export const apolloProvider = createApolloProvider({
-    defaultClient: apolloClient,
 })

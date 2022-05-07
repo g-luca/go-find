@@ -302,10 +302,9 @@ export default defineComponent({
      */
     async loadGovernance() {
       this.isLoadinGovernance = true;
-      const apollo = useApolloClient();
       this.proposals = [];
       try {
-        const governanceRaw = await apollo.client.query({
+        const governanceRaw = await apolloClientForbole.query({
           query: GovernanceQuery,
           variables: {
             address: this.authStore.account?.address,

@@ -474,7 +474,7 @@ export default defineComponent({
           memo: "Profile update | Go-find",
           messages: [
             {
-              typeUrl: "/desmos.profiles.v1beta1.MsgSaveProfile",
+              typeUrl: "/desmos.profiles.v2.MsgSaveProfile",
               value: msgSaveProfile as any,
             },
           ],

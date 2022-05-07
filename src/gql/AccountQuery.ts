@@ -1,42 +1,25 @@
 import { gql } from "@apollo/client/core";
 
 export const AccountQuery = gql`
-    query profile($dtag: String!, $address:String!) {
-        profile(where: {dtag: {_ilike: $dtag}}){
-            dtag
-            nickname
+    query profile($address:String!) {
+        account(where:{address:{_eq:$address}}){
             address
-            bio
-            profile_pic
-            cover_pic
-            application_links {
-                application
-                username
-                state
-            }
-            chain_links {
-                external_address
-                chain_config {
-                    name
-                }
-            }
-        }account(where:{address:{_eq: $address}}){
-            address
-            account_balances{
-                coins
-            }
-            delegations{
-                amount
-            }
-            unbonding_delegations{
-                amount
-            }
-            redelegations{
-                amount
-            }
-            delegation_rewards{
-                amount
-            }
+        }
+        account_balances: action_account_balance(address:$address){
+            coins
+        }
+        delegations: action_delegation(address:$address){
+            delegations
+        }
+        unbonding_delegations: action_unbonding_delegation(address:$address){
+            unbonding_delegations
+        }
+        redelegations: action_redelegation(address:$address){
+            redelegations
+        }
+        delegation_rewards: action_delegation_reward(address:$address){
+            coins
+            validator_address
         }
     }
 `;
