@@ -153,7 +153,7 @@
                     </div>
                   </div>
 
-                  <div v-if="isCustomChain">
+                  <!-- <div v-if="isCustomChain">
                     <label
                       for="chainName"
                       class="text-gray-700 text-sm"
@@ -168,7 +168,7 @@
                       name="chainName"
                       placeholder="Chain name"
                     >
-                  </div>
+                  </div> -->
                 </div>
               </div>
               <div class="text-center text-xs dark:text-gray-400 text-gray-600 mt-1">
@@ -177,7 +177,7 @@
 
               <!-- Method Select -->
               <div
-                v-if="isCustomChain||selectedChain"
+                v-if="selectedChain"
                 class="md:flex -mx-4 pt-4"
               >
                 <div class="px-4">

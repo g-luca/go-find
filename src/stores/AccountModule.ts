@@ -144,7 +144,7 @@ export const useAccountStore = defineStore({
             let profile: Profile | null = null;
             try {
                 const profileRaw = await apollo.client.query({
-                    query: AccountQuery, variables: { dtag, address: "" }, fetchPolicy: "no-cache"
+                    query: ProfileQuery, variables: { dtag, address: "" }, fetchPolicy: "no-cache"
                 });
                 if (profileRaw.data && profileRaw.data.profile[0]) {
                     profile = parseGqlProfileResult(profileRaw.data.profile[0]);

@@ -425,7 +425,7 @@ export default defineComponent({
           } else {
             if (
               this.txSent?.messages[0].typeUrl ===
-              "/desmos.profiles.v1beta1.MsgDeleteProfile"
+              "/desmos.profiles.v2.MsgDeleteProfile"
             ) {
               this.accountStore.setIsNewProfile();
             } else {
@@ -613,7 +613,7 @@ export default defineComponent({
         memo: "Profile delete",
         messages: [
           {
-            typeUrl: "/desmos.profiles.v1beta1.MsgDeleteProfile",
+            typeUrl: "/desmos.profiles.v2.MsgDeleteProfile",
             value: msgDeleteProfile as any,
           },
         ],

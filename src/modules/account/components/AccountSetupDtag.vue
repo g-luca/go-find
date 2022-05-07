@@ -164,7 +164,7 @@ export default defineComponent({
             Api.get(
               `${
                 import.meta.env.VITE_APP_LCD_ENDPOINT
-              }/desmos/profiles/v1beta1/profiles/` + this.inputDtag
+              }/desmos/profiles/v2/profiles/` + this.inputDtag
             ).then((response) => {
               if (this.inputDtag === dtag && response["profile"]) {
                 // dtag already taken

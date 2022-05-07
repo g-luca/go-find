@@ -541,7 +541,7 @@ export default defineComponent({
           // handle new application link
           if (
             this.tx?.messages[0].typeUrl ===
-              "/desmos.profiles.v1beta1.MsgLinkApplication" &&
+              "/desmos.profiles.v2.MsgLinkApplication" &&
             this.newApplicationLink
           ) {
             console.log("application link success!");
@@ -559,7 +559,7 @@ export default defineComponent({
           // handle application unlink
           if (
             this.tx?.messages[0].typeUrl ===
-              "/desmos.profiles.v1beta1.MsgUnlinkApplication" &&
+              "/desmos.profiles.v2.MsgUnlinkApplication" &&
             this.deletedApplicationLink
           ) {
             this.accountStore.profile.applicationLinks.slice(
@@ -606,7 +606,7 @@ export default defineComponent({
           memo: "Application unlink | Go-find",
           messages: [
             {
-              typeUrl: "/desmos.profiles.v1beta1.MsgUnlinkApplication",
+              typeUrl: "/desmos.profiles.v2.MsgUnlinkApplication",
               value: msgUnlinkApplication as any,
             },
           ],

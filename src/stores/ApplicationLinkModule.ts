@@ -34,7 +34,7 @@ export const useApplicationLinkStore = defineStore({
             }
 
             const msgLinkApplication: MsgLinkApplicationEncodeObject = {
-                typeUrl: "/desmos.profiles.v1beta1.MsgLinkApplication",
+                typeUrl: "/desmos.profiles.v2.MsgLinkApplication",
                 value: {
                     callData: callData,
                     linkData: {
@@ -51,7 +51,7 @@ export const useApplicationLinkStore = defineStore({
                 memo: `Application link ${application} | Go-find`,
                 messages: [
                     {
-                        typeUrl: "/desmos.profiles.v1beta1.MsgLinkApplication",
+                        typeUrl: "/desmos.profiles.v2.MsgLinkApplication",
                         value: msgLinkApplication.value as any,
                     }
                 ],

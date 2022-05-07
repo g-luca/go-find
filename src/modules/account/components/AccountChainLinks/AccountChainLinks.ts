@@ -81,7 +81,7 @@ export default defineComponent({
                     // the tx went well! update the data 
 
                     // handle new chain link
-                    if (this.tx?.messages[0].typeUrl === "/desmos.profiles.v1beta1.MsgLinkChainAccount" && this.newChainLink) {
+                    if (this.tx?.messages[0].typeUrl === "/desmos.profiles.v2.MsgLinkChainAccount" && this.newChainLink) {
                         console.log('chain link success!')
                         this.accountStore.profile.chainLinks.push(new ChainLink(this.newChainLink.address, this.newChainLink.chain));
                         this.newChainLink = null;
@@ -89,7 +89,7 @@ export default defineComponent({
                     }
 
                     // handle chain unlink
-                    if (this.tx?.messages[0].typeUrl === "/desmos.profiles.v1beta1.MsgUnlinkChainAccount" && this.deletedChainLink) {
+                    if (this.tx?.messages[0].typeUrl === "/desmos.profiles.v2.MsgUnlinkChainAccount" && this.deletedChainLink) {
                         this.accountStore.profile.chainLinks.slice(this.accountStore.profile.chainLinks.indexOf(new ChainLink(this.deletedChainLink.address, this.deletedChainLink.chain)), 1);
                         this.accountStore.profile.chainLinks = this.accountStore.profile.chainLinks.filter((chainLink) => {
                             return chainLink.address !== this.deletedChainLink?.address && chainLink.chain !== this.deletedChainLink?.chain;
@@ -141,7 +141,7 @@ export default defineComponent({
                     memo: "Chain unlink | Go-find",
                     messages: [
                         {
-                            typeUrl: "/desmos.profiles.v1beta1.MsgUnlinkChainAccount",
+                            typeUrl: "/desmos.profiles.v2.MsgUnlinkChainAccount",
                             value: msgUnlink as any,
                         }
                     ],
@@ -363,7 +363,7 @@ export default defineComponent({
         async sendChainLink(selectedChain: Blockchain, destAdress: string, userAddress: string, proof: Proof) {
             const msgLinkChain: MsgLinkChainAccount = {
                 chainAddress: {
-                    typeUrl: "/desmos.profiles.v1beta1.Bech32Address",
+                    typeUrl: "/desmos.profiles.v2.Bech32Address",
                     value: Bech32Address.encode({
                         prefix: selectedChain.bechPrefix,
                         value: destAdress,
@@ -379,7 +379,7 @@ export default defineComponent({
                 memo: "Chain link | Go-find",
                 messages: [
                     {
-                        typeUrl: "/desmos.profiles.v1beta1.MsgLinkChainAccount",
+                        typeUrl: "/desmos.profiles.v2.MsgLinkChainAccount",
                         value: msgLinkChain as any,
                     }
                 ],
