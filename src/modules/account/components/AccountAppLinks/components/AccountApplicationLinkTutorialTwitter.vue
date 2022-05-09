@@ -287,14 +287,17 @@ export default defineComponent({
           value: this.username,
         };
         const callData = Buffer.from(JSON.stringify(data)).toString("hex");
-        const txBody = useApplicationLinkStore().generateApplicationLinkTxBody(
-          "twitter",
-          this.username,
-          callData
-        );
+        const obj =
+          useApplicationLinkStore().generateApplicationLinkWrapperObject(
+            "twitter",
+            this.username,
+            callData
+          );
+
         this.$emit("applicationLinkSent", {
-          txBody: txBody,
+          messages: [obj?.message],
           applicationLink: new ApplicationLinkTwitter(this.username),
+          memo: obj?.memo,
         });
       } else {
         this.checkError = "Twitter biography link not found";
@@ -306,14 +309,17 @@ export default defineComponent({
         value: this.tweetId,
       };
       const callData = Buffer.from(JSON.stringify(data)).toString("hex");
-      const txBody = useApplicationLinkStore().generateApplicationLinkTxBody(
-        "twitter",
-        this.username,
-        callData
-      );
+      const obj =
+        useApplicationLinkStore().generateApplicationLinkWrapperObject(
+          "twitter",
+          this.username,
+          callData
+        );
+
       this.$emit("applicationLinkSent", {
-        txBody: txBody,
+        messages: [obj?.message],
         applicationLink: new ApplicationLinkTwitter(this.username),
+        memo: obj?.memo,
       });
     },
   },

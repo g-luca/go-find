@@ -333,6 +333,11 @@ import { useAccountStore } from "@/stores/AccountModule";
 import { useAuthStore } from "@/stores/AuthModule";
 import { MsgSaveProfile } from "@desmoslabs/desmjs-types/desmos/profiles/v2/msgs_profile";
 import Long from "long";
+import {
+  MsgDeleteProfileEncodeObject,
+  MsgSaveProfileEncodeObject,
+} from "@desmoslabs/desmjs";
+import { EncodeObject } from "@cosmjs/proto-signing";
 
 enum UploadImageType {
   "profilePic" = "profilePic",
@@ -371,7 +376,7 @@ export default defineComponent({
       accountStore: useAccountStore(),
       initialValues,
       formSchema,
-      txSent: null as TxBody | null,
+      messageSent: null as EncodeObject | null,
       inputNickname: "",
       inputProfilePic: "",
       inputProfileCover: "",
@@ -413,7 +418,8 @@ export default defineComponent({
         // check if is processing the right transaction and the status
         if (
           this.accountStore.profile &&
-          this.transactionStore.tx === this.txSent &&
+          // TODO: check
+          this.transactionStore.messages[0] === this.messageSent &&
           (this.transactionStore.transactionStatus ===
             TransactionStatus.Error ||
             this.transactionStore.transactionStatus ===
@@ -424,7 +430,7 @@ export default defineComponent({
             console.log("update failure!");
           } else {
             if (
-              this.txSent?.messages[0].typeUrl ===
+              this.messageSent?.typeUrl ===
               "/desmos.profiles.v2.MsgDeleteProfile"
             ) {
               this.accountStore.setIsNewProfile();
@@ -439,7 +445,7 @@ export default defineComponent({
                 this.accountStore.setNotNewProfile();
               }
             }
-            this.txSent = null;
+            this.messageSent = null;
             this.handleResetForm();
           }
         }
@@ -450,42 +456,34 @@ export default defineComponent({
     submitEdit(_data: void, { resetForm }: unknown): void {
       if (this.accountStore.profile) {
         const doNotModify = "[do-not-modify]";
-        const msgSaveProfile: MsgSaveProfile = {
-          dtag: this.accountStore.profile.dtag,
-          nickname:
-            this.accountStore.profile.nickname !== this.inputNickname
-              ? this.inputNickname
-              : doNotModify,
-          bio:
-            this.accountStore.profile.bio !== this.inputBio
-              ? this.inputBio
-              : doNotModify,
-          profilePicture:
-            this.accountStore.profile.profilePic !== this.inputProfilePic
-              ? this.inputProfilePic
-              : doNotModify,
-          coverPicture:
-            this.accountStore.profile.profileCover !== this.inputProfileCover
-              ? this.inputProfileCover
-              : doNotModify,
-          creator: this.accountStore.profile.address,
+        const msgSaveProfile: MsgSaveProfileEncodeObject = {
+          typeUrl: "/desmos.profiles.v2.MsgSaveProfile",
+          value: {
+            dtag: this.accountStore.profile.dtag,
+            nickname:
+              this.accountStore.profile.nickname !== this.inputNickname
+                ? this.inputNickname
+                : doNotModify,
+            bio:
+              this.accountStore.profile.bio !== this.inputBio
+                ? this.inputBio
+                : doNotModify,
+            profilePicture:
+              this.accountStore.profile.profilePic !== this.inputProfilePic
+                ? this.inputProfilePic
+                : doNotModify,
+            coverPicture:
+              this.accountStore.profile.profileCover !== this.inputProfileCover
+                ? this.inputProfileCover
+                : doNotModify,
+            creator: this.accountStore.profile.address,
+          },
         };
-        const txBody: TxBody = {
-          memo: "Profile update | Go-find",
-          messages: [
-            {
-              typeUrl: "/desmos.profiles.v2.MsgSaveProfile",
-              value: msgSaveProfile as any,
-            },
-          ],
-          extensionOptions: [],
-          nonCriticalExtensionOptions: [],
-          timeoutHeight: Long.ZERO,
-        };
-        this.txSent = txBody;
+        this.messageSent = msgSaveProfile;
         this.transactionStore.start({
-          tx: txBody,
+          messages: [msgSaveProfile],
           mode: BroadcastMode.Sync,
+          memo: "Profile update | Go-find",
         });
 
         // Vee Validate send as parameter the reset function, i need to save it to use for the reset after an update
@@ -606,26 +604,18 @@ export default defineComponent({
       return false;
     },
     async deleteProfile() {
-      const msgDeleteProfile: MsgDeleteProfile = {
-        creator: this.authStore.account!.address,
-      };
-      const txBody: TxBody = {
-        memo: "Profile delete",
-        messages: [
-          {
-            typeUrl: "/desmos.profiles.v2.MsgDeleteProfile",
-            value: msgDeleteProfile as any,
-          },
-        ],
-        extensionOptions: [],
-        nonCriticalExtensionOptions: [],
-        timeoutHeight: Long.ZERO,
+      const msgDeleteProfile: MsgDeleteProfileEncodeObject = {
+        typeUrl: "/desmos.profiles.v2.MsgDeleteProfile",
+        value: {
+          creator: this.authStore.account!.address,
+        },
       };
       this.transactionStore.start({
-        tx: txBody,
+        messages: [msgDeleteProfile],
         mode: BroadcastMode.Async,
+        memo: "Profile delete | Go-find",
       });
-      this.txSent = txBody;
+      this.messageSent = msgDeleteProfile;
       this.toggleProfileOptionDropdown();
     },
     toggleProfileOptionDropdown() {

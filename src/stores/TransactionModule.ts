@@ -4,7 +4,7 @@ import { useAuthStore } from './AuthModule';
 import { useWalletStore } from './WalletModule';
 import { StdFee } from "@cosmjs/amino";
 import { BroadcastMode } from "@cosmjs/launchpad";
-import { TxBody } from "cosmjs-types/cosmos/tx/v1beta1/tx"
+import { EncodeObject } from '@cosmjs/proto-signing';
 
 export enum TransactionStatus {
     Error = -1,
@@ -18,11 +18,12 @@ export const useTransactionStore = defineStore({
     id: 'TransactionStore',
     state: () => ({
         isOpen: false,
-        tx: null as TxBody | null,
+        messages: [] as EncodeObject[],
         transactionStatus: TransactionStatus.Idle,
         errorMessage: "",
         detailedErrorMessage: "",
         broadcastMode: BroadcastMode.Block,
+        txMemo: "",
     }),
     getters: {
     },
@@ -39,8 +40,8 @@ export const useTransactionStore = defineStore({
             if (this.transactionStatus !== TransactionStatus.Loading && authStore.account) {
                 this.isOpen = true;
                 this.transactionStatus = TransactionStatus.Loading;
-                if (this.tx) {
-                    const broadcastResult = await handleBroadcast(this.tx, this.broadcastMode);
+                if (this.messages) {
+                    const broadcastResult = await handleBroadcast(this.messages, this.broadcastMode, this.txMemo);
                     //const broadcastResult = { success: true, error: "" }; // only for development test
                     if (broadcastResult.success) {
                         setTimeout(() => {
@@ -65,9 +66,10 @@ export const useTransactionStore = defineStore({
          * Start the transaction process
          * @param tx the transaction that is going to be signed and broadcasted
          */
-        start(payload: { tx: TxBody, mode: BroadcastMode }): void {
+        start(payload: { messages: EncodeObject[], mode: BroadcastMode, memo: string }): void {
             this.broadcastMode = payload.mode;
-            this.tx = payload.tx;
+            this.messages = payload.messages;
+            this.txMemo = payload.memo;
             this.transactionStatus = TransactionStatus.Idle;
             this.errorMessage = "";
             this.detailedErrorMessage = "";
@@ -83,6 +85,7 @@ export const useTransactionStore = defineStore({
             this.errorMessage = "";
             this.detailedErrorMessage = "";
             this.isOpen = false;
+            this.txMemo = "";
         }
 
     },
@@ -95,7 +98,7 @@ export const useTransactionStore = defineStore({
  * @param signedTx the signed tx to broadcast
  * @returns true if succeeded, false otherwise
  */
-async function handleBroadcast(tx: CosmosTxBody, broadcastMode = BroadcastMode.Block): Promise<{ success: boolean, error: string }> {
+async function handleBroadcast(messages: EncodeObject[], broadcastMode = BroadcastMode.Block, memo: string): Promise<{ success: boolean, error: string }> {
     const authStore = useAuthStore();
     const walletStore = useWalletStore();
     try {
@@ -110,7 +113,7 @@ async function handleBroadcast(tx: CosmosTxBody, broadcastMode = BroadcastMode.B
             }
             // sign the tx
             const client = (await walletStore.wallet.client);
-            const broadcastResult = await client.signAndBroadcast(authStore.account.address, tx?.messages, defaultFee, tx?.memo);
+            const broadcastResult = await client.signAndBroadcast(authStore.account.address, messages, defaultFee, memo);
             console.log(`tx hash: ${broadcastResult.transactionHash}`);
             if (broadcastResult.transactionHash && broadcastResult.code === 0) {
                 return { success: true, error: "" };

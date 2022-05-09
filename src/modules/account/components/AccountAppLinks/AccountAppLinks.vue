@@ -469,6 +469,8 @@ import {
 } from "@/stores/TransactionModule";
 import { useAuthStore } from "@/stores/AuthModule";
 import { useWalletStore } from "@/stores/WalletModule";
+import { MsgUnlinkApplicationEncodeObject } from "@desmoslabs/desmjs";
+import { EncodeObject } from "@cosmjs/proto-signing";
 
 export default defineComponent({
   components: {
@@ -508,7 +510,7 @@ export default defineComponent({
       mPassword: "",
 
       isExecutingTransaction: false,
-      tx: null as CosmosTxBody | null,
+      txMessage: null as EncodeObject | null,
       newApplicationLink: null as ApplicationLink | null,
       deletedApplicationLink: null as ApplicationLink | null,
 
@@ -528,7 +530,8 @@ export default defineComponent({
       // check if is processing the right transaction and the status
       if (
         this.accountStore.profile &&
-        this.transactionStore.tx === this.tx &&
+        //TODO: check
+        this.transactionStore.messages[0] == this.txMessage &&
         (this.transactionStore.transactionStatus === TransactionStatus.Error ||
           this.transactionStore.transactionStatus === TransactionStatus.Success)
       ) {
@@ -540,7 +543,7 @@ export default defineComponent({
 
           // handle new application link
           if (
-            this.tx?.messages[0].typeUrl ===
+            this.txMessage?.typeUrl ===
               "/desmos.profiles.v2.MsgLinkApplication" &&
             this.newApplicationLink
           ) {
@@ -558,7 +561,7 @@ export default defineComponent({
 
           // handle application unlink
           if (
-            this.tx?.messages[0].typeUrl ===
+            this.txMessage?.typeUrl ===
               "/desmos.profiles.v2.MsgUnlinkApplication" &&
             this.deletedApplicationLink
           ) {
@@ -581,7 +584,7 @@ export default defineComponent({
             this.newApplicationLink = null;
             this.deletedApplicationLink = null;
           }
-          this.tx = null;
+          this.txMessage = null;
         }
       }
     });
@@ -597,29 +600,21 @@ export default defineComponent({
      */
     deleteApplicationLink(applicationLink: ApplicationLink): void {
       if (this.authStore.account) {
-        const msgUnlinkApplication: MsgUnlinkApplication = {
-          application: applicationLink.name,
-          username: applicationLink.username,
-          signer: this.authStore.account.address,
+        const msgUnlinkApplication: MsgUnlinkApplicationEncodeObject = {
+          typeUrl: "/desmos.profiles.v2.MsgUnlinkApplication",
+          value: {
+            application: applicationLink.name,
+            username: applicationLink.username,
+            signer: this.authStore.account.address,
+          },
         };
-        const txBody: CosmosTxBody = {
-          memo: "Application unlink | Go-find",
-          messages: [
-            {
-              typeUrl: "/desmos.profiles.v2.MsgUnlinkApplication",
-              value: msgUnlinkApplication as any,
-            },
-          ],
-          extensionOptions: [],
-          nonCriticalExtensionOptions: [],
-          timeoutHeight: 0,
-        };
-        this.tx = txBody;
+        this.txMessage = msgUnlinkApplication;
         this.newApplicationLink = null;
         this.deletedApplicationLink = applicationLink;
         this.transactionStore.start({
-          tx: txBody,
+          messages: [msgUnlinkApplication],
           mode: BroadcastMode.Block,
+          memo: "Application unlink | Go-find",
         });
       }
     },
@@ -775,19 +770,24 @@ export default defineComponent({
       this.generatedProof = null;
     },
     async onApplicationLinkSent(
-      payload: { txBody: CosmosTxBody; applicationLink: ApplicationLink } | null
+      payload: {
+        messages: EncodeObject;
+        applicationLink: ApplicationLink;
+        memo: string;
+      } | null
     ) {
       this.newApplicationLink = null;
       await this.toggleApplicationLinkEditor();
 
       if (payload) {
         this.isApplicationLinkEditorOpen = false;
-        this.tx = payload.txBody;
+        this.txMessage = payload.messages;
         this.newApplicationLink = payload.applicationLink;
         this.isExecutingTransaction = true;
         this.transactionStore.start({
-          tx: this.tx,
+          messages: [this.txMessage],
           mode: BroadcastMode.Block,
+          memo: payload.memo,
         });
       } else {
         console.log("payload error");

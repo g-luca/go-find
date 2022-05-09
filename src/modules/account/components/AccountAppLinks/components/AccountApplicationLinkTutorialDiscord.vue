@@ -144,14 +144,16 @@ export default defineComponent({
           username: this.username,
         })
       ).toString("hex");
-      const txBody = useApplicationLinkStore().generateApplicationLinkTxBody(
-        "discord",
-        this.username,
-        callData
-      );
+      const obj =
+        useApplicationLinkStore().generateApplicationLinkWrapperObject(
+          "discord",
+          this.username,
+          callData
+        );
       this.$emit("applicationLinkSent", {
-        txBody: txBody,
+        messages: [obj?.message],
         applicationLink: new ApplicationLinkDiscord(this.username),
+        memo: obj?.memo,
       });
     },
   },

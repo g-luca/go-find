@@ -240,6 +240,7 @@ import { BroadcastMode } from "@cosmjs/launchpad";
 import { useTransactionStore } from "@/stores/TransactionModule";
 import { useAuthStore } from "@/stores/AuthModule";
 import Long from "long";
+import { MsgVoteEncodeObject } from "@cosmjs/stargate";
 
 Chart.register(...registerables);
 
@@ -403,27 +404,19 @@ export default defineComponent({
       const proposalId = Number(proposalIdRaw);
       const vote: VoteOption = (<any>VoteOption)[voteString]; // cast the vote from string to enum
       if (this.authStore.account) {
-        const msgVote: MsgVote = {
-          option: vote,
-          proposalId: Long.fromNumber(proposalId),
-          voter: this.authStore.account?.address,
-        };
-        const txBody: CosmosTxBody = {
-          memo: "Vote | Go-find",
-          messages: [
-            {
-              typeUrl: "/cosmos.gov.v1beta1.MsgVote",
-              value: msgVote as any,
-            },
-          ],
-          extensionOptions: [],
-          nonCriticalExtensionOptions: [],
-          timeoutHeight: 0,
+        const msgVote: MsgVoteEncodeObject = {
+          typeUrl: "/cosmos.gov.v1beta1.MsgVote",
+          value: {
+            option: vote,
+            proposalId: Long.fromNumber(proposalId),
+            voter: this.authStore.account?.address,
+          },
         };
         await this.toggleModal();
         this.transactionStore.start({
-          tx: txBody,
+          messages: [msgVote],
           mode: BroadcastMode.Block,
+          memo: "Vote | Go-find",
         });
       }
     },

@@ -1,3 +1,4 @@
+import { EncodeObject } from '@cosmjs/proto-signing';
 import { useAuthStore } from './AuthModule';
 import { defineStore } from 'pinia'
 import { registerModuleHMR } from '.';
@@ -27,7 +28,7 @@ export const useApplicationLinkStore = defineStore({
          * @param callData callData related to the specific application
          * @returns Builded ApplicationLink TxBody 
          */
-        generateApplicationLinkTxBody(application: string, username: string, callData: string): TxBody | null {
+        generateApplicationLinkWrapperObject(application: string, username: string, callData: string): { message: EncodeObject, memo: string } | null {
             const authStore = useAuthStore();
             if (!authStore.account) {
                 return null;
@@ -47,19 +48,10 @@ export const useApplicationLinkStore = defineStore({
                     timeoutTimestamp: Long.fromNumber((Date.now() + 3600000) * 1000000),
                 }
             }
-            const txBody: TxBody = {
+            return {
+                message: msgLinkApplication,
                 memo: `Application link ${application} | Go-find`,
-                messages: [
-                    {
-                        typeUrl: "/desmos.profiles.v2.MsgLinkApplication",
-                        value: msgLinkApplication.value as any,
-                    }
-                ],
-                extensionOptions: [],
-                nonCriticalExtensionOptions: [],
-                timeoutHeight: Long.UZERO,
-            }
-            return txBody;
+            };
         },
 
         /**

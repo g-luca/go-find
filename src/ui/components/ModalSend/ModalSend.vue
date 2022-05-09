@@ -117,12 +117,12 @@
 import { defineComponent } from "vue";
 import { ref } from "vue";
 import { Dialog, DialogOverlay, DialogTitle } from "@headlessui/vue";
-import { CosmosTxBody, DesmosJS } from "desmosjs";
-import { MsgSend } from "cosmjs-types/cosmos/bank/v1beta1/tx";
+import { DesmosJS } from "desmosjs";
 import { BroadcastMode } from "@cosmjs/launchpad";
 import { useTransactionStore } from "@/stores/TransactionModule";
 import { useAccountStore } from "@/stores/AccountModule";
 import { useAuthStore } from "@/stores/AuthModule";
+import { MsgSendEncodeObject } from "@cosmjs/stargate";
 
 export default defineComponent({
   components: { Dialog, DialogOverlay, DialogTitle },
@@ -190,32 +190,24 @@ export default defineComponent({
     async send() {
       const sendAmount = this.amount * 1000000;
       if (this.accountStore.profile) {
-        const msgSend: MsgSend = {
-          fromAddress: this.accountStore.profile.address,
-          toAddress: this.addressTo,
-          amount: [
-            {
-              denom: this.ucoinDenom!,
-              amount: sendAmount.toString(),
-            },
-          ],
-        };
-        const txBody: CosmosTxBody = {
-          memo: "Send | Go-find",
-          messages: [
-            {
-              typeUrl: "/cosmos.bank.v1beta1.MsgSend",
-              value: msgSend as any,
-            },
-          ],
-          extensionOptions: [],
-          nonCriticalExtensionOptions: [],
-          timeoutHeight: 0,
+        const msgSend: MsgSendEncodeObject = {
+          typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+          value: {
+            fromAddress: this.accountStore.profile.address,
+            toAddress: this.addressTo,
+            amount: [
+              {
+                denom: this.ucoinDenom!,
+                amount: sendAmount.toString(),
+              },
+            ],
+          },
         };
         await this.toggleModal();
         useTransactionStore().start({
-          tx: txBody,
-          mode: BroadcastMode.Block,
+          messages: [msgSend],
+          mode: BroadcastMode.Sync,
+          memo: "Send | Go-find",
         });
       }
     },

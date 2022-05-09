@@ -99,14 +99,16 @@ export default defineComponent({
             domain,
           })
         ).toString("hex");
-        const txBody = useApplicationLinkStore().generateApplicationLinkTxBody(
-          "domain",
-          domain,
-          callData
-        );
+        const obj =
+          useApplicationLinkStore().generateApplicationLinkWrapperObject(
+            "domain",
+            domain,
+            callData
+          );
         this.$emit("applicationLinkSent", {
-          txBody: txBody,
+          messages: [obj?.message],
           applicationLink: new ApplicationLinkDomain(this.username),
+          memo: obj?.memo,
         });
       } else {
         this.checkError = "Domain TXT DNS record not found";

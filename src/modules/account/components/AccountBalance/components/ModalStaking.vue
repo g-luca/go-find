@@ -645,6 +645,11 @@ import { useAuthStore } from "@/stores/AuthModule";
 import { apolloClientDesmos } from "@/gql/ApolloDesmos";
 import { apolloClientForbole } from "@/gql/ApolloForbole";
 import { AccountDelegation } from "@/core/types/Account";
+import {
+  MsgDelegateEncodeObject,
+  MsgUndelegateEncodeObject,
+  MsgWithdrawDelegatorRewardEncodeObject,
+} from "@cosmjs/stargate";
 
 enum StakingOperations {
   None = "none",
@@ -946,30 +951,22 @@ export default defineComponent({
       const toValidatorAddress =
         this.stakingOperationValidatorTo.validator_info.operator_address;
       if (this.accountStore.profile) {
-        const msgDelegate: MsgDelegate = {
-          delegatorAddress: this.accountStore.profile.address,
-          validatorAddress: toValidatorAddress,
-          amount: {
-            denom: this.ucoinDenom!,
-            amount: amount.toString(),
-          },
-        };
-        const txBody: CosmosTxBody = {
-          memo: "Delegate | Go-find",
-          messages: [
-            {
-              typeUrl: "/cosmos.staking.v1beta1.MsgDelegate",
-              value: msgDelegate as any,
+        const msgDelegate: MsgDelegateEncodeObject = {
+          typeUrl: "/cosmos.staking.v1beta1.MsgDelegate",
+          value: {
+            delegatorAddress: this.accountStore.profile.address,
+            validatorAddress: toValidatorAddress,
+            amount: {
+              denom: this.ucoinDenom!,
+              amount: amount.toString(),
             },
-          ],
-          extensionOptions: [],
-          nonCriticalExtensionOptions: [],
-          timeoutHeight: 0,
+          },
         };
         await this.toggleStakingOperationModal();
         this.transactionStore.start({
-          tx: txBody,
+          messages: [msgDelegate],
           mode: BroadcastMode.Block,
+          memo: "Delegate | Go-find",
         });
       }
     },
@@ -981,31 +978,24 @@ export default defineComponent({
       const fromValidatorAddress =
         this.stakingOperationValidatorFrom.validator_info.operator_address;
       if (this.accountStore.profile) {
-        const msgRedelegate: MsgBeginRedelegate = {
-          delegatorAddress: this.accountStore.profile.address,
-          validatorSrcAddress: fromValidatorAddress,
-          validatorDstAddress: toValidatorAddress,
-          amount: {
-            denom: this.ucoinDenom!,
-            amount: amount.toString(),
-          },
-        };
-        const txBody: CosmosTxBody = {
-          memo: "Redelegate | Go-find",
-          messages: [
-            {
-              typeUrl: "/cosmos.staking.v1beta1.MsgBeginRedelegate",
-              value: msgRedelegate as any,
+        //TODO: Missing definition???
+        const msgRedelegate: any = {
+          typeUrl: "/cosmos.staking.v1beta1.MsgBeginRedelegate",
+          value: {
+            delegatorAddress: this.accountStore.profile.address,
+            validatorSrcAddress: fromValidatorAddress,
+            validatorDstAddress: toValidatorAddress,
+            amount: {
+              denom: this.ucoinDenom!,
+              amount: amount.toString(),
             },
-          ],
-          extensionOptions: [],
-          nonCriticalExtensionOptions: [],
-          timeoutHeight: 0,
+          },
         };
         await this.toggleStakingOperationModal();
         this.transactionStore.start({
-          tx: txBody,
+          messages: [msgRedelegate],
           mode: BroadcastMode.Block,
+          memo: "Redelegate | Go-find",
         });
       }
     },
@@ -1014,55 +1004,38 @@ export default defineComponent({
       const fromValidatorAddress =
         this.stakingOperationValidatorFrom.validator_info.operator_address;
       if (this.accountStore.profile) {
-        const msgUnbond: MsgUndelegate = {
-          delegatorAddress: this.accountStore.profile.address,
-          validatorAddress: fromValidatorAddress,
-          amount: {
-            denom: this.ucoinDenom!,
-            amount: amount.toString(),
-          },
-        };
-        const txBody: CosmosTxBody = {
-          memo: "Unbond | Go-find",
-          messages: [
-            {
-              typeUrl: "/cosmos.staking.v1beta1.MsgUndelegate",
-              value: msgUnbond as any,
+        const msgUnbond: MsgUndelegateEncodeObject = {
+          typeUrl: "/cosmos.staking.v1beta1.MsgUndelegate",
+          value: {
+            delegatorAddress: this.accountStore.profile.address,
+            validatorAddress: fromValidatorAddress,
+            amount: {
+              denom: this.ucoinDenom!,
+              amount: amount.toString(),
             },
-          ],
-          extensionOptions: [],
-          nonCriticalExtensionOptions: [],
-          timeoutHeight: 0,
+          },
         };
         await this.toggleStakingOperationModal();
         this.transactionStore.start({
-          tx: txBody,
+          messages: [msgUnbond],
           mode: BroadcastMode.Block,
+          memo: "Unbond | Go-find",
         });
       }
     },
     async withdrawRewards(validatorAddress: string) {
       if (this.accountStore.profile) {
-        const msgWithdrawRewards: MsgWithdrawDelegatorReward = {
-          delegatorAddress: this.accountStore.profile.address,
-          validatorAddress: validatorAddress,
-        };
-        const txBody: CosmosTxBody = {
-          memo: "Withdraw Rewards | Go-find",
-          messages: [
-            {
-              typeUrl:
-                "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
-              value: msgWithdrawRewards as any,
-            },
-          ],
-          extensionOptions: [],
-          nonCriticalExtensionOptions: [],
-          timeoutHeight: 0,
+        const msgWithdrawRewards: MsgWithdrawDelegatorRewardEncodeObject = {
+          typeUrl: "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+          value: {
+            delegatorAddress: this.accountStore.profile.address,
+            validatorAddress: validatorAddress,
+          },
         };
         this.transactionStore.start({
-          tx: txBody,
+          messages: [msgWithdrawRewards],
           mode: BroadcastMode.Block,
+          memo: "Withdraw Rewards | Go-find",
         });
       }
     },

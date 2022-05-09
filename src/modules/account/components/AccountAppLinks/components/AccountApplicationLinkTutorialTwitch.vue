@@ -101,14 +101,17 @@ export default defineComponent({
             username: this.username,
           })
         ).toString("hex");
-        const txBody = useApplicationLinkStore().generateApplicationLinkTxBody(
-          "twitch",
-          this.username,
-          callData
-        );
+        const obj =
+          useApplicationLinkStore().generateApplicationLinkWrapperObject(
+            "twitch",
+            this.username,
+            callData
+          );
+
         this.$emit("applicationLinkSent", {
-          txBody: txBody,
+          messages: [obj?.message],
           applicationLink: new ApplicationLinkTwitch(this.username),
+          memo: obj?.memo,
         });
       } else {
         this.checkError = "Twitch biography link not found";

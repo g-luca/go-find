@@ -137,14 +137,17 @@ export default defineComponent({
           gist_id: this.gistId,
         })
       ).toString("hex");
-      const txBody = useApplicationLinkStore().generateApplicationLinkTxBody(
-        "github",
-        this.username,
-        callData
-      );
+      const obj =
+        useApplicationLinkStore().generateApplicationLinkWrapperObject(
+          "github",
+          this.username,
+          callData
+        );
+
       this.$emit("applicationLinkSent", {
-        txBody: txBody,
+        messages: [obj?.message],
         applicationLink: new ApplicationLinkGithub(this.username),
+        memo: obj?.memo,
       });
     },
   },
