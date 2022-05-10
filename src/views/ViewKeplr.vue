@@ -7,7 +7,7 @@
           <div class="flex justify-center">
             <img
               class="max-h-28 w-auto"
-              src="public/assets/brands/go-find/logo.svg"
+              src="/public/assets/brands/go-find/logo.svg"
             >
           </div>
 
@@ -15,7 +15,7 @@
             <span class="mt-4 py-1 px-1 flex justify-center items-center">
               <img
                 class="max-h-16"
-                src="public/assets/brands/keplr/logo.svg"
+                src="/public/assets/brands/keplr/logo.svg"
               >
               <span class="pl-3 text-5xl xl:text-7xl font-extrabold text-gray-900 dark:text-white">
                 Keplr

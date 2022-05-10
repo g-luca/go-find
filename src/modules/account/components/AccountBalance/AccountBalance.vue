@@ -3,7 +3,7 @@
     <span v-if="accountStore.profileLoadingStatus">
       <div class="bg-white dark:bg-gray-900 overflow-hidden shadow-xl hover:shadow-2xl rounded-3xl relative mb-8 mt-8 lg:mt-0">
         <img
-          src="public/assets/brands/desmos/logo.svg"
+          src="/public/assets/brands/desmos/logo.svg"
           alt="desmos logo"
           class="h-24 w-24 absolute opacity-50 -right-0 pointer-events-none"
         >

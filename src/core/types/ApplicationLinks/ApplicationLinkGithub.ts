@@ -4,7 +4,7 @@ import ApplicationLink from "../ApplicationLink";
 export default class ApplicationLinkGithub extends ApplicationLink {
     readonly name: string = 'github';
     readonly displayName: string = 'GitHub';
-    readonly logo: string = 'public/assets/brands/github/logo.svg';
+    readonly logo: string = '/public/assets/brands/github/logo.svg';
     readonly url: string = "https://www.github.com/";
     readonly redirectUrl = `${this.url}${this.username}`;
 

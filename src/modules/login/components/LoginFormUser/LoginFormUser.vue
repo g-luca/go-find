@@ -115,7 +115,7 @@
     >
       <img
         class="h-8"
-        src="public/assets/brands/keplr/logo.svg"
+        src="/public/assets/brands/keplr/logo.svg"
         alt=""
       >
       <span class="text-white pl-3 text-lg">

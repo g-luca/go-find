@@ -4,7 +4,7 @@ import ApplicationLink from "../ApplicationLink";
 export default class ApplicationLinkTwitch extends ApplicationLink {
     readonly name: string = 'twitch';
     readonly displayName: string = 'Twitch';
-    readonly logo: string = 'public/assets/brands/twitch/logo.svg';
+    readonly logo: string = '/public/assets/brands/twitch/logo.svg';
     readonly url: string = "https://www.twitch.tv/";
     readonly redirectUrl = `${this.url}${this.username}`;
     readonly usernameRegExp = /^(\w){4,25}$/;

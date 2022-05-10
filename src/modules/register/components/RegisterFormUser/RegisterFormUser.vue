@@ -176,7 +176,7 @@
       >
         <img
           class="h-8"
-          src="public/assets/brands/keplr/logo.svg"
+          src="/public/assets/brands/keplr/logo.svg"
           alt=""
         >
         <span class="text-white pl-3 text-lg">
@@ -233,20 +233,20 @@ export default defineComponent({
         setTimeout(() => {
           if (this.inputDtag === dtag) {
             // verify if the dtag is not changed while waiting the timeout
-            Api.get(
+            const response = Api.get(
               `${
                 import.meta.env.VITE_APP_LCD_ENDPOINT
               }/desmos/profiles/v2/profiles/` + this.inputDtag
-            ).then((response) => {
-              if (this.inputDtag === dtag && response["profile"]) {
-                // dtag already taken
-                // the availability value depends if is recovering the account
-                this.isDtagAvailable = this.registerStore.hasDesmosProfile;
-              } else {
-                this.isDtagAvailable = !this.registerStore.hasDesmosProfile;
-              }
-              this.isVerifyingDtagAvailability = false;
-            });
+            );
+            console.log(response);
+            if (this.inputDtag === dtag && response["profile"]) {
+              // dtag already taken
+              // the availability value depends if is recovering the account
+              this.isDtagAvailable = this.registerStore.hasDesmosProfile;
+            } else {
+              this.isDtagAvailable = !this.registerStore.hasDesmosProfile;
+            }
+            this.isVerifyingDtagAvailability = false;
           } else {
             this.isVerifyingDtagAvailability = false;
           }
