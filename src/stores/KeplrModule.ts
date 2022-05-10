@@ -1,3 +1,4 @@
+import { DESMOS_MAINNET_CHAIN_INFO, DESMOS_TESTNET_CHAIN_INFO } from './../core/signer/KeplrSigner';
 import { useAuthStore } from './AuthModule';
 import { defineStore } from 'pinia'
 import { registerModuleHMR } from '.';
@@ -36,12 +37,14 @@ export const useKeplrStore = defineStore({
             }
             this.isInstalled = true;
 
+            const chainInfo = (useDesmosNetworkStore().isTestnet) ? DESMOS_TESTNET_CHAIN_INFO : DESMOS_MAINNET_CHAIN_INFO;
+
             // Create the Keplr Signer with the currrent configuration
             const keplrSigner = new KeplrSigner(window.keplr!, {
-                signingMode: SigningMode.AMINO,
+                signingMode: SigningMode.DIRECT,
                 preferNoSetFee: true,
                 preferNoSetMemo: true,
-                chainId: useDesmosNetworkStore().chainId,
+                chainInfo: chainInfo,
             });
 
             // If Keplr + Ledger, sign out the user
