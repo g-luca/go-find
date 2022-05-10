@@ -1,7 +1,16 @@
 import Long from 'long';
 import { Buffer } from "buffer";
-import { SHA256, AES, RIPEMD160, enc, mode, format, lib } from "crypto-js"
+import { SHA256, AES, RIPEMD160, enc, mode, format, lib, SHA3 } from "crypto-js"
 export default class CryptoUtils {
+
+    /**
+     * Hash a string with Keccak256 (SHA3)
+     * @param string 
+     * @returns Hex hash result
+     */
+    public static keccak256(string: string): string {
+        return SHA3(string, { outputLength: 256 }).toString(enc.Hex);
+    }
 
     /**
      * Hash a string with RIPEMD-160
