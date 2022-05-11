@@ -2,9 +2,10 @@ import { useAuthStore } from '@/stores/AuthModule';
 import CryptoUtils from "@/utils/CryptoUtils";
 import { Extension as TerraExtension, MsgSend as TerraMsgSend, Fee as TerraFee, LCDClient as TerraLCDClient, TxBody as TerraTxBody, AuthInfo as TerraAuthInfo, SignDoc as TerraSignDoc } from "@terra-money/terra.js";
 import { PubKey } from "cosmjs-types/cosmos/crypto/secp256k1/keys";
-import { Proof } from "@desmoslabs/desmjs-types/desmos/profiles/v2/models_chain_links";
+import { Proof, SingleSignatureData } from "@desmoslabs/desmjs-types/desmos/profiles/v2/models_chain_links";
 import Blockchain from '../types/Blockchain';
 import { Buffer } from "buffer";
+import { SignMode } from '@desmoslabs/desmjs-types/cosmos/tx/signing/v1beta1/signing';
 
 export type TerraChainLinkSignerResponse = {
     address: string;
@@ -98,7 +99,13 @@ export class TerraSigner {
                                                 key: terraPubkey,
                                             }).finish(),
                                         },
-                                        signature: Buffer.from(terraSignature, 'base64').toString('hex'),
+                                        signature: {
+                                            typeUrl: '/desmos.profiles.v2.SingleSignatureData',
+                                            value: SingleSignatureData.encode({
+                                                mode: SignMode.SIGN_MODE_DIRECT,
+                                                signature: Buffer.from(terraSignature.signature.signature, 'base64')
+                                            }).finish()
+                                        },
                                         plainText: Buffer.from(signDoc.toBytes()).toString('hex'),
                                     }
                                 } else {
@@ -127,7 +134,13 @@ export class TerraSigner {
                                                 key: terraPubkey,
                                             }).finish(),
                                         },
-                                        signature: Buffer.from(terraSignature, 'base64').toString('hex'),
+                                        signature: {
+                                            typeUrl: '/desmos.profiles.v2.SingleSignatureData',
+                                            value: SingleSignatureData.encode({
+                                                mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
+                                                signature: Buffer.from(terraSignature.signature.signature, 'base64')
+                                            }).finish()
+                                        },
                                     }
                                 }
                                 resolve({ address: terraAddress, proof: finalProof, error: '' });
