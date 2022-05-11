@@ -28,7 +28,7 @@
                   <div class="w-14 sm:w-16 md:w-20 m-auto col-span-2">
                     <img
                       class="p-4 pointer-events-none select-none text-left"
-                      :src="'public/assets/brands/' + chainLink.chain + '/logo.svg'"
+                      :src="'/public/assets/brands/' + chainLink.chain + '/logo.svg'"
                       alt=""
                     >
                   </div>
@@ -127,7 +127,7 @@
                         <div class="col-span-4">
                           <img
                             class="p-3 pointer-events-none select-none h-16 w-16"
-                            :src="'public/assets/' + chain.id + '/logo.svg'"
+                            :src="'/public/assets/brands/' + chain.id + '/logo.svg'"
                             alt=""
                           >
                         </div>
@@ -193,19 +193,16 @@
                   </div>
                   <div class="flex flex-nowrap min-w-full mt-4">
                     <div
-                      v-for="connectionMethod of supportedChainLinkConnectionMethods"
+                      v-for="connectionMethod of selectedChain.supportedConnectionMethods"
                       class="flex-initial m-1 rounded-3xl cursor-pointer select-none transition ease-in duration-150"
                       :class="connectionMethod?.id===selectedConnectionMethod?.id?'bg-purple-300 dark:bg-purple-800 dark:hover:bg-purple-700 hover:bg-purple-200':'bg-gray-100 dark:bg-denim-900 dark:hover:bg-purple-800 hover:bg-purple-200'"
                       @click="selectChainConnectionMethod(connectionMethod)"
                     >
-                      <div
-                        class="grid grid-cols-12 w-52 md:w-60"
-                        v-if="connectionMethod.chainRestrictions.length===0 || connectionMethod.chainRestrictions.indexOf(selectedChain?.id)!==-1"
-                      >
+                      <div class="grid grid-cols-12 w-52 md:w-60">
                         <div class="col-span-4">
                           <img
                             class="p-3 pointer-events-none select-none h-16 w-16"
-                            :src="'public/assets/' + connectionMethod.logo + '/logo.svg'"
+                            :src="'/public/assets/brands/' + connectionMethod.logo + '/logo.svg'"
                             alt=""
                           >
                         </div>
@@ -278,7 +275,7 @@
                         @click="connectWithLedger(ledgerAppName)"
                       >
                         <img
-                          :src="'public/assets/' + ledgerAppName + '/logo.svg'"
+                          :src="'/public/assets/brands/' + ledgerAppName + '/logo.svg'"
                           class="w-8 h-8 inline-flex"
                           alt=""
                         >
@@ -287,6 +284,47 @@
                     </div>
 
                   </div>
+                </span>
+                <span v-if="selectedConnectionMethod.id==='metamask'">
+                  <button
+                    :disabled="isSigningProof"
+                    type="button"
+                    class="py-2 px-4 w-6/12  text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                    :class="isSigningProof?'bg-gray-500 cursor-pointer':'bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200'"
+                    @click="connectWithMetaMask"
+                  >
+                    <span v-if="!isSigningProof">
+                      Connect
+                    </span>
+                    <span v-else>
+                      Loading...
+                    </span>
+                  </button>
+                </span>
+                <span
+                  v-if="selectedConnectionMethod.id==='mnemonic'"
+                  :set="inputMnemonic = ''"
+                >
+                  <InputMnemonic
+                    @onMnemonic="inputMnemonic=$event"
+                    :customBech32Prefix="selectedChain?.bechPrefix"
+                    :customHdpath="selectedChain?.hdpath"
+                    :showAddress="false"
+                  />
+                  <button
+                    :disabled="isSigningProof"
+                    type="button"
+                    class="py-2 px-4 w-6/12  text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                    :class="isSigningProof?'bg-gray-500 cursor-pointer':'bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200'"
+                    @click="connectWithMnemonic(inputMnemonic)"
+                  >
+                    <span v-if="!isSigningProof">
+                      Connect
+                    </span>
+                    <span v-else>
+                      Loading...
+                    </span>
+                  </button>
                 </span>
               </div>
 
