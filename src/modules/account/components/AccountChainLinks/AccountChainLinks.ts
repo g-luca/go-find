@@ -14,7 +14,6 @@ import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
 import { PubKey } from "cosmjs-types/cosmos/crypto/secp256k1/keys";
 import { Proof, Bech32Address, SingleSignatureData, HexAddress } from "@desmoslabs/desmjs-types/desmos/profiles/v2/models_chain_links";
-import { recoverPublicKey, publicKey as EthPublicKey, sign as EthSign, util, createIdentity } from "eth-crypto";
 import { ethers } from "ethers";
 
 import { BroadcastMode } from "@cosmjs/launchpad";
@@ -395,7 +394,7 @@ export default defineComponent({
                 const compressedPubKey = Buffer.from(compressedPubKeyRaw.substring(2), 'hex');
                 const pubKey = compressedPubKey;
 
-                const hashedMsg = Buffer.from(CryptoUtils.keccak256(msg), 'hex');
+                const hashedMsg = Buffer.from(CryptoUtils.sha256(msg), 'hex');
                 const signatureRaw = Buffer.from((await Secp256k1.createSignature(hashedMsg, privKey)).toFixedLength()).toString('hex')
                 const sigOnly = signatureRaw.substring(0, signatureRaw.length - 2); // remove last 2 chars
 
