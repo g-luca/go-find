@@ -46,6 +46,8 @@ export const useKeplrStore = defineStore({
                 preferNoSetMemo: true,
                 chainInfo: chainInfo,
             });
+            const walletStore = useWalletStore();
+            await walletStore.connect(keplrSigner, SupportedSigner.KEPLR);
 
             // If Keplr + Ledger, sign out the user
             const isLedgerKeplrUser = await (await window.keplr.getKey(useDesmosNetworkStore().chainId)).isNanoLedger;
@@ -56,8 +58,6 @@ export const useKeplrStore = defineStore({
                 return;
             }
 
-            const walletStore = useWalletStore();
-            await walletStore.connect(keplrSigner, SupportedSigner.KEPLR);
         },
 
         async setupTerraMainnet(): Promise<void> {

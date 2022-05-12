@@ -396,11 +396,10 @@ export default defineComponent({
                 const pubKey = compressedPubKey;
 
                 const hashedMsg = Buffer.from(CryptoUtils.keccak256(msg), 'hex');
-                const signatureRaw = Buffer.from(await (await Secp256k1.createSignature(hashedMsg, privKey)).toFixedLength()).toString('hex')
+                const signatureRaw = Buffer.from((await Secp256k1.createSignature(hashedMsg, privKey)).toFixedLength()).toString('hex')
                 const sigOnly = signatureRaw.substring(0, signatureRaw.length - 2); // remove last 2 chars
 
                 const ver = Wallet.verifySignature(hashedMsg, pubKey, Buffer.from(sigOnly, 'hex'));
-                console.log(ver);
                 const finalProof = {
                     plainText: Buffer.from(msg).toString('hex'),
                     pubKey: {
@@ -417,11 +416,6 @@ export default defineComponent({
                         }).finish()
                     },
                 }
-                if (finalProof.pubKey.value.length == 0) {
-                    console.error("pubKey is empty");
-                    throw new Error("pubKey is empty");
-                }
-                console.log(finalProof)
 
                 const chainAddress: Any = {
                     typeUrl: "/desmos.profiles.v2.HexAddress",
