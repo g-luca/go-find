@@ -53,7 +53,7 @@ export default class AccountModule extends VuexModule {
                     this.profileLoadingStatus = LoadingStatus.Error;
                 }
 
-                if (accountRaw.data) {
+                if (accountRaw.data && accountRaw.data.account && accountRaw.data.account[0]?.address) {
                     this.account = AccountModule.parseGqlAccountResult(accountRaw.data);
                 } else {
                     // The user hasn't done any transaction on chain, completelly new account
@@ -235,7 +235,7 @@ export default class AccountModule extends VuexModule {
                 unbonding: entry.unbonding,
             });
         })
-        return new Account(accountRaw.account[0].address, Number(accountRaw.account_balances?.coins[0]?.amount || 0) / 1000000, finalDelegations);
+        return new Account(accountRaw.account[0].address || "", Number(accountRaw.account_balances?.coins[0]?.amount || 0) / 1000000, finalDelegations);
     }
 
 
