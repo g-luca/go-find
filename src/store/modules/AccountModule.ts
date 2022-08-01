@@ -73,7 +73,7 @@ export default class AccountModule extends VuexModule {
                     this.profileLoadingStatus = LoadingStatus.Error;
                 }
 
-                if (accountRaw.data) {
+                if (profileRaw.data && profileRaw.data.profile) {
                     // The profile exists
                     this.profile = AccountModule.parseGqlProfileResult(profileRaw.data.profile[0]);
                 } else {
@@ -81,6 +81,8 @@ export default class AccountModule extends VuexModule {
                     this.isNewProfile = true;
                     this.profile = new Profile(authModule.account?.dtag, authModule.account?.address, "", "", "", "", [], []);
                 }
+                this.profile.dtag = authModule.account?.dtag;
+                this.profile.address = authModule.account?.address;
 
 
                 this.profileLoadingStatus = LoadingStatus.Loaded;
@@ -248,12 +250,12 @@ export default class AccountModule extends VuexModule {
         // calculate the total of the delegations (if they exists)
         const applicationLinks = ApplicationLinkModule.parseApplicationLinks(profileRaw);
         const chainLinks: ChainLink[] = [];
-        if (profileRaw.chain_links && profileRaw.chain_links.length > 0) {
+        if (profileRaw && profileRaw.chain_links && profileRaw.chain_links.length > 0) {
             profileRaw.chain_links.forEach((chainLink: any) => {
                 chainLinks.push(new ChainLink(chainLink.external_address, chainLink.chain_config.name));
             })
         }
-        return new Profile(profileRaw.dtag, profileRaw.address, profileRaw.nickname, profileRaw.bio, profileRaw.profile_pic, profileRaw.cover_pic, applicationLinks, chainLinks);
+        return new Profile(profileRaw?.dtag || "", profileRaw?.address, profileRaw?.nickname || "", profileRaw?.bio || "", profileRaw?.profile_pic || "", profileRaw?.cover_pic || "", applicationLinks, chainLinks);
 
     }
 
