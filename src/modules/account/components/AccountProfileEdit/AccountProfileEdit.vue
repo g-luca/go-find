@@ -198,7 +198,7 @@
             </div>
             <div class="grid grid-cols-12 items-center justify-between gap-4 my-6">
               <button
-                v-if="$store.state.TransactionModule.transactionStatus!==1&&(meta.valid&&meta.dirty)"
+                v-if="$store.state.TransactionModule.transactionStatus!==1&&(meta.valid&&meta.dirty)||$store.state.AccountModule.isNewProfile"
                 type="submit"
                 :disabled="$store.state.TransactionModule.transactionStatus===1"
                 class="py-2 px-4 col-span-9 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "

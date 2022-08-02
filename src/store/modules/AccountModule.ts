@@ -73,7 +73,7 @@ export default class AccountModule extends VuexModule {
                     this.profileLoadingStatus = LoadingStatus.Error;
                 }
 
-                if (profileRaw.data && profileRaw.data.profile) {
+                if (profileRaw.data && profileRaw.data.profile && profileRaw.data.profile[0]?.dtag) {
                     // The profile exists
                     this.profile = AccountModule.parseGqlProfileResult(profileRaw.data.profile[0]);
                 } else {
