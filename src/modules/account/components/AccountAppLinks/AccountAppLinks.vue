@@ -449,7 +449,7 @@ import {
   DialogTitle,
 } from "@headlessui/vue";
 import { CosmosTxBody, Transaction, Wallet } from "desmosjs";
-import { MsgUnlinkApplication } from "@desmoslabs/desmjs-types/desmos/profiles/v2/msgs_app_links";
+import { MsgUnlinkApplication } from "@desmoslabs/desmjs-types/desmos/profiles/v3/msgs_app_links";
 import { BroadcastMode } from "@cosmjs/launchpad";
 import CryptoUtils from "@/utils/CryptoUtils";
 import Clipboard from "@/ui/components/Clipboard.vue";

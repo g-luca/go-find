@@ -13,7 +13,7 @@ import { defineComponent, ref, watchEffect } from "vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
 import { PubKey } from "cosmjs-types/cosmos/crypto/secp256k1/keys";
-import { Proof, Bech32Address, SingleSignatureData, HexAddress } from "@desmoslabs/desmjs-types/desmos/profiles/v2/models_chain_links";
+import { Proof, Bech32Address, SingleSignature, SignatureValueType, HexAddress } from "@desmoslabs/desmjs-types/desmos/profiles/v3/models_chain_links";
 import { ethers } from "ethers";
 
 import { BroadcastMode } from "@cosmjs/launchpad";
@@ -220,8 +220,8 @@ export default defineComponent({
                     },
                     signature: {
                         typeUrl: '/desmos.profiles.v2.SingleSignatureData',
-                        value: SingleSignatureData.encode({
-                            mode: SignMode.SIGN_MODE_DIRECT,
+                        value: SingleSignature.encode({
+                            valueType: SignatureValueType.SIGNATURE_VALUE_TYPE_COSMOS_DIRECT,
                             signature: Buffer.from(signedTx.signature.signature, 'base64')
                         }).finish()
                     },

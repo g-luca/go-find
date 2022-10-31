@@ -630,7 +630,7 @@ import { useApolloClient } from "@vue/apollo-composable";
 import { ProfileQuery } from "@/gql/ProfileQuery";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import DOMPurify from "dompurify";
-import marked from "marked";
+import { marked } from "marked";
 import { CosmosTxBody } from "desmosjs";
 import {
   MsgDelegate,

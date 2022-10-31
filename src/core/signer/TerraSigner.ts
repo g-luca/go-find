@@ -2,7 +2,7 @@ import { useAuthStore } from '@/stores/AuthModule';
 import CryptoUtils from "@/utils/CryptoUtils";
 import { Extension as TerraExtension, MsgSend as TerraMsgSend, Fee as TerraFee, LCDClient as TerraLCDClient, TxBody as TerraTxBody, AuthInfo as TerraAuthInfo, SignDoc as TerraSignDoc } from "@terra-money/terra.js";
 import { PubKey } from "cosmjs-types/cosmos/crypto/secp256k1/keys";
-import { Proof, SingleSignatureData } from "@desmoslabs/desmjs-types/desmos/profiles/v2/models_chain_links";
+import { Proof, SingleSignature, SignatureValueType } from "@desmoslabs/desmjs-types/desmos/profiles/v3/models_chain_links";
 import Blockchain from '../types/Blockchain';
 import { Buffer } from "buffer";
 import { SignMode } from '@desmoslabs/desmjs-types/cosmos/tx/signing/v1beta1/signing';
@@ -101,8 +101,8 @@ export class TerraSigner {
                                         },
                                         signature: {
                                             typeUrl: '/desmos.profiles.v2.SingleSignatureData',
-                                            value: SingleSignatureData.encode({
-                                                mode: SignMode.SIGN_MODE_DIRECT,
+                                            value: SingleSignature.encode({
+                                                valueType: SignatureValueType.SIGNATURE_VALUE_TYPE_COSMOS_DIRECT,
                                                 signature: Buffer.from(terraSignature.signature.signature, 'base64')
                                             }).finish()
                                         },

@@ -232,7 +232,7 @@ import { GovernanceQuery } from "@/gql/GovernanceQuery";
 import DOMPurify from "dompurify";
 import { BarChart } from "vue-chart-3";
 import { Chart, ChartOptions, registerables } from "chart.js";
-import marked from "marked";
+import { marked } from "marked";
 import { CosmosTxBody } from "desmosjs";
 import { MsgVote } from "cosmjs-types/cosmos/gov/v1beta1/tx";
 import { VoteOption } from "cosmjs-types/cosmos/gov/v1beta1/gov";

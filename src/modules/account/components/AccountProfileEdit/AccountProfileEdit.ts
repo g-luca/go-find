@@ -21,7 +21,7 @@ import AccountChainLinks from "@/modules/account/components/AccountChainLinks/Ac
 import AccountModule from "@/store/modules/AccountModule";
 import { CosmosBroadcastMode, CosmosTxBody, DesmosMsgDeleteProfile, DesmosMsgSaveProfile } from "desmosjs";
 import TransactionModule, { TransactionStatus } from "@/store/modules/TransactionModule";
-import marked from "marked";
+import { marked } from "marked";
 import { sanitize } from "dompurify";
 const authModule = getModule(AuthModule);
 const accountModule = getModule(AccountModule);

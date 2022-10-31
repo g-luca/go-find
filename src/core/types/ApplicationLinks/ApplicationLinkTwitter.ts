@@ -1,4 +1,4 @@
-import { ApplicationLinkState } from "@desmoslabs/desmjs-types/desmos/profiles/v2/models_app_links";
+import { ApplicationLinkState } from "@desmoslabs/desmjs-types/desmos/profiles/v3/models_app_links";
 import ApplicationLink from "../ApplicationLink";
 
 export default class ApplicationLinkTwitter extends ApplicationLink {

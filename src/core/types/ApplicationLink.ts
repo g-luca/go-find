@@ -1,4 +1,4 @@
-import { ApplicationLinkState } from "@desmoslabs/desmjs-types/desmos/profiles/v2/models_app_links";
+import { ApplicationLinkState } from "@desmoslabs/desmjs-types/desmos/profiles/v3/models_app_links";
 export default class ApplicationLink {
     readonly name: string = "";
     readonly displayName: string = "";

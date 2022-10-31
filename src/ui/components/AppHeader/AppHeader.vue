@@ -93,7 +93,7 @@
       class="w-full shadow-lg bg-red-500 dark:bg-red-500 text-white text-center"
     >
       <h1 class="py-2">
-        <i class=" font-semibold">morpheus-apollo-2</i> testnet environment
+        <i class=" font-semibold">morpheus-apollo-3</i> testnet environment
       </h1>
     </div>
   </span>

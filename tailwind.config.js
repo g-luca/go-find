@@ -1,9 +1,8 @@
 /* With purge enabled if there is a new/edited class not used before it will not be loaded */
 module.exports = {
   content: [
-    './src/**/*.html',
-    './src/**/*.vue',
-    './src/**/*.jsx',
+    "./index.html",
+    "./src/**/*.{vue,js,ts,jsx,tsx}",
   ],
   darkMode: 'class',
   theme: {

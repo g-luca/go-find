@@ -321,9 +321,9 @@ import { Form, Field } from "vee-validate";
 import { Dialog, DialogTitle } from "@headlessui/vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import { TxBody } from "cosmjs-types/cosmos/tx/v1beta1/tx";
-import { MsgDeleteProfile } from "@desmoslabs/desmjs-types/desmos/profiles/v2/msgs_profile";
+import { MsgDeleteProfile } from "@desmoslabs/desmjs-types/desmos/profiles/v3/msgs_profile";
 import { BroadcastMode } from "@cosmjs/launchpad";
-import marked from "marked";
+import { marked } from "marked";
 import DOMPurify from "dompurify";
 import {
   TransactionStatus,
@@ -331,7 +331,7 @@ import {
 } from "@/stores/TransactionModule";
 import { useAccountStore } from "@/stores/AccountModule";
 import { useAuthStore } from "@/stores/AuthModule";
-import { MsgSaveProfile } from "@desmoslabs/desmjs-types/desmos/profiles/v2/msgs_profile";
+import { MsgSaveProfile } from "@desmoslabs/desmjs-types/desmos/profiles/v3/msgs_profile";
 import Long from "long";
 import {
   MsgDeleteProfileEncodeObject,
