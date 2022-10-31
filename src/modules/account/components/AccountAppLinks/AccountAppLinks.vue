@@ -449,7 +449,6 @@ import {
   DialogTitle,
 } from "@headlessui/vue";
 import { CosmosTxBody, Transaction, Wallet } from "desmosjs";
-import { MsgUnlinkApplication } from "@desmoslabs/desmjs-types/desmos/profiles/v3/msgs_app_links";
 import { BroadcastMode } from "@cosmjs/launchpad";
 import CryptoUtils from "@/utils/CryptoUtils";
 import Clipboard from "@/ui/components/Clipboard.vue";
@@ -544,7 +543,7 @@ export default defineComponent({
           // handle new application link
           if (
             this.txMessage?.typeUrl ===
-              "/desmos.profiles.v2.MsgLinkApplication" &&
+              "/desmos.profiles.v3.MsgLinkApplication" &&
             this.newApplicationLink
           ) {
             console.log("application link success!");
@@ -562,7 +561,7 @@ export default defineComponent({
           // handle application unlink
           if (
             this.txMessage?.typeUrl ===
-              "/desmos.profiles.v2.MsgUnlinkApplication" &&
+              "/desmos.profiles.v3.MsgUnlinkApplication" &&
             this.deletedApplicationLink
           ) {
             this.accountStore.profile.applicationLinks.slice(
@@ -601,7 +600,7 @@ export default defineComponent({
     deleteApplicationLink(applicationLink: ApplicationLink): void {
       if (this.authStore.account) {
         const msgUnlinkApplication: MsgUnlinkApplicationEncodeObject = {
-          typeUrl: "/desmos.profiles.v2.MsgUnlinkApplication",
+          typeUrl: "/desmos.profiles.v3.MsgUnlinkApplication",
           value: {
             application: applicationLink.name,
             username: applicationLink.username,
@@ -771,7 +770,7 @@ export default defineComponent({
     },
     async onApplicationLinkSent(
       payload: {
-        messages: EncodeObject;
+        messages: EncodeObject[];
         applicationLink: ApplicationLink;
         memo: string;
       } | null
@@ -781,11 +780,11 @@ export default defineComponent({
 
       if (payload) {
         this.isApplicationLinkEditorOpen = false;
-        this.txMessage = payload.messages;
+        this.txMessage = payload.messages[0];
         this.newApplicationLink = payload.applicationLink;
         this.isExecutingTransaction = true;
         this.transactionStore.start({
-          messages: [this.txMessage],
+          messages: payload.messages,
           mode: BroadcastMode.Block,
           memo: payload.memo,
         });

@@ -1,12 +1,11 @@
-import { DESMOS_MAINNET_CHAIN_INFO, DESMOS_TESTNET_CHAIN_INFO } from './../core/signer/KeplrSigner';
 import { useAuthStore } from './AuthModule';
 import { defineStore } from 'pinia'
 import { registerModuleHMR } from '.';
 import { Window as KeplrWindow } from "@keplr-wallet/types";
 import router from '@/router';
 import { useDesmosNetworkStore } from './DesmosNetworkModule';
-import { KeplrSigner } from '@/core/signer/KeplrSigner';
-import { SigningMode } from '@desmoslabs/desmjs';
+import { KeplrSigner } from '@desmoslabs/desmjs-keplr';
+import { DesmosMainnet, DesmosTestnet, SigningMode } from '@desmoslabs/desmjs';
 import { SupportedSigner, useWalletStore } from './WalletModule';
 
 declare global {
@@ -37,13 +36,16 @@ export const useKeplrStore = defineStore({
             }
             this.isInstalled = true;
 
-            const chainInfo = (useDesmosNetworkStore().isTestnet) ? DESMOS_TESTNET_CHAIN_INFO : DESMOS_MAINNET_CHAIN_INFO;
+            const chainInfo = (useDesmosNetworkStore().isTestnet) ? DesmosTestnet : DesmosMainnet;
 
             // Create the Keplr Signer with the currrent configuration
             const keplrSigner = new KeplrSigner(window.keplr!, {
                 signingMode: SigningMode.DIRECT,
-                preferNoSetFee: true,
-                preferNoSetMemo: true,
+                signOptions: {
+                    disableBalanceCheck: true,
+                    preferNoSetFee: true,
+                    preferNoSetMemo: true
+                },
                 chainInfo: chainInfo,
             });
             const walletStore = useWalletStore();
@@ -125,52 +127,6 @@ export const useKeplrStore = defineStore({
                         coinGeckoId: 'terra-luna',
                     },
                     coinType: 330,
-                });
-            }
-        },
-
-        async setupJunoMainnet(): Promise<void> {
-            if (await window.keplr) {
-                await window.keplr!.experimentalSuggestChain({
-                    chainId: 'juno-1',
-                    chainName: "Juno",
-                    rpc: 'https://rpc-juno.itastakers.com',
-                    rest: 'https://lcd-juno.itastakers.com',
-                    bip44: {
-                        coinType: 118,
-                    },
-                    bech32Config: {
-                        bech32PrefixAccAddr: "juno",
-                        bech32PrefixAccPub: "juno" + "pub",
-                        bech32PrefixValAddr: "juno" + "valoper",
-                        bech32PrefixValPub: "juno" + "valoperpub",
-                        bech32PrefixConsAddr: "juno" + "valcons",
-                        bech32PrefixConsPub: "juno" + "valconspub",
-                    },
-                    currencies: [
-                        {
-                            coinDenom: 'JUNO',
-                            coinMinimalDenom: 'ujuno',
-                            coinDecimals: 6,
-                            coinGeckoId: 'juno-network',
-                        },
-                    ],
-                    feeCurrencies: [
-                        {
-                            coinDenom: 'JUNO',
-                            coinMinimalDenom: 'ujuno',
-                            coinDecimals: 6,
-                            coinGeckoId: 'juno-network',
-                        },
-                    ],
-                    stakeCurrency: {
-                        coinDenom: 'JUNO',
-                        coinMinimalDenom: 'ujuno',
-                        coinDecimals: 6,
-                        coinGeckoId: 'juno-network',
-                    },
-                    features: ['stargate', 'ibc-transfer'],
-                    coinType: 118,
                 });
             }
         },

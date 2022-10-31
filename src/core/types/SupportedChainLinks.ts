@@ -18,7 +18,7 @@ export const supportedChainLinks: Blockchain[] = [
     new Blockchain("regen", "Regen", "regen", "regen-1", "m/44'/118'/0'/0/0", "regen", ["cosmos"], [connectionMethodKeplr, connectionMethodLedger]),
     new Blockchain("crypto.org", "Crypto.org", "cro", "crypto-org-chain-mainnet-1", "m/44'/118'/0'/0/0", "cro", ['crypto.org', 'cosmos'], [connectionMethodKeplr, connectionMethodLedger]),
     new Blockchain("sentinel", "Sentinel", "dvpn", "sentinelhub-2", "m/44'/118'/0'/0/0", "sent", ["cosmos"], [connectionMethodKeplr, connectionMethodLedger]),
-    new Blockchain("kava", "Kava", "kava", "kava-3", "m/44'/459'/0'/0/0", "kava", ['kava', 'cosmos'], [connectionMethodKeplr, connectionMethodLedger]),
+    new Blockchain("kava", "Kava", "kava", "kava_2222-10", "m/44'/459'/0'/0/0", "kava", ['kava', 'cosmos'], [connectionMethodKeplr, connectionMethodLedger]),
     new Blockchain("emoney", "e-Money", "ngm", "emoney-3", "m/44'/118'/0'/0/0", "emoney", ["cosmos"], [connectionMethodKeplr, connectionMethodLedger]),
     new Blockchain("juno", "Juno", "juno", "juno-1", "m/44'/118'/0'/0/0", "juno", ["cosmos"], [connectionMethodKeplr, connectionMethodLedger]),
     new Blockchain("bitsong", "Bitsong", "btsg", "bitsong-2b", "m/44'/639'/0'/0/0", "bitsong", ["cosmos"], [connectionMethodKeplr, connectionMethodLedger]),

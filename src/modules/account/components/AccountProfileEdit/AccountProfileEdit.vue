@@ -431,7 +431,7 @@ export default defineComponent({
           } else {
             if (
               this.messageSent?.typeUrl ===
-              "/desmos.profiles.v2.MsgDeleteProfile"
+              "/desmos.profiles.v3.MsgDeleteProfile"
             ) {
               this.accountStore.setIsNewProfile();
             } else {
@@ -457,7 +457,7 @@ export default defineComponent({
       if (this.accountStore.profile) {
         const doNotModify = "[do-not-modify]";
         const msgSaveProfile: MsgSaveProfileEncodeObject = {
-          typeUrl: "/desmos.profiles.v2.MsgSaveProfile",
+          typeUrl: "/desmos.profiles.v3.MsgSaveProfile",
           value: {
             dtag: this.accountStore.profile.dtag,
             nickname:
@@ -605,7 +605,7 @@ export default defineComponent({
     },
     async deleteProfile() {
       const msgDeleteProfile: MsgDeleteProfileEncodeObject = {
-        typeUrl: "/desmos.profiles.v2.MsgDeleteProfile",
+        typeUrl: "/desmos.profiles.v3.MsgDeleteProfile",
         value: {
           creator: this.authStore.account!.address,
         },

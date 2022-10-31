@@ -54,6 +54,15 @@
                     class="grid grid-cols-12"
                   >
                     <div
+                      v-if="proposals.length <= 0"
+                      class="col-span-12"
+                    >
+                      <p class="text-2xl text-center py-4">
+                        No active proposals at the moment.
+                      </p>
+                    </div>
+                    <div
+                      v-else
                       v-for="proposal in proposals"
                       class="col-span-12 md:col-span-6 lg:col-span-4 m-4"
                     >
@@ -241,6 +250,7 @@ import { useTransactionStore } from "@/stores/TransactionModule";
 import { useAuthStore } from "@/stores/AuthModule";
 import Long from "long";
 import { MsgVoteEncodeObject } from "@cosmjs/stargate";
+import { apolloClientForbole } from "@/gql/ApolloForbole";
 
 Chart.register(...registerables);
 

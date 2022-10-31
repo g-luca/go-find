@@ -4,7 +4,7 @@ import { EncodeObject } from '@cosmjs/proto-signing';
 import { TerraSigner, TerraChainLinkSignerResponse } from './../../../../core/signer/TerraSigner';
 import InputMnemonic from '@/ui/components/InputMnemonic.vue';
 import { MsgLinkChainAccountEncodeObject, MsgUnlinkChainAccountEncodeObject, SigningMode } from '@desmoslabs/desmjs';
-import { KeplrSigner } from '@/core/signer/KeplrSigner';
+import { KeplrSigner } from '@desmoslabs/desmjs-keplr';
 import { useAuthStore } from '@/stores/AuthModule';
 import { Buffer } from "buffer";
 import { useKeplrStore } from '@/stores/KeplrModule';
@@ -87,7 +87,7 @@ export default defineComponent({
                     // the tx went well! update the data 
 
                     // handle new chain link
-                    if (this.txMessage?.typeUrl === "/desmos.profiles.v2.MsgLinkChainAccount" && this.newChainLink) {
+                    if (this.txMessage?.typeUrl === "/desmos.profiles.v3.MsgLinkChainAccount" && this.newChainLink) {
                         console.log('chain link success!')
                         this.accountStore.profile.chainLinks.push(new ChainLink(this.newChainLink.address, this.newChainLink.chain));
                         this.newChainLink = null;
@@ -95,7 +95,7 @@ export default defineComponent({
                     }
 
                     // handle chain unlink
-                    if (this.txMessage?.typeUrl === "/desmos.profiles.v2.MsgUnlinkChainAccount" && this.deletedChainLink) {
+                    if (this.txMessage?.typeUrl === "/desmos.profiles.v3.MsgUnlinkChainAccount" && this.deletedChainLink) {
                         this.accountStore.profile.chainLinks.slice(this.accountStore.profile.chainLinks.indexOf(new ChainLink(this.deletedChainLink.address, this.deletedChainLink.chain)), 1);
                         this.accountStore.profile.chainLinks = this.accountStore.profile.chainLinks.filter((chainLink) => {
                             return chainLink.address !== this.deletedChainLink?.address && chainLink.chain !== this.deletedChainLink?.chain;
@@ -117,7 +117,6 @@ export default defineComponent({
             this.isSigningProof = false;
             const keplrStore = useKeplrStore();
             await keplrStore.setupTerraMainnet();
-            await keplrStore.setupJunoMainnet();
             await keplrStore.setupBandMainnet();
         },
         /**
@@ -139,7 +138,7 @@ export default defineComponent({
         deleteChainLink(chainLink: ChainLink): void {
             if (this.authStore.account) {
                 const msgUnlink: MsgUnlinkChainAccountEncodeObject = {
-                    typeUrl: "/desmos.profiles.v2.MsgUnlinkChainAccount",
+                    typeUrl: "/desmos.profiles.v3.MsgUnlinkChainAccount",
                     value: {
                         chainName: chainLink.chain,
                         owner: this.authStore.account?.address,
@@ -185,22 +184,11 @@ export default defineComponent({
                 }
 
 
-                // connect to the Keplr signer
-                const signer = new KeplrSigner(window.keplr, {
-                    chainInfo: {
-                        chainId: this.selectedChain.chainId
-                    } as any,
-                    preferNoSetFee: true,
-                    preferNoSetMemo: true,
-                    signingMode: SigningMode.AMINO,
-                })
-                await signer.connect();
-
 
                 const proofObj = this.prepareChainLinkProof();
 
                 // sign the proof
-                const signedTx = await signer.signAmino(extKeplrWallet.bech32Address, proofObj); // sign with Keplr
+                const signedTx = await window.keplr.signAmino(this.selectedChain.chainId, extKeplrWallet.bech32Address, proofObj); // sign with Keplr
                 const plainText = JSON.stringify(proofObj, null, 0); // convert to string to be used as plain_text
 
 
@@ -219,9 +207,9 @@ export default defineComponent({
                         }).finish()
                     },
                     signature: {
-                        typeUrl: '/desmos.profiles.v2.SingleSignatureData',
+                        typeUrl: '/desmos.profiles.v3.SingleSignature',
                         value: SingleSignature.encode({
-                            valueType: SignatureValueType.SIGNATURE_VALUE_TYPE_COSMOS_DIRECT,
+                            valueType: SignatureValueType.SIGNATURE_VALUE_TYPE_COSMOS_AMINO,
                             signature: Buffer.from(signedTx.signature.signature, 'base64')
                         }).finish()
                     },
@@ -229,7 +217,7 @@ export default defineComponent({
                 }
 
                 const chainAddress: Any = {
-                    typeUrl: "/desmos.profiles.v2.Bech32Address",
+                    typeUrl: "/desmos.profiles.v3.Bech32Address",
                     value: Bech32Address.encode({
                         prefix: this.selectedChain.bechPrefix,
                         value: extKeplrWallet.bech32Address
@@ -361,8 +349,8 @@ export default defineComponent({
                             }).finish(),
                         },
                         signature: {
-                            typeUrl: '/desmos.profiles.v2.SingleSignatureData',
-                            value: SingleSignatureData.encode({
+                            typeUrl: '/desmos.profiles.v3.SingleSignature',
+                            value: SingleSignature.encode({
                                 mode: SignMode.SIGN_MODE_TEXTUAL,
                                 signature: Buffer.from(sigOnly, 'hex')
                             }).finish()
@@ -408,8 +396,8 @@ export default defineComponent({
                         }).finish(),
                     },
                     signature: {
-                        typeUrl: '/desmos.profiles.v2.SingleSignatureData',
-                        value: SingleSignatureData.encode({
+                        typeUrl: '/desmos.profiles.v3.SingleSignature',
+                        value: SingleSignature.encode({
                             mode: SignMode.SIGN_MODE_TEXTUAL,
                             signature: Buffer.from(sigOnly, 'hex')
                         }).finish()
@@ -417,7 +405,7 @@ export default defineComponent({
                 }
 
                 const chainAddress: Any = {
-                    typeUrl: "/desmos.profiles.v2.HexAddress",
+                    typeUrl: "/desmos.profiles.v3.HexAddress",
                     value: HexAddress.encode({
                         prefix: this.selectedChain.bechPrefix,
                         value: address
@@ -443,7 +431,7 @@ export default defineComponent({
                 }
 
                 const chainAddress: Any = {
-                    typeUrl: "/desmos.profiles.v2.Bech32Address",
+                    typeUrl: "/desmos.profiles.v3.Bech32Address",
                     value: Bech32Address.encode({
                         prefix: this.selectedChain.bechPrefix,
                         value: signResult.address
@@ -478,8 +466,8 @@ export default defineComponent({
                                         }).finish()
                                     },
                                     signature: {
-                                        typeUrl: '/desmos.profiles.v2.SingleSignatureData',
-                                        value: SingleSignatureData.encode({
+                                        typeUrl: '/desmos.profiles.v3.SingleSignature',
+                                        value: SingleSignature.encode({
                                             mode: SignMode.SIGN_MODE_DIRECT,
                                             signature: Buffer.from(this.ledgerStore.actionSignature!, 'hex')
                                         }).finish()
@@ -487,7 +475,7 @@ export default defineComponent({
                                     plainText: Buffer.from(JSON.stringify(proofObj, null, 0)).toString('hex'),
                                 }
                                 const chainAddress: Any = {
-                                    typeUrl: "/desmos.profiles.v2.Bech32Address",
+                                    typeUrl: "/desmos.profiles.v3.Bech32Address",
                                     value: Bech32Address.encode({
                                         prefix: selectedChain.bechPrefix,
                                         value: this.ledgerStore.address
@@ -510,7 +498,7 @@ export default defineComponent({
          */
         async sendChainLink(selectedChain: Blockchain, destAdress: string, userAddress: string, proof: Proof, chainAddress: Any) {
             const msgLinkChain: MsgLinkChainAccountEncodeObject = {
-                typeUrl: "/desmos.profiles.v2.MsgLinkChainAccount",
+                typeUrl: "/desmos.profiles.v3.MsgLinkChainAccount",
                 value: {
                     chainAddress,
                     proof,

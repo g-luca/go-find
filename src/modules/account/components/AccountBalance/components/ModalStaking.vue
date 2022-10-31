@@ -723,7 +723,6 @@ export default defineComponent({
         });
         if (validatorsRaw.data) {
           this.validators = validatorsRaw.data.validator_aggregate.nodes;
-
           for (let i = 0; i < this.validators.length; i++) {
             this.totalVotingPower += Number(
               this.validators[i]["validator_voting_powers"][0]["voting_power"]
@@ -784,8 +783,11 @@ export default defineComponent({
               // skip
             }
 
-            if (accountModule.account && accountModule.account.delegations) {
-              accountModule.account.delegations.delegations.forEach(
+            if (
+              this.accountStore.account &&
+              this.accountStore.account.delegations
+            ) {
+              this.accountStore.account.delegations.delegations.forEach(
                 (del: AccountDelegation) => {
                   if (
                     del.validator_address ===

@@ -116,7 +116,7 @@ export default defineComponent({
                         // the transaction has an error message, failed
                         console.log('update failure!')
                     } else {
-                        if (this.txSent?.messages[0].typeUrl === '/desmos.profiles.v2.MsgDeleteProfile') {
+                        if (this.txSent?.messages[0].typeUrl === '/desmos.profiles.v3.MsgDeleteProfile') {
                             accountModule.setIsNewProfile();
                         } else {
                             // the tx went well! update the data 
@@ -152,7 +152,7 @@ export default defineComponent({
                     memo: "Profile update",
                     messages: [
                         {
-                            typeUrl: "/desmos.profiles.v2.MsgSaveProfile",
+                            typeUrl: "/desmos.profiles.v3.MsgSaveProfile",
                             value: DesmosMsgSaveProfile.encode(msgSaveProfile).finish(),
                         }
                     ],
@@ -286,7 +286,7 @@ export default defineComponent({
                 memo: "Profile delete",
                 messages: [
                     {
-                        typeUrl: "/desmos.profiles.v2.MsgDeleteProfile",
+                        typeUrl: "/desmos.profiles.v3.MsgDeleteProfile",
                         value: DesmosMsgDeleteProfile.encode(msgDeleteProfile).finish(),
                     }
                 ],

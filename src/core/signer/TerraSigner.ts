@@ -100,7 +100,7 @@ export class TerraSigner {
                                             }).finish(),
                                         },
                                         signature: {
-                                            typeUrl: '/desmos.profiles.v2.SingleSignatureData',
+                                            typeUrl: '/desmos.profiles.v3.SingleSignature',
                                             value: SingleSignature.encode({
                                                 valueType: SignatureValueType.SIGNATURE_VALUE_TYPE_COSMOS_DIRECT,
                                                 signature: Buffer.from(terraSignature.signature.signature, 'base64')
@@ -135,8 +135,8 @@ export class TerraSigner {
                                             }).finish(),
                                         },
                                         signature: {
-                                            typeUrl: '/desmos.profiles.v2.SingleSignatureData',
-                                            value: SingleSignatureData.encode({
+                                            typeUrl: '/desmos.profiles.v3.SingleSignature',
+                                            value: SingleSignature.encode({
                                                 mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
                                                 signature: Buffer.from(terraSignature.signature.signature, 'base64')
                                             }).finish()
