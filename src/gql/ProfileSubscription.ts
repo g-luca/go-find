@@ -9,7 +9,7 @@ export const ProfileSubscription = gql`
             bio
             profile_pic
             cover_pic
-            application_links {
+            applications_links {
                 application
                 username
                 state

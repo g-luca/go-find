@@ -62,10 +62,10 @@ export const useApplicationLinkStore = defineStore({
         parseApplicationLinks(profileRaw: any): ApplicationLink[] {
             const applicationLinks: ApplicationLink[] = [];
             try {
-                if (!profileRaw.application_links && !(profileRaw.application_links.length > 0))
+                if (!profileRaw.applications_links && !(profileRaw.applications_links.length > 0))
                     return [];
 
-                profileRaw.application_links.forEach((applicationLinkRaw: any) => {
+                profileRaw.applications_links.forEach((applicationLinkRaw: any) => {
                     switch (applicationLinkRaw.application) {
                         case "discord":
                             applicationLinks.push(new ApplicationLinkDiscord(applicationLinkRaw.username, applicationLinkRaw.state));
