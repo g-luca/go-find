@@ -41,7 +41,7 @@
               <div class="dark:text-white pt-3 pb-1 md:px-4">
                 <section class="pb-4">
                   <!-- Totals -->
-                  <span v-if="$store.state.AccountModule.account._delegations.totalAmount>0">
+                  <span v-if="accountStore.account.totalAmount>0">
                     <div class="grid grid-cols-12 pt-4 text-xl">
                       <!-- Delegations -->
                       <div class="col-span-12 md:col-span-4">
@@ -57,9 +57,9 @@
                           <div class="flex flex-col justify-start">
                             <p class="text-gray-700 dark:text-gray-100 text-4xl text-left font-bold my-4">
                               <span class="text-yellow-600 font-bold py-1">
-                                {{ splitNumberLeft($store.state.AccountModule.account._delegations.totalAmount,".") }}
+                                {{ splitNumberLeft(accountStore.account.delegations.totalAmount,".") }}
                                 <span class="text-lg">
-                                  .{{ splitNumberRight($store.state.AccountModule.account._delegations.totalDelegations,".") }}
+                                  .{{ splitNumberRight(accountStore.account.delegations.totalDelegations,".") }}
                                 </span>
                                 <span class="text-gray-700 dark:text-gray-300 pl-2 text-sm">
                                   {{coinDenom}}
@@ -84,9 +84,9 @@
                           <div class="flex flex-col justify-start">
                             <p class="text-gray-700 dark:text-gray-100 text-4xl text-left font-bold my-4">
                               <span class="text-seagreen-600 font-bold py-1">
-                                {{ splitNumberLeft($store.state.AccountModule.account._delegations.totalUnbonding,".") }}
+                                {{ splitNumberLeft(accountStore.account.delegations.totalUnbonding,".") }}
                                 <span class="text-lg">
-                                  .{{ splitNumberRight($store.state.AccountModule.account._delegations.totalUnbonding,".") }}
+                                  .{{ splitNumberRight(accountStore.account.delegations.totalUnbonding,".") }}
                                 </span>
                                 <span class="text-gray-700 dark:text-gray-300 pl-2 text-sm">
                                   {{coinDenom}}
@@ -111,9 +111,9 @@
                           <div class="flex flex-col justify-start">
                             <p class="text-gray-700 dark:text-gray-100 text-4xl text-left font-bold my-4">
                               <span class="text-blue-600 font-bold py-1">
-                                {{ splitNumberLeft($store.state.AccountModule.account._delegations.totalRewards,".") }}
+                                {{ splitNumberLeft(accountStore.account.delegations.totalRewards,".") }}
                                 <span class="text-lg">
-                                  .{{ splitNumberRight($store.state.AccountModule.account._delegations.totalRewards,".") }}
+                                  .{{ splitNumberRight(accountStore.account.delegations.totalRewards,".") }}
                                 </span>
                                 <span class="text-gray-700 dark:text-gray-300 pl-2 text-sm">
                                   {{coinDenom}}
@@ -296,7 +296,7 @@
                                   {{toDigitsFormat(userDelegation/1000000,6)}} {{coinDenom}}
                                 </h6>
                                 <button
-                                  v-if="$store.state.AccountModule.account._balance>0"
+                                  v-if="accountStore.account.balance>0"
                                   class="px-4 py-1 bg-yellow-500 hover:bg-yellow-600 rounded-lg text-white mr-1"
                                   type="button"
                                   @click="onDelegate(validator)"
@@ -627,28 +627,29 @@ import { ref } from "vue";
 import { Dialog, DialogOverlay, DialogTitle } from "@headlessui/vue";
 import { ValidatorsQuery } from "@/gql/ValidatorsQuery";
 import { useApolloClient } from "@vue/apollo-composable";
-import { getModule } from "vuex-module-decorators";
-import AuthModule from "@/store/modules/AuthModule";
 import { ProfileQuery } from "@/gql/ProfileQuery";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
-import { sanitize } from "dompurify";
-import marked from "marked";
-import AccountModule from "@/store/modules/AccountModule";
+import DOMPurify from "dompurify";
+import { marked } from "marked";
+import { CosmosTxBody } from "desmosjs";
 import {
-  CosmosBroadcastMode,
-  CosmosMsgBeginRedelegate,
-  CosmosMsgDelegate,
-  CosmosMsgUndelegate,
-  CosmosMsgWithdrawDelegatorReward,
-  CosmosTxBody,
-} from "desmosjs";
-import TransactionModule from "@/store/modules/TransactionModule";
+  MsgDelegate,
+  MsgBeginRedelegate,
+  MsgUndelegate,
+} from "cosmjs-types/cosmos/staking/v1beta1/tx";
+import { MsgWithdrawDelegatorReward } from "cosmjs-types/cosmos/distribution/v1beta1/tx";
+import { BroadcastMode } from "@cosmjs/launchpad";
+import { useTransactionStore } from "@/stores/TransactionModule";
+import { useAccountStore } from "@/stores/AccountModule";
+import { useAuthStore } from "@/stores/AuthModule";
 import { apolloClientDesmos } from "@/gql/ApolloDesmos";
 import { apolloClientForbole } from "@/gql/ApolloForbole";
 import { AccountDelegation } from "@/core/types/Account";
-const authModule = getModule(AuthModule);
-const accountModule = getModule(AccountModule);
-const transactionModule = getModule(TransactionModule);
+import {
+  MsgDelegateEncodeObject,
+  MsgUndelegateEncodeObject,
+  MsgWithdrawDelegatorRewardEncodeObject,
+} from "@cosmjs/stargate";
 
 enum StakingOperations {
   None = "none",
@@ -662,6 +663,9 @@ export default defineComponent({
   components: { Dialog, DialogOverlay, DialogTitle, SkeletonLoader },
   setup() {
     return {
+      authStore: useAuthStore(),
+      accountStore: useAccountStore(),
+      transactionStore: useTransactionStore(),
       isOpen: ref(false),
       isStakingOperationOpen: ref(false),
       isLoadingValidators: ref(false),
@@ -679,8 +683,8 @@ export default defineComponent({
 
       isOpenSelectStakingOperationValidatorTo: ref(false),
 
-      coinDenom: process.env.VUE_APP_COIN_DENOM,
-      ucoinDenom: process.env.VUE_APP_COIN_FEE_DENOM,
+      coinDenom: import.meta.env.VITE_APP_COIN_DENOM,
+      ucoinDenom: import.meta.env.VITE_APP_COIN_FEE_DENOM,
     };
   },
   methods: {
@@ -712,11 +716,13 @@ export default defineComponent({
       try {
         const validatorsRaw = await apolloClientForbole.query({
           query: ValidatorsQuery,
+          variables: {
+            address: this.authStore.account?.address,
+          },
           fetchPolicy: "no-cache",
         });
         if (validatorsRaw.data) {
           this.validators = validatorsRaw.data.validator_aggregate.nodes;
-
           for (let i = 0; i < this.validators.length; i++) {
             this.totalVotingPower += Number(
               this.validators[i]["validator_voting_powers"][0]["voting_power"]
@@ -753,7 +759,9 @@ export default defineComponent({
                       try {
                         (this.validators[i]["validator_descriptions"][0][
                           "details"
-                        ] as any) = sanitize(marked(validatorProfile["bio"]));
+                        ] as any) = DOMPurify.sanitize(
+                          marked(validatorProfile["bio"])
+                        );
                       } catch (e) {
                         // skip
                       }
@@ -775,8 +783,11 @@ export default defineComponent({
               // skip
             }
 
-            if (accountModule.account && accountModule.account.delegations) {
-              accountModule.account.delegations.delegations.forEach(
+            if (
+              this.accountStore.account &&
+              this.accountStore.account.delegations
+            ) {
+              this.accountStore.account.delegations.delegations.forEach(
                 (del: AccountDelegation) => {
                   if (
                     del.validator_address ===
@@ -882,8 +893,8 @@ export default defineComponent({
             this.stakingOperationValidatorFrom.delegation?.amount / 1000000 ||
             0;
         } else {
-          if (accountModule.account) {
-            maxAmount = accountModule.account.balance;
+          if (this.accountStore.account) {
+            maxAmount = this.accountStore.account.balance;
           }
         }
       } catch (e) {
@@ -895,14 +906,14 @@ export default defineComponent({
           this.stakingOperation !== StakingOperations.Unbond &&
           this.stakingOperation !== StakingOperations.Redelegate
         ) {
-          maxAmount -= Number(AuthModule.DEFAULT_FEE_AMOUNT) / 1000000;
+          maxAmount -= Number(this.authStore.DEFAULT_FEE_AMOUNT) / 1000000;
         }
       }
       this.stakingOperationMaxAmount = maxAmount;
     },
     async setMaxAmount() {
       await this.updateMaxAmount();
-      if (accountModule.account) {
+      if (this.accountStore.account) {
         this.stakingOperationAmount = this.stakingOperationMaxAmount;
         this.stakingOperationAmountRaw = String(this.stakingOperationMaxAmount);
         this.stakingOperationIsValidAmount = true;
@@ -910,7 +921,7 @@ export default defineComponent({
     },
     validateAmount() {
       let isValidNumber = false;
-      if (accountModule.account) {
+      if (this.accountStore.account) {
         //this.updateMaxAmount();
         // check regex
         const amountRegex = /^[0-9.,]{1,}$/;
@@ -941,31 +952,23 @@ export default defineComponent({
       const amount = this.stakingOperationAmount * 1000000;
       const toValidatorAddress =
         this.stakingOperationValidatorTo.validator_info.operator_address;
-      if (accountModule.profile) {
-        const msgDelegate: CosmosMsgDelegate = {
-          delegatorAddress: accountModule.profile.address,
-          validatorAddress: toValidatorAddress,
-          amount: {
-            denom: this.ucoinDenom!,
-            amount: amount.toString(),
+      if (this.accountStore.profile) {
+        const msgDelegate: MsgDelegateEncodeObject = {
+          typeUrl: "/cosmos.staking.v1beta1.MsgDelegate",
+          value: {
+            delegatorAddress: this.accountStore.profile.address,
+            validatorAddress: toValidatorAddress,
+            amount: {
+              denom: this.ucoinDenom!,
+              amount: amount.toString(),
+            },
           },
         };
-        const txBody: CosmosTxBody = {
-          memo: "Delegate | Go-find",
-          messages: [
-            {
-              typeUrl: "/cosmos.staking.v1beta1.MsgDelegate",
-              value: CosmosMsgDelegate.encode(msgDelegate).finish(),
-            },
-          ],
-          extensionOptions: [],
-          nonCriticalExtensionOptions: [],
-          timeoutHeight: 0,
-        };
         await this.toggleStakingOperationModal();
-        transactionModule.start({
-          tx: txBody,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+        this.transactionStore.start({
+          messages: [msgDelegate],
+          mode: BroadcastMode.Block,
+          memo: "Delegate | Go-find",
         });
       }
     },
@@ -976,32 +979,25 @@ export default defineComponent({
         this.stakingOperationValidatorTo.validator_info.operator_address;
       const fromValidatorAddress =
         this.stakingOperationValidatorFrom.validator_info.operator_address;
-      if (accountModule.profile) {
-        const msgRedelegate: CosmosMsgBeginRedelegate = {
-          delegatorAddress: accountModule.profile.address,
-          validatorSrcAddress: fromValidatorAddress,
-          validatorDstAddress: toValidatorAddress,
-          amount: {
-            denom: this.ucoinDenom!,
-            amount: amount.toString(),
+      if (this.accountStore.profile) {
+        //TODO: Missing definition???
+        const msgRedelegate: any = {
+          typeUrl: "/cosmos.staking.v1beta1.MsgBeginRedelegate",
+          value: {
+            delegatorAddress: this.accountStore.profile.address,
+            validatorSrcAddress: fromValidatorAddress,
+            validatorDstAddress: toValidatorAddress,
+            amount: {
+              denom: this.ucoinDenom!,
+              amount: amount.toString(),
+            },
           },
         };
-        const txBody: CosmosTxBody = {
-          memo: "Redelegate | Go-find",
-          messages: [
-            {
-              typeUrl: "/cosmos.staking.v1beta1.MsgBeginRedelegate",
-              value: CosmosMsgBeginRedelegate.encode(msgRedelegate).finish(),
-            },
-          ],
-          extensionOptions: [],
-          nonCriticalExtensionOptions: [],
-          timeoutHeight: 0,
-        };
         await this.toggleStakingOperationModal();
-        transactionModule.start({
-          tx: txBody,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+        this.transactionStore.start({
+          messages: [msgRedelegate],
+          mode: BroadcastMode.Block,
+          memo: "Redelegate | Go-find",
         });
       }
     },
@@ -1009,59 +1005,39 @@ export default defineComponent({
       const amount = this.stakingOperationAmount * 1000000;
       const fromValidatorAddress =
         this.stakingOperationValidatorFrom.validator_info.operator_address;
-      if (accountModule.profile) {
-        const msgUnbond: CosmosMsgUndelegate = {
-          delegatorAddress: accountModule.profile.address,
-          validatorAddress: fromValidatorAddress,
-          amount: {
-            denom: this.ucoinDenom!,
-            amount: amount.toString(),
+      if (this.accountStore.profile) {
+        const msgUnbond: MsgUndelegateEncodeObject = {
+          typeUrl: "/cosmos.staking.v1beta1.MsgUndelegate",
+          value: {
+            delegatorAddress: this.accountStore.profile.address,
+            validatorAddress: fromValidatorAddress,
+            amount: {
+              denom: this.ucoinDenom!,
+              amount: amount.toString(),
+            },
           },
         };
-        const txBody: CosmosTxBody = {
-          memo: "Unbond | Go-find",
-          messages: [
-            {
-              typeUrl: "/cosmos.staking.v1beta1.MsgUndelegate",
-              value: CosmosMsgUndelegate.encode(msgUnbond).finish(),
-            },
-          ],
-          extensionOptions: [],
-          nonCriticalExtensionOptions: [],
-          timeoutHeight: 0,
-        };
         await this.toggleStakingOperationModal();
-        transactionModule.start({
-          tx: txBody,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+        this.transactionStore.start({
+          messages: [msgUnbond],
+          mode: BroadcastMode.Block,
+          memo: "Unbond | Go-find",
         });
       }
     },
     async withdrawRewards(validatorAddress: string) {
-      if (accountModule.profile) {
-        const msgWithdrawRewards: CosmosMsgWithdrawDelegatorReward = {
-          delegatorAddress: accountModule.profile.address,
-          validatorAddress: validatorAddress,
+      if (this.accountStore.profile) {
+        const msgWithdrawRewards: MsgWithdrawDelegatorRewardEncodeObject = {
+          typeUrl: "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+          value: {
+            delegatorAddress: this.accountStore.profile.address,
+            validatorAddress: validatorAddress,
+          },
         };
-        const txBody: CosmosTxBody = {
+        this.transactionStore.start({
+          messages: [msgWithdrawRewards],
+          mode: BroadcastMode.Block,
           memo: "Withdraw Rewards | Go-find",
-          messages: [
-            {
-              typeUrl:
-                "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
-              value:
-                CosmosMsgWithdrawDelegatorReward.encode(
-                  msgWithdrawRewards
-                ).finish(),
-            },
-          ],
-          extensionOptions: [],
-          nonCriticalExtensionOptions: [],
-          timeoutHeight: 0,
-        };
-        transactionModule.start({
-          tx: txBody,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
         });
       }
     },

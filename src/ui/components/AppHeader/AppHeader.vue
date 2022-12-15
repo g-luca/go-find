@@ -11,7 +11,7 @@
             >
               <div class="flex">
                 <img
-                  src="@/assets/brands/go-find/logo.svg"
+                  src="/public/assets/brands/go-find/logo.svg"
                   class="mx-auto object-cover h-10 w-10 rounded-full"
                 >
                 <span class=" hidden md:block my-auto ml-1 px-2 md:px-4 py-0.5 text-white font-medium text-lg rounded-xl bg-gradient-to-r from-indigo-900 via-indigo-800 to-indigo-700">
@@ -27,7 +27,7 @@
             <!-- Search bar -->
             <SearchUser class="" />
 
-            <span v-if="$store.state.AuthModule._authLevel>0">
+            <span v-if="authStore.authLevel>0">
               <Menu
                 as="div"
                 class="block relative pl-2 pt-1 inline-block text-left"
@@ -35,7 +35,7 @@
                 <div>
                   <MenuButton class="">
                     <img
-                      :src="$store.state.AccountModule.profile._profilePic || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
+                      :src="accountStore.profile._profilePic || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
                       class="mx-auto object-cover h-10 w-10 rounded-full"
                     >
                   </MenuButton>
@@ -93,7 +93,7 @@
       class="w-full shadow-lg bg-red-500 dark:bg-red-500 text-white text-center"
     >
       <h1 class="py-2">
-        <i class=" font-semibold">morpheus-apollo-2</i> testnet environment
+        <i class=" font-semibold">morpheus-apollo-3</i> testnet environment
       </h1>
     </div>
   </span>
@@ -104,12 +104,8 @@ import { defineComponent } from "vue";
 import ToggleTheme from "@/ui/components/ToggleTheme/ToggleTheme.vue";
 import SearchUser from "../SearchUser/SearchUser.vue";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
-import { getModule } from "vuex-module-decorators";
-import AuthModule from "@/store/modules/AuthModule";
-import router from "@/router";
-import WalletConnectModule from "@/store/modules/WalletConnectModule";
-const authModule = getModule(AuthModule);
-const walletConnectModule = getModule(WalletConnectModule);
+import { useAccountStore } from "@/stores/AccountModule";
+import { useAuthStore } from "@/stores/AuthModule";
 
 export default defineComponent({
   components: {
@@ -122,18 +118,16 @@ export default defineComponent({
     MenuItems,
   },
   data() {
-    const isTestnet = process.env.VUE_APP_IS_TESTNET === "true";
+    const isTestnet = import.meta.env.VITE_APP_IS_TESTNET === "true";
     return {
+      authStore: useAuthStore(),
+      accountStore: useAccountStore(),
       isTestnet,
     };
   },
   methods: {
     logout() {
-      if (authModule.account?.isUsingWalletConnect) {
-        walletConnectModule.logout();
-      }
-      authModule.logout();
-      router.push("/");
+      this.authStore.logout();
     },
   },
 });

@@ -3,13 +3,13 @@
     <div class="flex justify-center">
       <img
         class="max-h-44 xl:max-h-64"
-        src="@/assets/illustrations/register/register-success.svg"
+        src="/public/assets/illustrations/register/register-success.svg"
         alt="Success"
       >
     </div>
     <div class="text-center pt-10 xl:pt-20">
       <h1 class="text-4xl xl:text-6xl dark:text-white">
-        Welcome aboard @<span class="text-brand">{{ $store.state.RegisterModule.dtag }}</span>!
+        Welcome aboard @<span class="text-brand">{{ registerStore.dtag }}</span>!
       </h1>
     </div>
     <div class="pt-10 w-1/2 mx-auto pb-10 text-center">
@@ -23,4 +23,16 @@
   </div>
 </template>
 
-<script lang="ts" src="./RegisterSuccess.ts"/>
+<script lang="ts">
+import { useRegisterStore } from "@/stores/RegisterModule";
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  data() {
+    return {
+      registerStore: useRegisterStore(),
+    };
+  },
+  methods: {},
+});
+</script>

@@ -7,7 +7,7 @@
       <div class="text-center col-span-12">
         <img
           class="w-1/3 mx-auto py-4"
-          src="@/assets/illustrations/register/loading_blockchain.svg"
+          src="/public/assets/illustrations/register/loading_blockchain.svg"
           alt=""
         >
         <div class="text-2xl">
@@ -68,7 +68,7 @@
         <div class="text-center">
           <img
             class="w-1/3 mx-auto py-4"
-            src="@/assets/illustrations/airdrop/claim_error.svg"
+            src="/public/assets/illustrations/airdrop/claim_error.svg"
             alt=""
           >
           <span class="text-red-500 text-2xl">
@@ -82,17 +82,13 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { getModule } from "vuex-module-decorators";
-import ClipboardModule from "@/store/modules/ClipboardModule";
-import DesmosNetworkModule from "@/store/modules/DesmosNetworkModule";
-import AuthModule from "@/store/modules/AuthModule";
 import { ApplicationLinkQuery } from "@/gql/ApplicationLinkQuery";
 import { useApolloClient } from "@vue/apollo-composable";
-import AccountModule from "@/store/modules/AccountModule";
-const clipboardModule = getModule(ClipboardModule);
-const desmosNetwork = getModule(DesmosNetworkModule);
-const authModule = getModule(AuthModule);
-const accountModule = getModule(AccountModule);
+import { useClipboardStore } from "@/stores/ClipboardModule";
+import { useDesmosNetworkStore } from "@/stores/DesmosNetworkModule";
+import { useAccountStore } from "@/stores/AccountModule";
+import { useAuthStore } from "@/stores/AuthModule";
+import { Buffer } from "buffer";
 
 export default defineComponent({
   components: {},
@@ -103,9 +99,11 @@ export default defineComponent({
     },
   },
   data() {
-    const net = desmosNetwork.isTestnet ? "testnet" : "mainnet";
+    const net = useDesmosNetworkStore().isTestnet ? "testnet" : "mainnet";
     const cmdVerify = `!verify ${net}`;
     return {
+      authStore: useAuthStore(),
+      accountStore: useAccountStore(),
       cmdVerify,
       isVerifyingAppConnection: false,
       isAppConnected: false,
@@ -117,7 +115,7 @@ export default defineComponent({
   },
   methods: {
     copy(value: string) {
-      clipboardModule.copy(value);
+      useClipboardStore().copy(value);
     },
     async waitApplicationLink(): Promise<void> {
       this.isVerifyingAppConnection = true;
@@ -128,7 +126,7 @@ export default defineComponent({
             query: ApplicationLinkQuery,
             fetchPolicy: "no-cache",
             variables: {
-              dtag: authModule.account?.dtag,
+              dtag: this.authStore.account?.dtag,
               appName: "discord",
               appUsername: this.username,
             },
@@ -141,8 +139,8 @@ export default defineComponent({
               case "APPLICATION_LINK_STATE_VERIFICATION_SUCCESS":
                 this.isAppConnected = true;
                 this.isVerifyingAppConnection = false;
-                if (accountModule.profile) {
-                  accountModule.loadAccount(true);
+                if (this.accountStore.profile) {
+                  this.accountStore.loadAccount(true);
                 }
                 break;
               case "APPLICATION_LINK_STATE_TIMED_OUT":

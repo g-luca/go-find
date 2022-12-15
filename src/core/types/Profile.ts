@@ -1,8 +1,7 @@
 import PostLink from "./PostLink";
 import ApplicationLink from "./ApplicationLink";
 import ChainLink from "./ChainLink";
-import marked from "marked";
-import { sanitize } from "dompurify";
+import DOMPurify from "dompurify";
 
 export class Profile {
     private _dtag: string;
@@ -15,14 +14,10 @@ export class Profile {
     private _applicationLinks: ApplicationLink[] = [];
     private _chainLinks: ChainLink[] = []
 
-    private _postLinks: PostLink[] = [
-        new PostLink(0, 'Link 1', 'addasdad'),
-        new PostLink(0, 'Link 2', 'addasdad'),
-        new PostLink(0, 'Link 3', 'addasdad'),
-    ]
+    private _postLinks: PostLink[] = []
 
 
-    static DTAG_REGEX = /^[A-Za-z0-9_]{6,30}$/;
+    static DTAG_REGEX = import.meta.env.VITE_APP_IS_TESTNET ? /^[A-Za-z0-9_]{3,30}$/ : /^[A-Za-z0-9_]{6,30}$/;
     static PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\w\W]{10,}$/;
 
 
@@ -30,7 +25,7 @@ export class Profile {
         this._dtag = dtag;
         this._address = address;
         this._nickname = nickname;
-        this._bio = sanitize(marked(bio));
+        this._bio = DOMPurify.sanitize(bio);
         this._profilePic = profilePic;
         this._profileCover = profileCover;
         this._applicationLinks = applicationLinks;

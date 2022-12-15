@@ -1,8 +1,22 @@
-import LedgerModule from '@/store/modules/LedgerModule';
+import { Any } from 'cosmjs-types/google/protobuf/any';
+import CryptoUtils from '@/utils/CryptoUtils';
+import { EncodeObject } from '@cosmjs/proto-signing';
+import { TerraSigner, TerraChainLinkSignerResponse } from './../../../../core/signer/TerraSigner';
+import InputMnemonic from '@/ui/components/InputMnemonic.vue';
+import { MsgLinkChainAccountEncodeObject, MsgUnlinkChainAccountEncodeObject, SigningMode } from '@desmoslabs/desmjs';
+import { KeplrSigner } from '@desmoslabs/desmjs-keplr';
+import { useAuthStore } from '@/stores/AuthModule';
+import { Buffer } from "buffer";
+import { useKeplrStore } from '@/stores/KeplrModule';
+import { useAccountStore } from '@/stores/AccountModule';
 import { defineComponent, ref, watchEffect } from "vue";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
 import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
-import { CosmosBroadcastMode, CosmosPubKey, CosmosTxBody, DesmosBech32Address, DesmosMsgLinkChainAccount, DesmosMsgUnlinkChainAccount, DesmosProof, Transaction } from "desmosjs";
+import { PubKey } from "cosmjs-types/cosmos/crypto/secp256k1/keys";
+import { Proof, Bech32Address, SingleSignature, SignatureValueType, HexAddress } from "@desmoslabs/desmjs-types/desmos/profiles/v3/models_chain_links";
+import { ethers } from "ethers";
+
+import { BroadcastMode } from "@cosmjs/launchpad";
 
 import {
     TransitionRoot,
@@ -11,37 +25,18 @@ import {
     DialogOverlay,
     DialogTitle,
 } from "@headlessui/vue";
-import InputMnemonic from "@/ui/components/InputMnemonic.vue";
 import { supportedChainLinks } from "@/core/types/SupportedChainLinks";
 import Blockchain from "@/core/types/Blockchain";
-import { Wallet, } from "desmosjs";
-import CryptoUtils from "@/utils/CryptoUtils";
-import { getModule } from "vuex-module-decorators";
-import AuthModule from "@/store/modules/AuthModule";
-import TransactionModule, { TransactionStatus } from "@/store/modules/TransactionModule";
 import ChainLink from "@/core/types/ChainLink";
-import AccountModule from "@/store/modules/AccountModule";
 import { Key } from "@keplr-wallet/types";
-import KeplrModule from "@/store/modules/KeplrModule";
-import { Extension as TerraExtension, MsgSend as TerraMsgSend, Fee as TerraFee, LCDClient as TerraLCDClient, TxBody as TerraTxBody, AuthInfo as TerraAuthInfo, SignDoc as TerraSignDoc } from "@terra-money/terra.js";
-const authModule = getModule(AuthModule);
-const accountModule = getModule(AccountModule);
-const transactionModule = getModule(TransactionModule);
-const ledgerModule = getModule(LedgerModule);
-
-class ChainLinkConnectionMethod {
-    public id: string;
-    public name: string;
-    public logo: string;
-    public chainRestrictions: string[] = [];
-
-    constructor(id: string, name: string, logo: string, chainRestrictions: string[] = []) {
-        this.id = id;
-        this.name = name;
-        this.logo = logo;
-        this.chainRestrictions = chainRestrictions;
-    }
-}
+import { useTransactionStore, TransactionStatus } from '@/stores/TransactionModule';
+import { useLedgerStore } from "@/stores/LedgerModule";
+import { ChainLinkConnectionMethod } from '@/core/types/ChainLinkConnectionMethod';
+import Long from 'long';
+import { SignMode } from '@desmoslabs/desmjs-types/cosmos/tx/signing/v1beta1/signing';
+import { Bip39, EnglishMnemonic, Secp256k1 } from '@cosmjs/crypto';
+import { Wallet } from 'desmosjs';
+import { Secp256k1Wallet } from '@cosmjs/amino';
 
 
 
@@ -58,60 +53,57 @@ export default defineComponent({
     },
     data() {
         return {
-            supportedChainLinkConnectionMethods: [new ChainLinkConnectionMethod("keplr", "Keplr", "keplr"), new ChainLinkConnectionMethod("ledger", "Ledger", "ledger"), new ChainLinkConnectionMethod("terrastation", "Terra Station", "terrastation", ["terra"])],
+            authStore: useAuthStore(),
+            accountStore: useAccountStore(),
+            transactionStore: useTransactionStore(),
+            ledgerStore: useLedgerStore(),
             selectedConnectionMethod: null as ChainLinkConnectionMethod | null,
             supportedChainLinks,
             filteredSupportedChainLinks: supportedChainLinks,
-            isCustomChain: false,
-            customChainName: "",
-            customBechPrefix: "",
             selectedChain: null as Blockchain | null,
-            customHdPath: '',
             isChainLinkEditorOpen: false,
-            isAdvancedOptionsOpen: false,
             isSigningProof: false,
             isLinkingWithKeplr: false,
             isExecutingTransaction: false,
-            tx: null as CosmosTxBody | null,
+            txMessage: null as EncodeObject | null,
             newChainLink: null as ChainLink | null,
             deletedChainLink: null as ChainLink | null,
 
-            generatedProof: null as DesmosProof | null,
+            generatedProof: null as Proof | null,
             generateProofError: "",
 
             inputMnemonic: new Array<string>(24),
-            terraExtension: null as TerraExtension | null
         }
     },
     beforeMount() {
-        ref(transactionModule);
+        ref(this.transactionStore);
         watchEffect(() => {
             // check if is processing the right transaction and the status
-            if (accountModule.profile && transactionModule.tx === this.tx && (transactionModule.transactionStatus === TransactionStatus.Error || transactionModule.transactionStatus === TransactionStatus.Success)) {
-                if (transactionModule.errorMessage) {
+            if (this.accountStore.profile && this.transactionStore.tx === this.txMessage && (this.transactionStore.transactionStatus === TransactionStatus.Error || this.transactionStore.transactionStatus === TransactionStatus.Success)) {
+                if (this.transactionStore.errorMessage) {
                     // the transaction has an error message, failed
                     console.log('chain link failure!')
                 } else {
                     // the tx went well! update the data 
 
                     // handle new chain link
-                    if (this.tx?.messages[0].typeUrl === "/desmos.profiles.v1beta1.MsgLinkChainAccount" && this.newChainLink) {
+                    if (this.txMessage?.typeUrl === "/desmos.profiles.v3.MsgLinkChainAccount" && this.newChainLink) {
                         console.log('chain link success!')
-                        accountModule.profile.chainLinks.push(new ChainLink(this.newChainLink.address, this.newChainLink.chain));
+                        this.accountStore.profile.chainLinks.push(new ChainLink(this.newChainLink.address, this.newChainLink.chain));
                         this.newChainLink = null;
                         this.deletedChainLink = null;
                     }
 
                     // handle chain unlink
-                    if (this.tx?.messages[0].typeUrl === "/desmos.profiles.v1beta1.MsgUnlinkChainAccount" && this.deletedChainLink) {
-                        accountModule.profile.chainLinks.slice(accountModule.profile.chainLinks.indexOf(new ChainLink(this.deletedChainLink.address, this.deletedChainLink.chain)), 1);
-                        accountModule.profile.chainLinks = accountModule.profile.chainLinks.filter((chainLink: ChainLink) => {
+                    if (this.txMessage?.typeUrl === "/desmos.profiles.v3.MsgUnlinkChainAccount" && this.deletedChainLink) {
+                        this.accountStore.profile.chainLinks.slice(this.accountStore.profile.chainLinks.indexOf(new ChainLink(this.deletedChainLink.address, this.deletedChainLink.chain)), 1);
+                        this.accountStore.profile.chainLinks = this.accountStore.profile.chainLinks.filter((chainLink) => {
                             return chainLink.address !== this.deletedChainLink?.address && chainLink.chain !== this.deletedChainLink?.chain;
                         });
                         this.newChainLink = null;
                         this.deletedChainLink = null;
                     }
-                    this.tx = null;
+                    this.txMessage = null;
                 }
             }
         })
@@ -121,15 +113,11 @@ export default defineComponent({
             this.selectedChain = null;
             this.selectedConnectionMethod = null;
             this.isChainLinkEditorOpen = !this.isChainLinkEditorOpen;
-            //this.inputMnemonic = new Array<string>(24);
-            this.selectedChain = null;
             this.filteredSupportedChainLinks = this.supportedChainLinks;
             this.isSigningProof = false;
-            await KeplrModule.setupTerraMainnet();
-            await KeplrModule.setupJunoMainnet();
-            await KeplrModule.setupBandMainnet();
-        }, toggleAdvancedOptions(): void {
-            this.isAdvancedOptionsOpen = !this.isAdvancedOptionsOpen;
+            const keplrStore = useKeplrStore();
+            await keplrStore.setupTerraMainnet();
+            await keplrStore.setupBandMainnet();
         },
         /**
          * Filter supported chain links by text input
@@ -148,110 +136,24 @@ export default defineComponent({
          * @param chainLink chainLink to delete
          */
         deleteChainLink(chainLink: ChainLink): void {
-            if (authModule.account) {
-                const msgUnlink: DesmosMsgUnlinkChainAccount = {
-                    chainName: chainLink.chain,
-                    owner: authModule.account?.address,
-                    target: chainLink.address,
+            if (this.authStore.account) {
+                const msgUnlink: MsgUnlinkChainAccountEncodeObject = {
+                    typeUrl: "/desmos.profiles.v3.MsgUnlinkChainAccount",
+                    value: {
+                        chainName: chainLink.chain,
+                        owner: this.authStore.account?.address,
+                        target: chainLink.address,
+                    }
                 }
-                const txBody: CosmosTxBody = {
-                    memo: "Chain unlink",
-                    messages: [
-                        {
-                            typeUrl: "/desmos.profiles.v1beta1.MsgUnlinkChainAccount",
-                            value: DesmosMsgUnlinkChainAccount.encode(msgUnlink).finish(),
-                        }
-                    ],
-                    extensionOptions: [],
-                    nonCriticalExtensionOptions: [],
-                    timeoutHeight: 0,
-                }
-                this.tx = txBody;
+                this.txMessage = msgUnlink;
                 this.newChainLink = null;
                 this.deletedChainLink = chainLink;
-                transactionModule.start({
-                    tx: txBody,
-                    mode: CosmosBroadcastMode.BROADCAST_MODE_ASYNC,
+                this.transactionStore.start({
+                    messages: [msgUnlink],
+                    mode: BroadcastMode.Async,
+                    memo: "Chain unlink | Go-find",
                 });
             }
-        },
-        /**
-         * Generate Chain Link proof for users with mnemonic input
-         * @returns success value
-         */
-        async generateProof(): Promise<boolean> {
-            let success = false;
-            this.inputMnemonic.forEach((word, i) => {
-                this.inputMnemonic[i] = word.trim();
-            });
-            const mnemonic = this.inputMnemonic.join(' ');
-            if (mnemonic.trimEnd().split(' ').length >= 12 && authModule.account && this.selectedChain) {
-                try {
-                    const destWallet = new Wallet(mnemonic, this.customHdPath, this.customBechPrefix);
-
-
-                    const canCreateChainLink = await this.verifyChainLinkRequirements(destWallet.address, this.selectedChain?.id);
-                    if (!canCreateChainLink) {
-                        this.generateProofError = "Connection already exists or profile not found";
-                        return false;
-                    }
-
-
-                    const msgLinkChain: DesmosMsgLinkChainAccount = {
-                        chainAddress: {
-                            typeUrl: "/desmos.profiles.v1beta1.Bech32Address",
-                            value: DesmosBech32Address.encode({
-                                prefix: destWallet.bech32Prefix,
-                                value: destWallet.address,
-                            }).finish()
-                        },
-                        proof: {
-                            pubKey: {
-                                typeUrl: destWallet.publicKey.typeUrl,
-                                value: CosmosPubKey.encode({
-                                    key: destWallet.publicKey.value
-                                }).finish()
-                            },
-                            signature: Buffer.from(Transaction.signBytes(Buffer.from(CryptoUtils.sha256Buffer(Buffer.from(authModule.account.address))), destWallet.privateKey)).toString('hex'),
-                            plainText: Buffer.from(authModule.account.address).toString('hex'),
-                        }, chainConfig: {
-                            name: this.selectedChain?.id.toLowerCase(),
-                        },
-                        signer: authModule.account?.address,
-                    }
-                    const txBody: CosmosTxBody = {
-                        memo: "Chain link",
-                        messages: [
-                            {
-                                typeUrl: "/desmos.profiles.v1beta1.MsgLinkChainAccount",
-                                value: DesmosMsgLinkChainAccount.encode(msgLinkChain).finish(),
-                            }
-                        ],
-                        extensionOptions: [],
-                        nonCriticalExtensionOptions: [],
-                        timeoutHeight: 0,
-                    }
-                    this.tx = txBody;
-                    this.isExecutingTransaction = true;
-                    this.newChainLink = new ChainLink(destWallet.address, this.selectedChain.id);
-
-                    await this.toggleChainLinkEditor();
-                    transactionModule.start({
-                        tx: this.tx,
-                        mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
-                    });
-
-                    success = true;
-                    this.generateProofError = "";
-                } catch (e) {
-                    console.log(e)
-                    this.generateProofError = "Error generating the address";
-                    this.newChainLink = null;
-                }
-            } else {
-                this.generateProofError = "Invalid mnemonic";
-            }
-            return success;
         },
         /**
          * Generate Chain Link proof for user with Keplr
@@ -259,115 +161,78 @@ export default defineComponent({
          * @returns success value
          */
         async generateProofWithKeplr(extKeplrWallet: Key): Promise<boolean> {
-            let success = false
-            if (this.selectedChain) {
-                try {
-                    const canCreateChainLink = await this.verifyChainLinkRequirements(extKeplrWallet.bech32Address, this.selectedChain?.id);
-                    if (!canCreateChainLink) {
-                        this.generateProofError = "Connection already exists or profile not found";
-                        return false;
+            const canCreateChainLink = await this.verifyChainLinkRequirements(extKeplrWallet.bech32Address, this.selectedChain?.id || '');
+
+            if (!window.keplr) {
+                this.generateProofError = "Keplr is not installed. Please install it to use this feature.";
+                return false;
+            }
+
+            // check if can create the chain link
+            if (!canCreateChainLink || this.selectedChain === null) {
+                this.generateProofError = "Connection already exists or profile not found";
+                return false;
+            }
+
+            try {
+                // avoid keplr custom values
+                (window.keplr as any).defaultOptions = {
+                    sign: {
+                        preferNoSetFee: true,
+                        preferNoSetMemo: true,
                     }
-
-                    // avoid keplr custom values
-                    (window.keplr as any).defaultOptions = {
-                        sign: {
-                            preferNoSetFee: true,
-                            preferNoSetMemo: true,
-                        }
-                    }
-
-                    // get the Keplr signer
-                    const signer = window.keplr?.getOfflineSigner(this.selectedChain.chainId);
-                    // generate a "fake" transaction to be used as proof
-                    const proofObj = {
-                        account_number: "0",
-                        chain_id: this.selectedChain.chainId,
-                        fee: {
-                            amount: [{
-                                amount: "0",
-                                denom: `${this.selectedChain.symbol}`
-                            }],
-                            gas: "1"
-                        },
-                        memo: `${authModule.account?.address}`,
-                        msgs: [],
-                        sequence: "0"
-                    }
-                    // sign the proof
-                    const signedTx = await signer?.signAmino(extKeplrWallet.bech32Address, proofObj); // sign with Keplr
-                    const plainText = JSON.stringify(proofObj, null, 0); // convert to string to be used as plain_text
-
-                    // create the chain link transaction
-                    if (signedTx && authModule.account) {
-                        const msgLinkChain: DesmosMsgLinkChainAccount = {
-                            chainAddress: {
-                                typeUrl: "/desmos.profiles.v1beta1.Bech32Address",
-                                value: DesmosBech32Address.encode({
-                                    prefix: this.selectedChain.bechPrefix,
-                                    value: extKeplrWallet.bech32Address,
-                                }).finish()
-                            },
-                            proof: {
-                                pubKey: {
-                                    typeUrl: '/cosmos.crypto.secp256k1.PubKey',
-                                    value: CosmosPubKey.encode({
-                                        key: extKeplrWallet.pubKey
-                                    }).finish()
-                                },
-                                signature: Buffer.from(signedTx.signature.signature, 'base64').toString('hex'), // need to convert the signature from Base64 to Hex
-                                plainText: Buffer.from(plainText).toString('hex'),
-                            }, chainConfig: {
-                                name: this.selectedChain?.id.toLowerCase(),
-                            },
-                            signer: authModule.account?.address,
-                        }
-                        const txBody: CosmosTxBody = {
-                            memo: "Chain link",
-                            messages: [
-                                {
-                                    typeUrl: "/desmos.profiles.v1beta1.MsgLinkChainAccount",
-                                    value: DesmosMsgLinkChainAccount.encode(msgLinkChain).finish(),
-                                }
-                            ],
-                            extensionOptions: [],
-                            nonCriticalExtensionOptions: [],
-                            timeoutHeight: 0,
-                        }
-                        this.isExecutingTransaction = true;
-                        this.newChainLink = new ChainLink(extKeplrWallet.bech32Address, this.selectedChain.id);
-
-                        await this.toggleChainLinkEditor();
-                        transactionModule.start({
-                            tx: txBody,
-                            mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
-                        });
-                        this.tx = txBody;
-
-
-                        this.generateProofError = "";
-                        success = true;
-                    } else {
-                        this.generateProofError = "Authorization failed";
-                    }
-                } catch (e) {
-                    console.log(e)
-                    this.isLinkingWithKeplr = false;
-                    this.generateProofError = "";
                 }
+
+
+
+                const proofObj = this.prepareChainLinkProof();
+
+                // sign the proof
+                const signedTx = await window.keplr.signAmino(this.selectedChain.chainId, extKeplrWallet.bech32Address, proofObj); // sign with Keplr
+                const plainText = JSON.stringify(proofObj, null, 0); // convert to string to be used as plain_text
+
+
+                // ensure that signed the proof
+                if (!signedTx || this.authStore.account === null) {
+                    this.generateProofError = "Proof authorization failed";
+                    return false;
+                }
+
+                // finalize the Keplr chain link proof
+                const finalProof: Proof = {
+                    pubKey: {
+                        typeUrl: '/cosmos.crypto.secp256k1.PubKey',
+                        value: PubKey.encode({
+                            key: extKeplrWallet.pubKey
+                        }).finish()
+                    },
+                    signature: {
+                        typeUrl: '/desmos.profiles.v3.SingleSignature',
+                        value: SingleSignature.encode({
+                            valueType: SignatureValueType.SIGNATURE_VALUE_TYPE_COSMOS_AMINO,
+                            signature: Buffer.from(signedTx.signature.signature, 'base64')
+                        }).finish()
+                    },
+                    plainText: Buffer.from(plainText).toString('hex'),
+                }
+
+                const chainAddress: Any = {
+                    typeUrl: "/desmos.profiles.v3.Bech32Address",
+                    value: Bech32Address.encode({
+                        prefix: this.selectedChain.bechPrefix,
+                        value: extKeplrWallet.bech32Address
+                    }).finish(),
+                };
+                await this.sendChainLink(this.selectedChain, extKeplrWallet.bech32Address, this.authStore.account.address, finalProof, chainAddress);
+                return true;
+            } catch (e) {
+                console.log(e)
+                this.isLinkingWithKeplr = false;
+                this.generateProofError = "";
             }
-            return success;
+            return false;
         }, async selectChain(chain: Blockchain | null): Promise<void> {
-            if (chain === null) {
-                this.isCustomChain = true;
-                this.selectedChain = null;
-                this.customHdPath = '';
-                this.customBechPrefix = '';
-            } else {
-                this.isCustomChain = false;
-                this.selectedChain = chain;
-                this.customHdPath = chain.hdpath;
-                this.customBechPrefix = chain.bechPrefix;
-            }
+            this.selectedChain = chain || null;
             this.selectedConnectionMethod = null;
             this.isSigningProof = false;
             this.generateProofError = "";
@@ -378,21 +243,27 @@ export default defineComponent({
             this.isSigningProof = false;
             this.generateProofError = "";
         },
+        /**
+         * Verify if the user can create a chain link for the selected chain/address. Checks if it is valid and if it already exists
+         * @param extAddress bech32 address to connect
+         * @param chain chain name to connect
+         * @returns true if the user can create the chain link
+         */
         async verifyChainLinkRequirements(extAddress: string, chain: string): Promise<boolean> {
             let profileExists = false;
             let chainLinkExists = false;
-            if (authModule.account) {
+            if (this.authStore.account) {
 
                 // parse new data to ensure that the profile exists
-                const profile = await AccountModule.getProfile(authModule.account.dtag);
+                const profile = await this.accountStore.getProfile(this.authStore.account.dtag);
                 if (profile) {
                     profileExists = true;
                     try {
                         // check if the chain link with the same address-chainId already exists
 
-                        if (accountModule.profile) {
+                        if (this.accountStore.profile) {
                             // parse local chain links first
-                            const localChainLink = accountModule.profile.chainLinks.find(c => (c.address === extAddress && c.chain.toLowerCase() === chain.toLowerCase()));
+                            const localChainLink = this.accountStore.profile.chainLinks.find(c => (c.address === extAddress && c.chain.toLowerCase() === chain.toLowerCase()));
                             if (localChainLink) {
                                 chainLinkExists = true;
                             }
@@ -431,279 +302,247 @@ export default defineComponent({
             this.isLinkingWithKeplr = false;
             this.isSigningProof = false;
         },
-        async gerateProofWithTerrastation(): Promise<any> {
-            // Check if Terra Extension is already initialized
-            if (this.terraExtension === null) {
-                this.terraExtension = new TerraExtension();
+        async connectWithMetaMask(): Promise<void> {
+            if (!this.selectedChain || !this.authStore.account) {
+                return;
             }
-
-            // If initialized and available, connect
-            if (this.terraExtension && this.terraExtension.isAvailable) {
-                this.terraExtension.connect();
-
+            const metamaskClient = window['ethereum'];
+            if (metamaskClient && metamaskClient.isMetaMask) {
                 try {
-                    this.terraExtension.once(({ error, address }) => {
-                        if (error) {
-                            this.generateProofError = error.message || 'Unknown Error';
-                        }
-                        try {
-                            // Request transaction sign
-                            this.terraExtension!.sign({
-                                msgs: [new TerraMsgSend(address, address, { uluna: 0 })],
-                                memo: `${authModule.account?.address}`,
-                                fee: TerraFee.fromAmino({
-                                    amount: [{
-                                        amount: '0',
-                                        denom: 'uluna',
-                                    }],
-                                    gas: '1'
-                                }),
-                            })
+                    /* this.isSigningProof = true;
+                    const addresses = await metamaskClient.request({ method: 'eth_requestAccounts' }); // request connection and sign permissions
+                    const address = addresses[0];
 
-                            // Catch & handle sign response
-                            this.terraExtension!.once(async (payload) => {
-                                if (payload.error) {
-                                    if (payload.error.message === "Unknown Status Code: 27404") {
-                                        payload.error.message += " (Make sure your Ledger is unlocked)";
-                                    }
-                                    if ((payload.error.message as string).includes("rpc error: code = NotFound desc = account")) {
-                                        payload.error.message += " (Make sure that your account exists, has a positive balance, or has made at least one transaction)";
-                                    }
-                                    this.generateProofError = payload.error.message || 'Unknown Error';
-                                } else {
-                                    try {
-                                        const terraAddress = payload.result.body.messages[0].from_address
-                                        const terraSignature = payload.result.signatures[0]
-                                        const terraPubkey = Buffer.from(payload.result.auth_info.signer_infos[0].public_key.key, 'base64')
-                                        const terraSignMode = payload.result.auth_info.signer_infos[0].mode_info.single.mode
-                                        const terraSequence = payload.result.auth_info.signer_infos[0].sequence || 0;
-                                        const terraBody = payload.result.body || {};
-                                        const terraAuthInfo = payload.result.auth_info;
-                                        const terraLCDClient = new TerraLCDClient({
-                                            URL: 'https://lcd.terra.dev',
-                                            chainID: this.selectedChain!.chainId,
-                                        })
-                                        const auth = await terraLCDClient.auth.accountInfo(terraAddress)
-                                        const terraAccountNumber = auth.getAccountNumber() || 0;
+                    const msg = this.authStore.account.address;
+                    //const tmp = await metamaskClient.request({ method: 'eth_sign', params: [address, Buffer.from("0x" + Buffer.from(' ciao').toString('hex'))] }); // sign the message
+                    const wr = Buffer.from(String(address).substring(2), 'hex').toString('utf8');
+                    console.log(wr)
+                    console.log(Web3.utils.sha3(msg))
+                    const tmp = await metamaskClient.request({ method: 'eth_sign', params: [address, Web3.utils.sha3(msg)] })
 
-                                        let finalProof = null as DesmosProof | null;
-
-                                        // Terra Station sign
-                                        if (terraSignMode === 'SIGN_MODE_DIRECT') {
-                                            const txBody = terraBody
-                                            const signDoc = new TerraSignDoc(
-                                                this.selectedChain!.chainId,
-                                                terraAccountNumber,
-                                                terraSequence,
-                                                TerraAuthInfo.fromData(terraAuthInfo),
-                                                TerraTxBody.fromData(txBody)
-                                            )
-                                            finalProof = {
-                                                pubKey: {
-                                                    typeUrl: '/cosmos.crypto.secp256k1.PubKey',
-                                                    value: CosmosPubKey.encode({
-                                                        key: terraPubkey,
-                                                    }).finish(),
-                                                },
-                                                signature: Buffer.from(terraSignature, 'base64').toString('hex'),
-                                                plainText: Buffer.from(signDoc.toBytes()).toString('hex'),
-                                            }
-                                        } else {
-                                            // Terra Station + Ledger sign
-                                            const tmpProof = {
-                                                account_number: String(terraAccountNumber),
-                                                chain_id: this.selectedChain?.chainId,
-                                                fee: {
-                                                    amount: [
-                                                        {
-                                                            amount: '0',
-                                                            denom: 'uluna',
-                                                        },
-                                                    ],
-                                                    gas: '1',
-                                                },
-                                                memo: `${authModule.account?.address}`,
-                                                msgs: (payload.result.body.messages || []).map((m: any) => TerraMsgSend.fromData(m).toAmino()),
-                                                sequence: String(terraSequence),
-                                            }
-                                            finalProof = {
-                                                plainText: Buffer.from(CryptoUtils.sortedJsonStringify(tmpProof)).toString('hex'),
-                                                pubKey: {
-                                                    typeUrl: '/cosmos.crypto.secp256k1.PubKey',
-                                                    value: CosmosPubKey.encode({
-                                                        key: terraPubkey,
-                                                    }).finish(),
-                                                },
-                                                signature: Buffer.from(terraSignature, 'base64').toString('hex'),
-                                            }
-                                        }
-
-                                        if (finalProof) {
-                                            // create the chain link transaction
-                                            if (finalProof && authModule.account && this.selectedChain) {
-                                                const msgLinkChain: DesmosMsgLinkChainAccount = {
-                                                    chainAddress: {
-                                                        typeUrl: "/desmos.profiles.v1beta1.Bech32Address",
-                                                        value: DesmosBech32Address.encode({
-                                                            prefix: this.selectedChain.bechPrefix,
-                                                            value: address,
-                                                        }).finish()
-                                                    },
-                                                    proof: finalProof,
-                                                    chainConfig: {
-                                                        name: this.selectedChain?.id.toLowerCase(),
-                                                    },
-                                                    signer: authModule.account?.address,
-                                                }
-                                                const txBody: CosmosTxBody = {
-                                                    memo: "Chain link | Go-find",
-                                                    messages: [
-                                                        {
-                                                            typeUrl: "/desmos.profiles.v1beta1.MsgLinkChainAccount",
-                                                            value: DesmosMsgLinkChainAccount.encode(msgLinkChain).finish(),
-                                                        }
-                                                    ],
-                                                    extensionOptions: [],
-                                                    nonCriticalExtensionOptions: [],
-                                                    timeoutHeight: 0,
-                                                }
-
-                                                this.isExecutingTransaction = true;
-                                                this.newChainLink = new ChainLink(terraAddress, this.selectedChain.id);
-
-                                                await this.toggleChainLinkEditor();
-                                                transactionModule.start({
-                                                    tx: txBody,
-                                                    mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
-                                                });
-                                                this.tx = txBody;
+                    console.log(tmp)
 
 
-                                                this.generateProofError = "";
-                                            } else {
-                                                this.generateProofError = "Authorization failed";
-                                            }
-                                        }
+                    const signatureRaw = await metamaskClient.request({ method: 'personal_sign', params: [address, Buffer.from(msg).toString('hex')], from: address }); // sign the message
+                    const signature = String(signatureRaw).substring(2); // hex signature without first 0x
 
-                                    } catch (e) {
-                                        console.log(e);
-                                        this.generateProofError = "Terra LCD error or invalid payload";
-                                    }
-                                }
-                                this.isSigningProof = false;
-                            })
-                        } catch (e) {
-                            this.generateProofError = 'Unknown Terra Station Error';
-                            this.isSigningProof = false;
-                        }
-                    })
-                } catch (e) {
-                    this.generateProofError = "Terrastation error";
-                    this.isSigningProof = false;
+                    // How MetaMask signs messages:
+                    const tmpProof = "\x19Ethereum Signed Message:\n" + msg.length + msg
+                    const hashedProof = CryptoUtils.keccak256(tmpProof)
+
+                    // decode the pubKey from the signature
+                    // Metamask doesn't use the secp256k1 curve to generate the pubKey but X25519_XSalsa20_Poly1305, so we need to decode the signature to get the correct pubKey
+                    const pubKeyExpanded = recoverPublicKey(
+                        signature,
+                        hashedProof
+                    );
+                    const pubKey = Buffer.from(EthPublicKey.compress(pubKeyExpanded), 'hex');
+
+                    const sigOnly = signature.substring(0, signature.length - 2); // remove last 2 chars
+                    //Wallet.verifySignature(Buffer.from(hashedProof, 'hex'), pubKey, Buffer.from(sigOnly, 'hex'));
+                    const finalProof = {
+                        plainText: hashedProof,
+                        pubKey: {
+                            typeUrl: '/cosmos.crypto.secp256k1.PubKey',
+                            value: PubKey.encode({
+                                key: pubKey,
+                            }).finish(),
+                        },
+                        signature: {
+                            typeUrl: '/desmos.profiles.v3.SingleSignature',
+                            value: SingleSignature.encode({
+                                mode: SignMode.SIGN_MODE_TEXTUAL,
+                                signature: Buffer.from(sigOnly, 'hex')
+                            }).finish()
+                        },
+                    }
+                    await this.sendChainLink(this.selectedChain, address, this.authStore.account.address, finalProof); */
+                } catch (e: any) {
+                    // Connection refused or failed
+                    this.generateProofError = e.message || "MetaMask permission denied";
+                    console.log(e);
                 }
-            } else {
-                this.generateProofError = "Terra extension not available";
-                this.isSigningProof = false;
             }
+            this.isSigningProof = false;
+        },
+        async connectWithMnemonic(mnemonic: string): Promise<void> {
+            if (!this.selectedChain || !this.authStore.account) {
+                return;
+            }
+            this.isSigningProof = true;
+            try {
+                const msg = this.authStore.account.address;
+
+                const ethWallet = ethers.Wallet.fromMnemonic(mnemonic, "m/44'/60'/0'/0/0");
+                const privKey = Buffer.from(ethWallet.privateKey.substring(2), 'hex');
+                const address = ethWallet.address;
+
+
+                const compressedPubKeyRaw = ethers.utils.computePublicKey(privKey, true);
+                const compressedPubKey = Buffer.from(compressedPubKeyRaw.substring(2), 'hex');
+                const pubKey = compressedPubKey;
+
+                const hashedMsg = Buffer.from(CryptoUtils.sha256(msg), 'hex');
+                const signatureRaw = Buffer.from((await Secp256k1.createSignature(hashedMsg, privKey)).toFixedLength()).toString('hex')
+                const sigOnly = signatureRaw.substring(0, signatureRaw.length - 2); // remove last 2 chars
+
+                const ver = Wallet.verifySignature(hashedMsg, pubKey, Buffer.from(sigOnly, 'hex'));
+                const finalProof = {
+                    plainText: Buffer.from(msg).toString('hex'),
+                    pubKey: {
+                        typeUrl: '/cosmos.crypto.secp256k1.PubKey',
+                        value: PubKey.encode({
+                            key: pubKey,
+                        }).finish(),
+                    },
+                    signature: {
+                        typeUrl: '/desmos.profiles.v3.SingleSignature',
+                        value: SingleSignature.encode({
+                            mode: SignMode.SIGN_MODE_TEXTUAL,
+                            signature: Buffer.from(sigOnly, 'hex')
+                        }).finish()
+                    },
+                }
+
+                const chainAddress: Any = {
+                    typeUrl: "/desmos.profiles.v3.HexAddress",
+                    value: HexAddress.encode({
+                        prefix: this.selectedChain.bechPrefix,
+                        value: address
+                    }).finish(),
+                };
+                await this.sendChainLink(this.selectedChain, address, this.authStore.account.address, finalProof, chainAddress);
+            } catch (e) {
+                console.log(e)
+            }
+            this.isSigningProof = false;
         },
         async connectWithTerrastation(): Promise<void> {
             this.isSigningProof = true;
-            await this.gerateProofWithTerrastation();
+            if (!this.selectedChain || !this.authStore.account) {
+                return;
+            }
+            try {
+                this.isSigningProof = true;
+                const signResult = (await TerraSigner.generateChainLinkProof(this.selectedChain));
+                if (signResult.error || signResult.proof === null) {
+                    this.generateProofError = signResult.error;
+                    return;
+                }
+
+                const chainAddress: Any = {
+                    typeUrl: "/desmos.profiles.v3.Bech32Address",
+                    value: Bech32Address.encode({
+                        prefix: this.selectedChain.bechPrefix,
+                        value: signResult.address
+                    }).finish(),
+                };
+                await this.sendChainLink(this.selectedChain, signResult.address, this.authStore.account.address, signResult.proof, chainAddress);
+            } catch (e) {
+                this.generateProofError = (<TerraChainLinkSignerResponse>e).error;
+            }
+            this.isSigningProof = false;
         },
         async connectWithLedger(ledgerAppName: string): Promise<void> {
             if (this.selectedChain && ledgerAppName && this.selectedChain) {
-
-                // generate a "fake" transaction to be used as proof
-                const proofObj = {
-                    account_number: '0',
-                    chain_id: this.selectedChain.chainId,
-                    fee: {
-                        amount: [
-                            {
-                                amount: '0',
-                                denom: `${this.selectedChain.symbol}`,
-                            },
-                        ],
-                        gas: '1',
-                    },
-                    memo: `${authModule.account?.address}`,
-                    msgs: [],
-                    sequence: '0',
-                }
-
                 const selectedChain = this.selectedChain;
                 await this.toggleChainLinkEditor();
-                await ledgerModule.setLedgerAction({ app: selectedChain, ledgerAppName: ledgerAppName, message: proofObj as any });
-                await ledgerModule.startLedgerAction();
+                const proofObj = this.prepareChainLinkProof();
+                await this.ledgerStore.setLedgerAction({ app: selectedChain, ledgerAppName: ledgerAppName, message: proofObj });
+                await this.ledgerStore.startLedgerAction();
 
-                ref(ledgerModule.actionSignature);
+                ref(this.ledgerStore.actionSignature);
                 watchEffect(async () => {
-                    if (ledgerModule.actionSignature !== null) {
+                    if (this.ledgerStore.actionSignature !== null) {
                         setTimeout(async () => {
-                            if (selectedChain && authModule.account) {
-                                await ledgerModule.toggleModal();
-                                await ledgerModule.setLedgerAction({ app: selectedChain, ledgerAppName: ledgerAppName, message: '' });
-                                const finalProof: DesmosProof = {
+                            if (selectedChain && this.authStore.account) {
+                                await this.ledgerStore.toggleModal();
+                                await this.ledgerStore.setLedgerAction({ app: selectedChain, ledgerAppName: ledgerAppName, message: '' });
+                                const finalProof: Proof = {
                                     pubKey: {
                                         typeUrl: '/cosmos.crypto.secp256k1.PubKey',
-                                        value: CosmosPubKey.encode({
-                                            key: Buffer.from(ledgerModule.ledgerPubKey, 'hex')
+                                        value: PubKey.encode({
+                                            key: Buffer.from(this.ledgerStore.ledgerPubKey, 'hex')
                                         }).finish()
                                     },
-                                    signature: ledgerModule.actionSignature!,
+                                    signature: {
+                                        typeUrl: '/desmos.profiles.v3.SingleSignature',
+                                        value: SingleSignature.encode({
+                                            mode: SignMode.SIGN_MODE_DIRECT,
+                                            signature: Buffer.from(this.ledgerStore.actionSignature!, 'hex')
+                                        }).finish()
+                                    },
                                     plainText: Buffer.from(JSON.stringify(proofObj, null, 0)).toString('hex'),
                                 }
+                                const chainAddress: Any = {
+                                    typeUrl: "/desmos.profiles.v3.Bech32Address",
+                                    value: Bech32Address.encode({
+                                        prefix: selectedChain.bechPrefix,
+                                        value: this.ledgerStore.address
+                                    }).finish(),
+                                };
 
-                                await this.sendChainLink(selectedChain, ledgerModule.ledgerAddress, authModule.account?.address, finalProof);
+                                await this.sendChainLink(selectedChain, this.ledgerStore.ledgerAddress, this.authStore.account?.address, finalProof, chainAddress);
                             }
                         }, 2000)
                     }
                 })
             }
         },
-        async sendChainLink(selectedChain: Blockchain, destAdress: string, userAddress: string, proof: DesmosProof) {
-            const msgLinkChain: DesmosMsgLinkChainAccount = {
-                chainAddress: {
-                    typeUrl: "/desmos.profiles.v1beta1.Bech32Address",
-                    value: DesmosBech32Address.encode({
-                        prefix: selectedChain.bechPrefix,
-                        value: destAdress,
-                    }).finish()
-                },
-                proof: proof,
-                chainConfig: {
-                    name: selectedChain?.id.toLowerCase(),
-                },
-                signer: userAddress,
+        /**
+         * Sign and broadcast a chain link transaction
+         * @param selectedChain selected chain object
+         * @param destAdress destination chain address
+         * @param userAddress signer address
+         * @param proof original raw proof object
+         */
+        async sendChainLink(selectedChain: Blockchain, destAdress: string, userAddress: string, proof: Proof, chainAddress: Any) {
+            const msgLinkChain: MsgLinkChainAccountEncodeObject = {
+                typeUrl: "/desmos.profiles.v3.MsgLinkChainAccount",
+                value: {
+                    chainAddress,
+                    proof,
+                    chainConfig: {
+                        name: selectedChain?.id.toLowerCase(),
+                    },
+                    signer: userAddress,
+                }
             }
-            const txBody: CosmosTxBody = {
-                memo: "Chain link | Go-find",
-                messages: [
-                    {
-                        typeUrl: "/desmos.profiles.v1beta1.MsgLinkChainAccount",
-                        value: DesmosMsgLinkChainAccount.encode(msgLinkChain).finish(),
-                    }
-                ],
-                extensionOptions: [],
-                nonCriticalExtensionOptions: [],
-                timeoutHeight: 0,
-            }
-
-            this.isExecutingTransaction = true;
+            console.log(msgLinkChain)
             this.newChainLink = new ChainLink(destAdress, selectedChain.id);
+            this.isExecutingTransaction = true;
 
-            transactionModule.start({
-                tx: txBody,
-                mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+            this.transactionStore.start({
+                messages: [msgLinkChain],
+                mode: BroadcastMode.Async,
+                memo: "Chain link | Go-find",
             });
-            this.tx = txBody;
+            this.txMessage = msgLinkChain;
             this.generateProofError = "";
         },
-        getChainLogo(name: string) {
-            try {
-                return require('@/assets/brands/' + name + '/logo.svg')
-            } catch (e) {
-                return '';
+        /**
+         * Prepare the chain link proof to be signed
+         * @returns chain link proof object
+         */
+        prepareChainLinkProof(): any {
+            if (!this.selectedChain) {
+                return null;
+            }
+            return {
+                account_number: '0',
+                chain_id: this.selectedChain.chainId,
+                fee: {
+                    amount: [
+                        {
+                            amount: '0',
+                            denom: `${this.selectedChain.symbol}`,
+                        },
+                    ],
+                    gas: '1',
+                },
+                memo: `${this.authStore.account?.address}`,
+                msgs: [],
+                sequence: '0',
             }
         },
         getChainName(nameRaw: string) {
@@ -715,9 +554,6 @@ export default defineComponent({
             } else {
                 return nameRaw;
             }
-        }
-        , onMnemonic(mnemonic: string) {
-            this.inputMnemonic = mnemonic.split(" ");
-        }
+        },
     },
 });

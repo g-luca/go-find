@@ -2,24 +2,24 @@
   <div class="p-4 md:pr-8">
     <Clipboard />
     <section v-if="
-        $store.state.AccountModule.profileLoadingStatus == 0 ||
-        $store.state.AccountModule.profileLoadingStatus
+        accountStore.profileLoadingStatus == 0 ||
+        accountStore.profileLoadingStatus
       ">
-      <span v-if="$store.state.AccountModule.profileLoadingStatus">
+      <span v-if="accountStore.profileLoadingStatus">
         <div class="pt-2 pb-3 md:pt-6 px-2 bg-white dark:bg-gray-900 rounded-3xl shadow-xl hover:shadow-2xl">
           <h1 class="pb-8 pl-4 text-5xl md:text-6xl text-brand font-extrabold">
             Social Networks
           </h1>
           <span v-if="
-              $store.state.AccountModule.profile.applicationLinks &&
-              $store.state.AccountModule.profile.applicationLinks.length > 0
+              accountStore.profile.applicationLinks &&
+              accountStore.profile.applicationLinks.length > 0
             ">
             <div class="grid grid-cols-12">
               <div class="col-span-12 mx-4">
                 <div class="pt-2 pb-3 md:pt-6 px-2 bg-gray-100 dark:bg-denim-900 dark:bg-gray-700 rounded-3xl shadow-xl">
                   <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 text-center">
                     <div
-                      v-for="applicationLink in $store.state.AccountModule.profile
+                      v-for="applicationLink in accountStore.profile
                         .applicationLinks"
                       :key="applicationLink"
                       class="m-auto cursor-pointer"
@@ -272,8 +272,8 @@
                   <div
                     v-if="
                       !generatedProof &&
-                      $store.state.AuthModule._account.isUsingKeplr === false &&
-                      $store.state.AuthModule._account.isUsingWalletConnect === false
+                      authStore.account.isUsingKeplr === false &&
+                      authStore.account.isUsingWalletConnect === false
                     "
                     class="col-span-2 py-2"
                   >
@@ -301,13 +301,13 @@
                   </span>
                   <div
                     v-if="
-                      ($store.state.AuthModule._account.isUsingKeplr === false &&
-                        $store.state.AuthModule._account.isUsingWalletConnect === false &&
+                      (authStore.account.isUsingKeplr === false &&
+                        authStore.account.isUsingWalletConnect === false &&
                         applicationUsername.length > 1 &&
                         mPassword.length > 0 &&
                         !generatedProof) ||
-                      ($store.state.AuthModule._account.isUsingKeplr === true && applicationUsername.length > 1 ) ||
-                      ($store.state.AuthModule._account.isUsingWalletConnect === true && applicationUsername.length > 1)
+                      (authStore.account.isUsingKeplr === true && applicationUsername.length > 1 ) ||
+                      (authStore.account.isUsingWalletConnect === true && applicationUsername.length > 1)
                     "
                     class="col-span-2 py-2"
                   >
@@ -326,7 +326,7 @@
                         disabled
                         class="py-2 w-full px-4 bg-gray-600 hover:bg-gray-700 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md rounded-lg"
                       >
-                        <span v-if="!$store.state.AuthModule._account.isUsingWalletConnect">
+                        <span v-if="!authStore.account.isUsingWalletConnect">
                           Generating...
                         </span>
                         <span v-else> Waiting DPM... </span>
@@ -431,4 +431,373 @@
   </div>
 </template>
 
-<script lang="ts" src="./AccountAppLinks.ts" />
+<script lang="ts">
+import ApplicationLinkDiscord from "@/core/types/ApplicationLinks/ApplicationLinkDiscord";
+import ApplicationLinkDomain from "@/core/types/ApplicationLinks/ApplicationLinkDomain";
+import ApplicationLinkTwitch from "@/core/types/ApplicationLinks/ApplicationLinkTwitch";
+import ApplicationLinkGithub from "@/core/types/ApplicationLinks/ApplicationLinkGithub";
+import ApplicationLinkTwitter from "@/core/types/ApplicationLinks/ApplicationLinkTwitter";
+import { defineComponent, ref, watchEffect } from "vue";
+import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
+import ModalTransaction from "@/ui/components/ModalTransaction/ModalTransaction.vue";
+import { Buffer } from "buffer";
+import {
+  TransitionRoot,
+  TransitionChild,
+  Dialog,
+  DialogOverlay,
+  DialogTitle,
+} from "@headlessui/vue";
+import { CosmosTxBody, Transaction, Wallet } from "desmosjs";
+import { BroadcastMode } from "@cosmjs/launchpad";
+import CryptoUtils from "@/utils/CryptoUtils";
+import Clipboard from "@/ui/components/Clipboard.vue";
+import AccountApplicationLinkTutorialDiscord from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialDiscord.vue";
+import AccountApplicationLinkTutorialDiscordVerify from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialDiscordVerify.vue";
+import AccountApplicationLinkTutorialGithub from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialGithub.vue";
+import AccountApplicationLinkTutorialTwitch from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialTwitch.vue";
+import AccountApplicationLinkTutorialTwitter from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialTwitter.vue";
+import AccountApplicationLinkTutorialDomain from "@/modules/account/components/AccountAppLinks/components/AccountApplicationLinkTutorialDomain.vue";
+import ApplicationLink from "@/core/types/ApplicationLink";
+import Api from "@/core/api/Api";
+import { useDesmosNetworkStore } from "@/stores/DesmosNetworkModule";
+import { useAccountStore } from "@/stores/AccountModule";
+import {
+  useTransactionStore,
+  TransactionStatus,
+} from "@/stores/TransactionModule";
+import { useAuthStore } from "@/stores/AuthModule";
+import { useWalletStore } from "@/stores/WalletModule";
+import { MsgUnlinkApplicationEncodeObject } from "@desmoslabs/desmjs";
+import { EncodeObject } from "@cosmjs/proto-signing";
+
+export default defineComponent({
+  components: {
+    SkeletonLoader,
+    ModalTransaction,
+    TransitionRoot,
+    TransitionChild,
+    Dialog,
+    DialogOverlay,
+    DialogTitle,
+    AccountApplicationLinkTutorialDiscord,
+    AccountApplicationLinkTutorialDiscordVerify,
+    AccountApplicationLinkTutorialGithub,
+    AccountApplicationLinkTutorialTwitch,
+    AccountApplicationLinkTutorialTwitter,
+    AccountApplicationLinkTutorialDomain,
+    Clipboard,
+  },
+  data() {
+    return {
+      authStore: useAuthStore(),
+      accountStore: useAccountStore(),
+      transactionStore: useTransactionStore(),
+      desmosNetworkStore: useDesmosNetworkStore(),
+      supportedApplicationLinks: [
+        new ApplicationLinkTwitter(""),
+        new ApplicationLinkGithub(""),
+        new ApplicationLinkTwitch(""),
+        new ApplicationLinkDiscord(""),
+        new ApplicationLinkDomain(""),
+      ] as ApplicationLink[],
+      selectedApplication: null as ApplicationLink | null,
+      isApplicationLinkEditorOpen: false,
+
+      applicationUsername: "",
+      isValidApplicationUsername: true,
+      mPassword: "",
+
+      isExecutingTransaction: false,
+      txMessage: null as EncodeObject | null,
+      newApplicationLink: null as ApplicationLink | null,
+      deletedApplicationLink: null as ApplicationLink | null,
+
+      generatedProof: null as any | null,
+      generateProofError: "",
+      isGeneratingProof: false,
+      isUploadingProof: false,
+      hasUploadedProof: false,
+      proofUrl: "",
+
+      isModalDiscordVerifyOpen: false,
+    };
+  },
+  beforeMount() {
+    ref();
+    watchEffect(() => {
+      // check if is processing the right transaction and the status
+      if (
+        this.accountStore.profile &&
+        //TODO: check
+        this.transactionStore.messages[0] == this.txMessage &&
+        (this.transactionStore.transactionStatus === TransactionStatus.Error ||
+          this.transactionStore.transactionStatus === TransactionStatus.Success)
+      ) {
+        if (this.transactionStore.errorMessage) {
+          // the transaction has an error message, failed
+          console.log("application link failure!");
+        } else {
+          // the tx went well! update the data
+
+          // handle new application link
+          if (
+            this.txMessage?.typeUrl ===
+              "/desmos.profiles.v3.MsgLinkApplication" &&
+            this.newApplicationLink
+          ) {
+            console.log("application link success!");
+            // application link message sent, now we need also to wait the verification process
+            this.accountStore.profile.applicationLinks.push(
+              this.newApplicationLink
+            );
+
+            // if Discord, reopen the modal to complete the process
+            if (this.newApplicationLink.name === "discord") {
+              this.toggleModalDiscordVerify();
+            }
+          }
+
+          // handle application unlink
+          if (
+            this.txMessage?.typeUrl ===
+              "/desmos.profiles.v3.MsgUnlinkApplication" &&
+            this.deletedApplicationLink
+          ) {
+            this.accountStore.profile.applicationLinks.slice(
+              this.accountStore.profile.applicationLinks.indexOf(
+                this.deletedApplicationLink
+              ),
+              1
+            );
+            this.accountStore.profile.applicationLinks =
+              this.accountStore.profile.applicationLinks.filter(
+                (applicationLink: ApplicationLink) => {
+                  return (
+                    applicationLink.username !==
+                      this.deletedApplicationLink?.username &&
+                    applicationLink.name !== this.deletedApplicationLink?.name
+                  );
+                }
+              );
+            this.newApplicationLink = null;
+            this.deletedApplicationLink = null;
+          }
+          this.txMessage = null;
+        }
+      }
+    });
+  },
+  methods: {
+    async toggleApplicationLinkEditor(): Promise<void> {
+      this.isApplicationLinkEditorOpen = !this.isApplicationLinkEditorOpen;
+      this.selectedApplication = null;
+    },
+    /**
+     * Delete a connected application link
+     * @param applicationLink applicationLink to delete
+     */
+    deleteApplicationLink(applicationLink: ApplicationLink): void {
+      if (this.authStore.account) {
+        const msgUnlinkApplication: MsgUnlinkApplicationEncodeObject = {
+          typeUrl: "/desmos.profiles.v3.MsgUnlinkApplication",
+          value: {
+            application: applicationLink.name,
+            username: applicationLink.username,
+            signer: this.authStore.account.address,
+          },
+        };
+        this.txMessage = msgUnlinkApplication;
+        this.newApplicationLink = null;
+        this.deletedApplicationLink = applicationLink;
+        this.transactionStore.start({
+          messages: [msgUnlinkApplication],
+          mode: BroadcastMode.Block,
+          memo: "Application unlink | Go-find",
+        });
+      }
+    },
+    async generateProof(): Promise<boolean> {
+      const walletStore = useWalletStore();
+      this.isValidApplicationUsername = true;
+      if (
+        !this.selectedApplication?.usernameRegExp.test(this.applicationUsername)
+      ) {
+        this.isValidApplicationUsername = false;
+        return false;
+      }
+
+      this.isGeneratingProof = true;
+      try {
+        this.generateProofError = "";
+        this.hasUploadedProof = false;
+        this.isUploadingProof = false;
+        this.proofUrl = "";
+        let generatedProof = null as any;
+
+        const signerAccount =
+          await walletStore.wallet.signer.getCurrentAccount();
+        if (!signerAccount || !this.authStore.account) {
+          this.generateProofError = "Signer or account not available";
+          return false;
+        }
+
+        if (
+          this.authStore.account.isUsingKeplr!! ||
+          this.authStore.account.isUsingWalletConnect!!
+        ) {
+          try {
+            const pubKeyHex = Buffer.from(signerAccount.pubkey)
+              .toString("hex")
+              .toLowerCase();
+
+            // hash the pubKey Buffer with SHA256
+            const hashedPubKey = CryptoUtils.sha256Buffer(
+              Buffer.from(signerAccount.pubkey)
+            );
+            // hash the result with RIPEMD160
+            const ripedAddress =
+              CryptoUtils.ripemd160Buffer(hashedPubKey).toString("hex");
+
+            // tx to sign as proof
+            const proofTx = {
+              account_number: "",
+              chain_id: this.desmosNetworkStore.chainId,
+              fee: {
+                amount: [
+                  {
+                    amount: "1",
+                    denom: import.meta.env.VITE_APP_COIN_FEE_DENOM,
+                  },
+                ],
+                gas: "1",
+              },
+              memo: "",
+              msgs: [],
+              sequence: "0",
+            };
+
+            const signedTx = await walletStore.wallet.signer.signAmino(
+              signerAccount.address,
+              proofTx
+            );
+
+            // update the tx proof with the signed tx (memo/fees/gas may have changed), and sort the attributes in the right order
+            const proofValue = CryptoUtils.sortedJsonStringify(signedTx.signed);
+
+            if (signedTx) {
+              generatedProof = {
+                address: ripedAddress,
+                pub_key: pubKeyHex,
+                signature: Buffer.from(
+                  signedTx.signature.signature,
+                  "base64"
+                ).toString("hex"),
+                value: Buffer.from(proofValue).toString("hex"),
+              };
+            }
+          } catch (e) {
+            console.log(e);
+          }
+
+          // Wallet Connect custom flow
+        } else {
+          const mPassword = CryptoUtils.sha256(this.mPassword);
+          try {
+            const mKey = this.authStore.getMKey(mPassword);
+            if (mKey) {
+              const privKey = Buffer.from(
+                CryptoUtils.decryptAes(mPassword, mKey),
+                "hex"
+              );
+              const pubKey = Wallet.calculatePubKey(privKey);
+              if (pubKey) {
+                generatedProof = Transaction.signApplicationLinkData(
+                  this.applicationUsername,
+                  pubKey,
+                  privKey
+                );
+                generatedProof.value = Buffer.from(
+                  this.applicationUsername
+                ).toString("hex");
+              }
+            }
+          } catch (e) {
+            this.generateProofError = "Invalid Password";
+          }
+        }
+
+        if (generatedProof) {
+          this.generatedProof = JSON.stringify(generatedProof);
+          this.isUploadingProof = true;
+          try {
+            const res = await Api.post(
+              `${Api.endpoint}proof`,
+              JSON.stringify({ proof: generatedProof })
+            );
+            if (res.success) {
+              this.hasUploadedProof = true;
+              this.proofUrl = `${Api.endpoint}proof/${res.id}`;
+            }
+          } catch (e) {
+            //
+          }
+          if (this.proofUrl === "") {
+            this.hasUploadedProof = false;
+          }
+          this.isUploadingProof = false;
+        }
+      } catch (e) {
+        console.log(e);
+        // catch all
+      }
+
+      this.isGeneratingProof = false;
+      return this.proofUrl !== "";
+    },
+    selectApplication(applicationLink: ApplicationLink): void {
+      this.applicationUsername = "";
+      this.hasUploadedProof = false;
+      this.isUploadingProof = false;
+      this.proofUrl = "";
+      this.generatedProof = null;
+      if (applicationLink !== null) {
+        this.selectedApplication = applicationLink;
+      }
+    },
+    resetGeneratedProof() {
+      this.generatedProof = null;
+    },
+    async onApplicationLinkSent(
+      payload: {
+        messages: EncodeObject[];
+        applicationLink: ApplicationLink;
+        memo: string;
+      } | null
+    ) {
+      this.newApplicationLink = null;
+      await this.toggleApplicationLinkEditor();
+
+      if (payload) {
+        this.isApplicationLinkEditorOpen = false;
+        this.txMessage = payload.messages[0];
+        this.newApplicationLink = payload.applicationLink;
+        this.isExecutingTransaction = true;
+        this.transactionStore.start({
+          messages: payload.messages,
+          mode: BroadcastMode.Block,
+          memo: payload.memo,
+        });
+      } else {
+        console.log("payload error");
+      }
+    },
+    openApplicationLink(applicationLink: ApplicationLink): void {
+      window.open(applicationLink.redirectUrl, "_blank");
+    },
+    async toggleModalDiscordVerify(): Promise<void> {
+      this.isModalDiscordVerifyOpen = !this.isModalDiscordVerifyOpen;
+    },
+  },
+});
+</script>

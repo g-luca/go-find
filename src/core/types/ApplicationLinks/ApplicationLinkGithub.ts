@@ -1,14 +1,14 @@
-import { DesmosApplicationLinkState } from "desmosjs";
+import { ApplicationLinkState } from "@desmoslabs/desmjs-types/desmos/profiles/v3/models_app_links";
 import ApplicationLink from "../ApplicationLink";
 
 export default class ApplicationLinkGithub extends ApplicationLink {
     readonly name: string = 'github';
     readonly displayName: string = 'GitHub';
-    readonly logo: string = require('@/assets/brands/github/logo.svg');
+    readonly logo: string = '/public/assets/brands/github/logo.svg';
     readonly url: string = "https://www.github.com/";
     readonly redirectUrl = `${this.url}${this.username}`;
 
-    constructor(username: string, state = DesmosApplicationLinkState.APPLICATION_LINK_STATE_INITIALIZED_UNSPECIFIED) {
+    constructor(username: string, state = ApplicationLinkState.APPLICATION_LINK_STATE_INITIALIZED_UNSPECIFIED) {
         super(username, state);
     }
 

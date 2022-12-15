@@ -1,3 +1,4 @@
+import { useDesmosNetworkStore } from './../stores/DesmosNetworkModule';
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import 'vue-router';
 import ViewHome from "../views/ViewLanding.vue";
@@ -7,16 +8,9 @@ import ViewProfile from "../views/ViewProfile/ViewProfile.vue";
 import ViewAccount from "../views/ViewAccount/ViewAccount.vue";
 import ViewKeplr from "../views/ViewKeplr.vue";
 import ViewWalletConnect from "../views/ViewWalletConnect.vue";
-
 import ViewError404 from "../views/errors/ViewError404/ViewError404.vue";
-
-import { getModule } from "vuex-module-decorators";
-import AuthModule, { AuthLevel } from "@/store/modules/AuthModule";
-import KeplrModule from "@/store/modules/KeplrModule";
-import DesmosNetworkModule from "@/store/modules/DesmosNetworkModule";
-const authModule = getModule(AuthModule);
-const keplrModule = getModule(KeplrModule);
-const desmosNetworkModule = getModule(DesmosNetworkModule);
+import { useKeplrStore } from './../stores/KeplrModule';
+import { AuthLevel, useAuthStore } from '@/stores/AuthModule';
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -56,7 +50,7 @@ const routes: Array<RouteRecordRaw> = [
     component: ViewWalletConnect,
     meta: { requiresAuth: false, hiddenWithAuth: true },
     beforeEnter: (to, from, next) => {
-      if (!desmosNetworkModule.isTestnet) {
+      if (!useDesmosNetworkStore().isTestnet) {
         next('/login');
       } else {
         next();
@@ -86,16 +80,16 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore();
   const requiresAuth = to.meta.requiresAuth;
   const hiddenWithAuth = to.meta.hiddenWithAuth;
 
   // check authentication
-  authModule.authenticate();
-  keplrModule.init();
+  authStore.authenticate();
 
-  if (requiresAuth && authModule.authLevel === AuthLevel.None) {
+  if (requiresAuth && authStore.authLevel === AuthLevel.None) {
     next('/login');
-  } else if (hiddenWithAuth && authModule.authLevel > AuthLevel.None) {
+  } else if (hiddenWithAuth && authStore.authLevel > AuthLevel.None) {
     next('/me');
   } else {
     next();

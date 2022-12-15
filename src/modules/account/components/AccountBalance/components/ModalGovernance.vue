@@ -54,6 +54,15 @@
                     class="grid grid-cols-12"
                   >
                     <div
+                      v-if="proposals.length <= 0"
+                      class="col-span-12"
+                    >
+                      <p class="text-2xl text-center py-4">
+                        No active proposals at the moment.
+                      </p>
+                    </div>
+                    <div
+                      v-else
                       v-for="proposal in proposals"
                       class="col-span-12 md:col-span-6 lg:col-span-4 m-4"
                     >
@@ -226,24 +235,22 @@
 import { defineComponent } from "vue";
 import { ref } from "vue";
 import { Dialog, DialogOverlay, DialogTitle } from "@headlessui/vue";
-import { getModule } from "vuex-module-decorators";
-import AuthModule from "@/store/modules/AuthModule";
+import { useApolloClient } from "@vue/apollo-composable";
 import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
-import TransactionModule from "@/store/modules/TransactionModule";
 import { GovernanceQuery } from "@/gql/GovernanceQuery";
-import { sanitize } from "dompurify";
+import DOMPurify from "dompurify";
 import { BarChart } from "vue-chart-3";
 import { Chart, ChartOptions, registerables } from "chart.js";
-import marked from "marked";
-import {
-  CosmosBroadcastMode,
-  CosmosMsgVote,
-  CosmosTxBody,
-  CosmosVoteOption,
-} from "desmosjs";
+import { marked } from "marked";
+import { CosmosTxBody } from "desmosjs";
+import { MsgVote } from "cosmjs-types/cosmos/gov/v1beta1/tx";
+import { VoteOption } from "cosmjs-types/cosmos/gov/v1beta1/gov";
+import { BroadcastMode } from "@cosmjs/launchpad";
+import { useTransactionStore } from "@/stores/TransactionModule";
+import { useAuthStore } from "@/stores/AuthModule";
+import Long from "long";
+import { MsgVoteEncodeObject } from "@cosmjs/stargate";
 import { apolloClientForbole } from "@/gql/ApolloForbole";
-const authModule = getModule(AuthModule);
-const transactionModule = getModule(TransactionModule);
 
 Chart.register(...registerables);
 
@@ -285,6 +292,8 @@ export default defineComponent({
       },
     };
     return {
+      authStore: useAuthStore(),
+      transactionStore: useTransactionStore(),
       isOpen: ref(false),
       isLoadinGovernance: ref(false),
       proposals: ref([]),
@@ -309,7 +318,7 @@ export default defineComponent({
         const governanceRaw = await apolloClientForbole.query({
           query: GovernanceQuery,
           variables: {
-            address: authModule.account?.address,
+            address: this.authStore.account?.address,
           },
           fetchPolicy: "no-cache",
         });
@@ -322,7 +331,7 @@ export default defineComponent({
                 proposalsRaw[i].proposal_votes[0]?.option || "";
 
               // sanitize description
-              proposalsRaw[i].description = sanitize(
+              proposalsRaw[i].description = DOMPurify.sanitize(
                 marked(proposalsRaw[i].description)
               ).replace(/\\n/g, "<br>");
 
@@ -403,29 +412,21 @@ export default defineComponent({
     },
     async onVote(proposalIdRaw: string, voteString: string) {
       const proposalId = Number(proposalIdRaw);
-      const vote: CosmosVoteOption = (<any>CosmosVoteOption)[voteString]; // cast the vote from string to enum
-      if (authModule.account) {
-        const msgVote: CosmosMsgVote = {
-          option: vote,
-          proposalId: Number(proposalId),
-          voter: authModule.account?.address,
-        };
-        const txBody: CosmosTxBody = {
-          memo: "Vote | Go-find",
-          messages: [
-            {
-              typeUrl: "/cosmos.gov.v1beta1.MsgVote",
-              value: CosmosMsgVote.encode(msgVote).finish(),
-            },
-          ],
-          extensionOptions: [],
-          nonCriticalExtensionOptions: [],
-          timeoutHeight: 0,
+      const vote: VoteOption = (<any>VoteOption)[voteString]; // cast the vote from string to enum
+      if (this.authStore.account) {
+        const msgVote: MsgVoteEncodeObject = {
+          typeUrl: "/cosmos.gov.v1beta1.MsgVote",
+          value: {
+            option: vote,
+            proposalId: Long.fromNumber(proposalId),
+            voter: this.authStore.account?.address,
+          },
         };
         await this.toggleModal();
-        transactionModule.start({
-          tx: txBody,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_SYNC,
+        this.transactionStore.start({
+          messages: [msgVote],
+          mode: BroadcastMode.Block,
+          memo: "Vote | Go-find",
         });
       }
     },

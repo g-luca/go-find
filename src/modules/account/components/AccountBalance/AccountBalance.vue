@@ -1,11 +1,11 @@
 <template>
   <section>
-    <span v-if="$store.state.AccountModule.profileLoadingStatus">
+    <span v-if="accountStore.profileLoadingStatus">
       <div class="bg-white dark:bg-gray-900 overflow-hidden shadow-xl hover:shadow-2xl rounded-3xl relative mb-8 mt-8 lg:mt-0">
         <img
-          src="@/assets/brands/desmos/logo.svg"
+          src="/public/assets/brands/desmos/logo.svg"
           alt="desmos logo"
-          class="h-24 w-24 absolute opacity-50 -right-1 pointer-events-none"
+          class="h-24 w-24 absolute opacity-50 -right-0 pointer-events-none"
         >
         <div class="px-4 pt-5 pb-2 sm:pt-6">
           <dl>
@@ -13,14 +13,14 @@
               Wallet
             </dt>
             <div class="font-mono text-md truncate py-2 dark:text-gray-400 text-gray-700">
-              {{ $store.state.AccountModule.account._address }}
+              {{ accountStore.account.address }}
             </div>
             <div class="mb-6">
               <div class="grid grid-cols-12">
 
                 <!-- Send -->
                 <div
-                  v-if="$store.state.AccountModule.account._balance>0"
+                  v-if="accountStore.account.balance>0"
                   class="col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-1 mx-auto"
                 >
                   <ModalSend />
@@ -38,7 +38,7 @@
 
                 <!-- Airdrop -->
                 <span
-                  v-if="$store.state.AirdropModule.config!==null&&$store.state.AirdropModule.config.airdrop_enabled===true"
+                  v-if="airdropStore.config!==null&&airdropStore.config.airdrop_enabled===true"
                   class="col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-1 mx-auto"
                 >
 
@@ -60,9 +60,9 @@
             <!-- Balance value -->
             <div>
               <span class="text-brand font-bold pt-1 text-6xl">
-                {{ splitNumberLeft($store.state.AccountModule.account._balance,".") }}
+                {{ splitNumberLeft(accountStore.account.balance,".") }}
                 <span class="text-sm">
-                  .{{ splitNumberRight($store.state.AccountModule.account._balance,".") }}
+                  .{{ splitNumberRight(accountStore.account.balance,".") }}
                 </span>
                 <span class="text-black dark:text-white pl-4 text-4xl">
                   {{coinDenom}}
@@ -86,4 +86,49 @@
   </section>
 </template>
 
-<script lang="ts" src="./AccountBalance.ts"/>
+<script lang="ts">
+import { useAirdropStore } from "@/stores/AirdropModule";
+import { defineComponent } from "vue";
+import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
+import AccountAirdrop from "@/modules/account/components/AccountAirdrop/AccountAirdrop.vue";
+import ModalSend from "@/ui/components/ModalSend/ModalSend.vue";
+import ModalStaking from "@/modules/account/components/AccountBalance/components/ModalStaking.vue";
+import ModalGovernance from "@/modules/account/components/AccountBalance/components/ModalGovernance.vue";
+import { useAccountStore } from "@/stores/AccountModule";
+
+export default defineComponent({
+  components: {
+    SkeletonLoader,
+    AccountAirdrop,
+    ModalSend,
+    ModalStaking,
+    ModalGovernance,
+  },
+  data() {
+    return {
+      accountStore: useAccountStore(),
+      airdropStore: useAirdropStore(),
+      coinDenom: `${import.meta.env.VITE_APP_COIN_DENOM}`,
+      isAirdropActive: false,
+    };
+  },
+  mounted() {
+    this.checkAirdrop();
+  },
+  methods: {
+    splitNumberLeft(value: number, separator: string) {
+      return String(value).split(separator)[0];
+    },
+    splitNumberRight(value: number, separator: string) {
+      return String(value).split(separator)[1];
+    },
+    toggleAirdropModal() {
+      this.airdropStore.toggleAirdropModal();
+      this.airdropStore.checkAirdrop();
+    },
+    async checkAirdrop() {
+      await this.airdropStore.loadAirdropConfig();
+    },
+  },
+});
+</script>

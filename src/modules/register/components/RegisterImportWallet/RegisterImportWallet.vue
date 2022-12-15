@@ -8,7 +8,7 @@
       </div>
       <div>
         <h2 class="dark:text-gray-50 text-gray-800 pb-1 font-medium text-3xl text-center">
-          Your Desmos wallet for @<span class="text-brand">{{ $store.state.RegisterModule.dtag }}</span>
+          Your Desmos wallet for @<span class="text-brand">{{ registerStore.dtag }}</span>
         </h2>
       </div>
     </div>
@@ -31,4 +31,36 @@
   </div>
 </template>
 
-<script lang="ts" src="./RegisterImportWallet.ts"/>
+<script lang="ts">
+import { defineComponent } from "vue";
+import InputMnemonic from "@/ui/components/InputMnemonic.vue";
+import { RegisterState, useRegisterStore } from "@/stores/RegisterModule";
+
+export default defineComponent({
+  components: {
+    InputMnemonic,
+  },
+  data() {
+    return {
+      registerStore: useRegisterStore(),
+      isValidMnemonic: false,
+    };
+  },
+  methods: {
+    goBack(): void {
+      this.registerStore.nextState(RegisterState.StateWalletGeneration);
+    },
+    completeRegistration(): void {
+      this.registerStore.completeRegistration();
+    },
+    onMnemonic(mnemonic: string): void {
+      if (mnemonic) {
+        this.isValidMnemonic = true;
+        this.registerStore.generateWallet({ mnemonic: mnemonic, isNew: false });
+      } else {
+        this.isValidMnemonic = false;
+      }
+    },
+  },
+});
+</script>

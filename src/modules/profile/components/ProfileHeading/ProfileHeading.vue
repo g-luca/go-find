@@ -4,10 +4,10 @@
     <div>
       <div class="grid grid-cols-12">
         <div class="col-span-12 my-auto">
-          <span v-if="$store.state.ProfileModule.profileLoadingStatus">
+          <span v-if="profileStore.profileLoadingStatus&&profileStore.profile">
             <img
               alt="cover"
-              :src="$store.state.ProfileModule.profile.profileCover || 'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=='"
+              :src="profileStore.profile.profileCover || 'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=='"
               class="mx-auto object-cover h-64 lg:h-96 w-full pointer-events-none select-none"
             >
           </span>
@@ -26,10 +26,10 @@
     <div class=" -mt-36">
       <div class="grid grid-cols-12">
         <div class="md:col-start-2 lg:col-start-2 md:col-span-3 col-span-12 my-auto mt-8">
-          <span v-if="$store.state.ProfileModule.profileLoadingStatus">
+          <span v-if="profileStore.profileLoadingStatus&&profileStore.profile">
             <img
               alt="avatar"
-              :src="$store.state.ProfileModule.profile.profilePic || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
+              :src="profileStore.profile.profilePic || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'"
               class="mx-auto object-cover rounded-full h-44 w-44 md:h-56 md:w-56 pointer-events-none select-none shadow-sm md:shadow-2xl"
             >
           </span>
@@ -45,29 +45,29 @@
         <!-- User Info -->
         <div class="md:col-start-6 md:col-span-5 lg:col-start-5 lg:col-span-6 col-span-12 my-auto pt-4 md:pt-8">
           <div class="md:w-full text-center md:text-left dark:text-gray-100 bg-gray-50 md:bg-white dark:bg-denim-900 md:bg-gray-50 md:dark:bg-gray-900 md:bg-opacity-95 backdrop-grayscale md:shadow-2xl rounded-2xl md:pl-7 py-2 md:py-6">
-            <span v-if="$store.state.ProfileModule.profileLoadingStatus">
+            <span v-if="profileStore.profileLoadingStatus&&profileStore.profile">
               <div class="font-bold text-5xl">
                 <h1>
-                  {{ $store.state.ProfileModule.profile.nickname }}
+                  {{ profileStore.profile.nickname }}
                 </h1>
               </div>
               <div class="py-2">
                 <h2 class="text-brand font-semibold text-3xl">
-                  @{{ $store.state.ProfileModule.profile.dtag }}
+                  @{{ profileStore.profile.dtag }}
                 </h2>
                 <div class="flex justify-center md:justify-start px-4 md:pl-0 pb-2 pt-1">
                   <div class="flex-none w-5">
                     <img
-                      src="@/assets/brands/desmos/logo.svg"
+                      src="/public/assets/brands/desmos/logo.svg"
                       class="object-cover w-5 inline-block"
                     >
                   </div>
                   <div class="flex-shrink font-mono text-md mt-1 truncate px-2 dark:text-gray-400">
-                    {{ $store.state.ProfileModule.profile.address }}
+                    {{ profileStore.profile.address }}
                   </div>
                   <div
                     class="flex-none w-5"
-                    @click="copyAddress($store.state.ProfileModule.profile.address)"
+                    @click="copyAddress(profileStore.profile.address)"
                   >
                     <i class="bi bi-clipboard text-blue-500 cursor-pointer" />
                   </div>
@@ -76,12 +76,12 @@
               <div
                 class="prose max-w-none dark:text-white prose-indigo dark:prose-blue"
                 style="max-height:200px;overflow:auto;text-color:white"
-                v-html="$store.state.ProfileModule.profile.bio"
+                v-html="profileStore.profile.bio"
               />
 
               <!-- Chain Links -->
               <div
-                v-if="$store.state.ProfileModule.profile.chainLinks.length>0"
+                v-if="profileStore.profile.chainLinks.length>0"
                 class="pt-2"
               >
                 <h3 class="text-2xl font-bold text-orchid-500">
@@ -90,11 +90,11 @@
                 <div
                   class="grid grid-cols-12 gap-3 text-center"
                   :class="{
-                    'overflow-y-auto max-h-40':$store.state.ProfileModule.profile.chainLinks.length>3
+                    'overflow-y-auto max-h-40':profileStore.profile.chainLinks.length>3
                   }"
                 >
                   <div
-                    v-for="chainLink in $store.state.ProfileModule.profile.chainLinks"
+                    v-for="chainLink in profileStore.profile.chainLinks"
                     class="col-span-12 xl:col-span-6 bg-indigo-50 dark:bg-indigo-800 rounded-2xl mx-4 md:mx-0 md:mr-4 py-1"
                   >
                     <div class="grid grid-cols-12">
@@ -102,25 +102,25 @@
                         <div class="rounded-full w-10 h-10 md:w-10 md:h-10 m-auto">
                           <img
                             class="p-2 pointer-events-none select-none"
-                            :src="getChainLogo(chainLink.chain)"
+                            :src="'/public/assets/brands/' + chainLink.chain + '/logo.svg'"
                             alt=""
                           >
                         </div>
                       </div>
                       <div class="col-span-10">
                         <h4 class="dark:text-white select-none text-lg font-medium capitalize text-left">
-                          {{ chainLink._chain }}
+                          {{ chainLink.chain }}
                         </h4>
                         <!-- 
                         <h4 class="dark:text-white select-none text-sm font-light text-left truncate">
                         </h4> -->
                         <h4 class="flex dark:text-white select-none text-sm font-light text-left">
                           <span class="flex-1 truncate">
-                            {{ chainLink._address }}
+                            {{ chainLink.address }}
                           </span>
                           <span
                             class="flex-none mr-4 w-5"
-                            @click="copyAddress(chainLink._address)"
+                            @click="copyAddress(chainLink.address)"
                           >
                             <i class="bi bi-clipboard text-blue-500 cursor-pointer" />
                           </span>
@@ -161,7 +161,29 @@
 </template>
 
 
-<script lang="ts" src="./ProfileHeading.ts"/>
+<script lang="ts">
+import { defineComponent } from "vue";
+
+import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
+import { useClipboardStore } from "@/stores/ClipboardModule";
+import { useProfileStore } from "@/stores/ProfilleModule";
+
+export default defineComponent({
+  components: {
+    SkeletonLoader,
+  },
+  data() {
+    return {
+      profileStore: useProfileStore(),
+    };
+  },
+  methods: {
+    copyAddress(value: string) {
+      useClipboardStore().copy(value);
+    },
+  },
+});
+</script>
 
 
 <style scoped>

@@ -106,4 +106,52 @@
   </div>
 </template>
         
-<script lang="tsx" src="./RegisterFormMPassword.ts"/>
+<script lang="ts">
+import { Profile } from "@/core/types/Profile";
+import LinkBlockSample from "@/modules/landing/components/LinkBlockSample/LinkBlockSample.vue";
+import { defineComponent } from "vue";
+import { Form, Field } from "vee-validate";
+import { RegisterState, useRegisterStore } from "@/stores/RegisterModule";
+
+export default defineComponent({
+  components: {
+    LinkBlockSample,
+    Form,
+    Field,
+  },
+  data() {
+    const formSchema = {
+      mPassword: { required: true, regex: Profile.PASSWORD_REGEX },
+      mPasswordConfirm: {
+        required: true,
+        regex: Profile.PASSWORD_REGEX,
+        confirmed: "@mPassword",
+      },
+    };
+    return {
+      registerStore: useRegisterStore(),
+      formSchema,
+      isValidMPassword: true,
+      inputMPassword: "",
+      inputMPasswordConfirm: "",
+    };
+  },
+  methods: {
+    validateMPassword() {
+      this.isValidMPassword =
+        this.inputMPassword !== this.registerStore.ePassword;
+    },
+    goBack(): void {
+      this.registerStore.nextState(RegisterState.StateUserInput);
+    },
+    setMPassword() {
+      this.registerStore.setMPassword(this.inputMPassword);
+      if (this.registerStore.hasDesmosProfile) {
+        this.registerStore.nextState(RegisterState.StateWalletImport);
+      } else {
+        this.registerStore.nextState(RegisterState.StateWalletGeneration);
+      }
+    },
+  },
+});
+</script>

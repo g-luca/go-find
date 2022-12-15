@@ -1,6 +1,6 @@
 <template>
   <Dialog
-    :open="$store.state.TransactionModule.isOpen"
+    :open="transactionStore.isOpen"
     @close="closeModal"
   >
     <div class="fixed inset-0 z-50 overflow-y-auto bg-opacity-50 bg-gray-500">
@@ -17,7 +17,7 @@
               <div class="flex text-brand">Confirm Transaction</div>
               <div class="flex-auto text-right">
                 <button
-                  v-if="$store.state.TransactionModule.transactionStatus!==1"
+                  v-if="transactionStore.transactionStatus!==1"
                   ref="closeModalButtonRef"
                   tabindex="1"
                 >
@@ -29,9 +29,9 @@
               </div>
             </span>
           </DialogTitle>
-          <section v-if="$store.state.TransactionModule.transactionStatus!==2">
+          <section v-if="transactionStore.transactionStatus!==2">
             <!-- Registered user Transaction -->
-            <span v-if="!$store.state.AuthModule._account.isUsingKeplr&&!$store.state.AuthModule._account.isUsingWalletConnect">
+            <span v-if="!authStore.account.isUsingKeplr&&!authStore.account.isUsingWalletConnect">
               <label
                 class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
                 for="inputMPassword"
@@ -60,18 +60,18 @@
                 {{ tx.$tx.$fee.$amount[0].$denom }}
               </span>
             </div> -->
-              <span v-if="$store.state.AccountModule.account._balance>0||$store.state.AirdropModule.canGetGrant">
+              <span v-if="accountStore.account.balance>0">
                 <div class="pt-4">
                   <button
-                    v-if="(!$store.state.AuthModule._account.isUsingKeplr&&!$store.state.AuthModule._account.isUsingWalletConnect&&inputMPassword.length>0)||$store.state.AuthModule._account.isUsingKeplr||$store.state.AuthModule._account.isUsingWalletConnect"
-                    :disabled="$store.state.TransactionModule.transactionStatus===1"
+                    v-if="(!authStore.account.isUsingKeplr&&!authStore.account.isUsingWalletConnect&&inputMPassword.length>0)||authStore.account.isUsingKeplr||authStore.account.isUsingWalletConnect"
+                    :disabled="transactionStore.transactionStatus===1"
                     type="button"
-                    :class="{'bg-gray-500 hover:bg-gray-500': $store.state.TransactionModule.transactionStatus===1, 'bg-indigo-600 hover:bg-indigo-700': $store.state.TransactionModule.transactionStatus!==1}"
+                    :class="{'bg-gray-500 hover:bg-gray-500': transactionStore.transactionStatus===1, 'bg-indigo-600 hover:bg-indigo-700': transactionStore.transactionStatus!==1}"
                     class="py-2 px-4 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
                     @click="sign()"
                   >
                     <span
-                      v-if="$store.state.TransactionModule.transactionStatus===1"
+                      v-if="transactionStore.transactionStatus===1"
                       class="text-center"
                     >
                       <svg
@@ -101,7 +101,7 @@
                   </button>
 
                   <div
-                    v-if="$store.state.AuthModule._account.isUsingWalletConnect && $store.state.TransactionModule.transactionStatus===1"
+                    v-if="authStore.account.isUsingWalletConnect && transactionStore.transactionStatus===1"
                     class="pt-3 text-gray-700 dark:text-gray-200 text-center"
                   >
                     Approve the Transaction from your DPM App.
@@ -112,18 +112,18 @@
                 <h1 class="text-md dark:text-white"><i class="bi bi-exclamation-triangle text-red-500" /> Your actual balance cannot cover transaction fees.</h1>
               </span>
               <div
-                v-if="$store.state.TransactionModule.transactionStatus===-1"
+                v-if="transactionStore.transactionStatus===-1"
                 class="pt-2"
               >
                 <p class="text-red-700">
-                  {{ $store.state.TransactionModule.errorMessage }}
+                  {{ transactionStore.errorMessage }}
                 </p>
                 <p class="text-red-700 text-xs">
-                  {{ $store.state.TransactionModule.detailedErrorMessage }}
+                  {{ transactionStore.detailedErrorMessage }}
                 </p>
               </div>
               <div
-                v-if="!$store.state.AuthModule._account.isUsingKeplr&&!$store.state.AuthModule._account.isUsingWalletConnect"
+                v-if="!authStore.account.isUsingKeplr&&!authStore.account.isUsingWalletConnect"
                 class="pt-2 text-gray-400"
               >
                 <i class="bi bi-wifi-off text-md " />
@@ -133,7 +133,7 @@
               </div>
             </div>
           </section>
-          <section v-if="$store.state.TransactionModule.transactionStatus===2">
+          <section v-if="transactionStore.transactionStatus===2">
             <div class="pt-4 text-center">
               <i class="bi bi-check2-circle text-green-500 text-7xl" />
               <h4 class="pt-2 pb-4 text-3xl dark:text-white">
@@ -147,4 +147,33 @@
   </Dialog>
 </template>
 
-<script lang="ts" src="./ModalTransaction.ts"/>
+<script lang="ts">
+import { defineComponent } from "vue";
+import { Dialog, DialogTitle } from "@headlessui/vue";
+import { useTransactionStore } from "@/stores/TransactionModule";
+import { useAccountStore } from "@/stores/AccountModule";
+import { useAuthStore } from "@/stores/AuthModule";
+
+export default defineComponent({
+  components: {
+    Dialog,
+    DialogTitle,
+  },
+  data() {
+    return {
+      inputMPassword: "",
+      authStore: useAuthStore(),
+      accountStore: useAccountStore(),
+      transactionStore: useTransactionStore(),
+    };
+  },
+  methods: {
+    closeModal() {
+      this.transactionStore.closeModal();
+    },
+    async sign() {
+      await this.transactionStore.send({ mPassword: this.inputMPassword });
+    },
+  },
+});
+</script>

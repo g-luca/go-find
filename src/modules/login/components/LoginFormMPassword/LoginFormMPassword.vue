@@ -42,4 +42,66 @@
   </div>
 </template>
         
-<script lang="tsx" src="./LoginFormMPassword.ts"/>
+<script lang="ts">
+import AuthAccount from "@/core/types/AuthAccount";
+import { Profile } from "@/core/types/Profile";
+import LinkBlockSample from "@/modules/landing/components/LinkBlockSample/LinkBlockSample.vue";
+import router from "@/router";
+import { useAuthStore } from "@/stores/AuthModule";
+import { useLoginStore } from "@/stores/LoginModule";
+import CryptoUtils from "@/utils/CryptoUtils";
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  components: {
+    LinkBlockSample,
+  },
+  data() {
+    return {
+      authStore: useAuthStore(),
+      loginStore: useLoginStore(),
+      isValidMPassword: false,
+      hasLoginError: false,
+      isTouched: false,
+      inputMPassword: "",
+    };
+  },
+  methods: {
+    validatePassword() {
+      this.isValidMPassword = Profile.PASSWORD_REGEX.test(this.inputMPassword);
+    },
+    signin() {
+      this.validatePassword();
+      if (this.isValidMPassword) {
+        const mPassword = CryptoUtils.sha256(this.inputMPassword); // generate hashed mPassword
+        try {
+          //ePaassword is already hashed
+          const mKeyRaw = CryptoUtils.decryptAes(
+            this.loginStore.ePassword,
+            this.loginStore.eKey
+          ); // decrypt mKey
+          const mKey = mKeyRaw.split("#ok")[0];
+          CryptoUtils.decryptAes(mPassword, mKey); // try to decrypt privKey
+          this.hasLoginError = false;
+          this.authStore.saveMKey({ mKey, mPassword });
+
+          this.authStore.saveAuthAccount({
+            account: new AuthAccount(
+              this.loginStore.dtag,
+              this.loginStore.address,
+              false
+            ),
+          });
+          this.loginStore.reset();
+          router.push({ path: "/me" });
+        } catch (e) {
+          console.log(e);
+          this.hasLoginError = true;
+        }
+      } else {
+        this.hasLoginError = true;
+      }
+    },
+  },
+});
+</script>

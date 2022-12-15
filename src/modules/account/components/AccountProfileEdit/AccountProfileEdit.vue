@@ -6,18 +6,18 @@
       :initial-values="initialValues"
       @submit="submitEdit"
     >
-      <span v-if="$store.state.AccountModule.profileLoadingStatus">
+      <span v-if="accountStore.profileLoadingStatus">
         <div class="w-full text-center md:text-left dark:text-white">
           <div class="pb-4 pt-8 grid grid-cols-12">
             <div class="col-span-11">
               <h2 class="dark:text-white font-bold text-5xl">
-                Welcome back, <span class="text-brand">{{ $store.state.AccountModule.profile.dtag }}</span>
+                Welcome back, <span class="text-brand">{{ accountStore.profile.dtag }}</span>
               </h2>
             </div>
             <div class="col-span-1 text-right my-auto">
               <div class="relative inline-block text-left">
                 <button
-                  v-if="!$store.state.AccountModule.isNewProfile"
+                  v-if="!accountStore.isNewProfile"
                   type="button"
                 >
                   <div
@@ -198,16 +198,16 @@
             </div>
             <div class="grid grid-cols-12 items-center justify-between gap-4 my-6">
               <button
-                v-if="$store.state.TransactionModule.transactionStatus!==1&&(meta.valid&&meta.dirty)||$store.state.AccountModule.isNewProfile"
+                v-if="transactionStore.transactionStatus!==1&&(meta.valid&&meta.dirty)"
                 type="submit"
-                :disabled="$store.state.TransactionModule.transactionStatus===1"
+                :disabled="transactionStore.transactionStatus===1"
                 class="py-2 px-4 col-span-9 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
               >
                 Save changes
               </button>
 
               <button
-                v-if="$store.state.TransactionModule.transactionStatus!==1&&(meta.dirty)"
+                v-if="transactionStore.transactionStatus!==1&&(meta.dirty)"
                 type="button"
                 :class="{'col-start-10':!meta.valid}"
                 class="py-2 px-4 col-span-3 bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
@@ -315,4 +315,313 @@
   </section>
 </template>
 
-<script lang="ts" src="./AccountProfileEdit.ts"/>
+<script lang="ts">
+import { defineComponent, ref, watchEffect } from "vue";
+import { Form, Field } from "vee-validate";
+import { Dialog, DialogTitle } from "@headlessui/vue";
+import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
+import { TxBody } from "cosmjs-types/cosmos/tx/v1beta1/tx";
+import { MsgDeleteProfile } from "@desmoslabs/desmjs-types/desmos/profiles/v3/msgs_profile";
+import { BroadcastMode } from "@cosmjs/launchpad";
+import { marked } from "marked";
+import DOMPurify from "dompurify";
+import {
+  TransactionStatus,
+  useTransactionStore,
+} from "@/stores/TransactionModule";
+import { useAccountStore } from "@/stores/AccountModule";
+import { useAuthStore } from "@/stores/AuthModule";
+import { MsgSaveProfile } from "@desmoslabs/desmjs-types/desmos/profiles/v3/msgs_profile";
+import Long from "long";
+import {
+  MsgDeleteProfileEncodeObject,
+  MsgSaveProfileEncodeObject,
+} from "@desmoslabs/desmjs";
+import { EncodeObject } from "@cosmjs/proto-signing";
+
+enum UploadImageType {
+  "profilePic" = "profilePic",
+  "profileCover" = "profileCover",
+}
+
+export default defineComponent({
+  components: {
+    SkeletonLoader,
+    Form,
+    Field,
+    Dialog,
+    DialogTitle,
+  },
+  data() {
+    const formSchema = {
+      nickname: { min: 2, max: 1000 },
+      profilePic: { regex: /^(http)s?:?(\/\/[^"']*$)/ },
+      profileCover: { regex: /^(http)s?:?(\/\/[^"']*$)/ },
+      bio: { max: 1000 },
+    };
+    let initialValues = {};
+    // set the default values form the accountModule
+    const tmpAccountStore = useAccountStore();
+    if (tmpAccountStore.profile) {
+      initialValues = {
+        nickname: tmpAccountStore.profile.nickname,
+        profilePic: tmpAccountStore.profile.profilePic,
+        profileCover: tmpAccountStore.profile.profileCover,
+        bio: tmpAccountStore.profile.bio,
+      };
+    }
+    return {
+      authStore: useAuthStore(),
+      transactionStore: useTransactionStore(),
+      accountStore: useAccountStore(),
+      initialValues,
+      formSchema,
+      messageSent: null as EncodeObject | null,
+      inputNickname: "",
+      inputProfilePic: "",
+      inputProfileCover: "",
+      inputBio: "",
+      markedInputBio: "",
+
+      isUploadingImage: false,
+      hasUploadImageError: "",
+      hasUploadedImage: false,
+      isModalUploadImageOpen: false,
+      imageUploadPreviewUrl: "",
+      imageUploadFile: null as any,
+      imageUploadType: UploadImageType.profilePic,
+
+      isProfileOptionDropdownVisible: false,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      resetForm: (_values?: unknown) => {
+        return;
+      },
+    };
+  },
+  async beforeMount() {
+    const account = this.authStore.account;
+    if (account) {
+      //register the watcher of the accountModule user account profile
+      ref(this.accountStore.profile);
+      watchEffect(() => {
+        if (this.accountStore.profile) {
+          this.inputNickname = this.accountStore.profile.nickname;
+          this.inputProfilePic = this.accountStore.profile.profilePic;
+          this.inputProfileCover = this.accountStore.profile.profileCover;
+          this.inputBio = this.accountStore.profile.bio;
+        }
+      });
+
+      // start listening the transactionStore to intercept the results
+      ref(this.transactionStore);
+      watchEffect(() => {
+        // check if is processing the right transaction and the status
+        if (
+          this.accountStore.profile &&
+          // TODO: check
+          this.transactionStore.messages[0] === this.messageSent &&
+          (this.transactionStore.transactionStatus ===
+            TransactionStatus.Error ||
+            this.transactionStore.transactionStatus ===
+              TransactionStatus.Success)
+        ) {
+          if (this.transactionStore.errorMessage) {
+            // the transaction has an error message, failed
+            console.log("update failure!");
+          } else {
+            if (
+              this.messageSent?.typeUrl ===
+              "/desmos.profiles.v3.MsgDeleteProfile"
+            ) {
+              this.accountStore.setIsNewProfile();
+            } else {
+              // the tx went well! update the data
+              console.log("update success!");
+              this.accountStore.profile.nickname = this.inputNickname;
+              this.accountStore.profile.profilePic = this.inputProfilePic;
+              this.accountStore.profile.profileCover = this.inputProfileCover;
+              this.accountStore.profile.bio = this.inputBio;
+              if (this.accountStore.isNewProfile) {
+                this.accountStore.setNotNewProfile();
+              }
+            }
+            this.messageSent = null;
+            this.handleResetForm();
+          }
+        }
+      });
+    }
+  },
+  methods: {
+    submitEdit(_data: void, { resetForm }: unknown): void {
+      if (this.accountStore.profile) {
+        const doNotModify = "[do-not-modify]";
+        const msgSaveProfile: MsgSaveProfileEncodeObject = {
+          typeUrl: "/desmos.profiles.v3.MsgSaveProfile",
+          value: {
+            dtag: this.accountStore.profile.dtag,
+            nickname:
+              this.accountStore.profile.nickname !== this.inputNickname
+                ? this.inputNickname
+                : doNotModify,
+            bio:
+              this.accountStore.profile.bio !== this.inputBio
+                ? this.inputBio
+                : doNotModify,
+            profilePicture:
+              this.accountStore.profile.profilePic !== this.inputProfilePic
+                ? this.inputProfilePic
+                : doNotModify,
+            coverPicture:
+              this.accountStore.profile.profileCover !== this.inputProfileCover
+                ? this.inputProfileCover
+                : doNotModify,
+            creator: this.accountStore.profile.address,
+          },
+        };
+        this.messageSent = msgSaveProfile;
+        this.transactionStore.start({
+          messages: [msgSaveProfile],
+          mode: BroadcastMode.Sync,
+          memo: "Profile update | Go-find",
+        });
+
+        // Vee Validate send as parameter the reset function, i need to save it to use for the reset after an update
+        // This may be fixed by Vee itself in future https://github.com/logaretm/vee-validate/issues/3292
+        this.resetForm = resetForm;
+      }
+    },
+    /**
+     * Convert the input bio in markdown html
+     * @param bio input bio
+     */
+    markInputBio(bio: string) {
+      this.markedInputBio = marked(DOMPurify.sanitize(marked(bio)));
+    },
+
+    /**
+     * Reset the form and the input data
+     */
+    handleResetForm(): void {
+      if (this.accountStore.profile) {
+        this.inputNickname = this.accountStore.profile.nickname;
+        this.inputProfilePic = this.accountStore.profile.profilePic;
+        this.inputProfileCover = this.accountStore.profile.profileCover;
+        this.inputBio = this.accountStore.profile.bio;
+        this.markedInputBio = marked(
+          DOMPurify.sanitize(marked(this.accountStore.profile.bio))
+        );
+        this.resetForm({
+          values: {
+            nickname: this.inputNickname,
+            profilePic: this.inputProfilePic,
+            profileCover: this.inputProfileCover,
+            bio: this.inputBio,
+          },
+        });
+      }
+    },
+
+    openModalUploadImage(e: any, type: UploadImageType) {
+      // retrieve the image
+      this.imageUploadFile = null;
+      try {
+        const image = e.target.files[0] || e.dataTransfer.files[0];
+        this.imageUploadFile = image;
+        this.imageUploadType = type;
+        this.imageUploadPreviewUrl = URL.createObjectURL(image);
+        this.isModalUploadImageOpen = true;
+        this.isUploadingImage = false;
+        this.hasUploadImageError = "";
+        this.hasUploadedImage = false;
+      } catch (e) {
+        // input file removed
+      }
+    },
+    closeModalUploadImage() {
+      this.isModalUploadImageOpen = false;
+    },
+
+    /**
+     * Upload generic profile image (using IPFS)
+     * @param image image file
+     */
+    async uploadProfileImage() {
+      this.isUploadingImage = true;
+      this.hasUploadedImage = false;
+      this.hasUploadImageError = "";
+      const uploadedImageUrl = await this.uploadFileIpfs(this.imageUploadFile);
+      if (uploadedImageUrl !== false) {
+        this.hasUploadedImage = true;
+        switch (this.imageUploadType) {
+          case UploadImageType.profilePic:
+            this.inputProfilePic = uploadedImageUrl;
+            break;
+
+          case UploadImageType.profileCover:
+            this.inputProfileCover = uploadedImageUrl;
+            break;
+        }
+        window.setTimeout(() => {
+          this.closeModalUploadImage();
+        }, 1000);
+      } else {
+        this.hasUploadImageError =
+          "Ops, something went wrong uploading the image. Try again!";
+      }
+      this.isUploadingImage = false;
+    },
+
+    /**
+     * Upload a file to IPFS
+     * @param file file to upload
+     * @returns uploaded file URL if uploaded successfully, false otherwise
+     */
+    async uploadFileIpfs(file: any): Promise<string | false> {
+      // define the IPFS gateway
+      const ipfsGateway = "https://ipfs.infura.io";
+
+      // prepare the file to be uploaded
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // try to upload the file
+      try {
+        const res = await (
+          await fetch(`${ipfsGateway}:5001/api/v0/add`, {
+            method: "POST",
+            body: formData as any,
+          })
+        ).json();
+        // if uploaded, get the response CID
+        const cid = res.Hash;
+        if (cid) {
+          return `${ipfsGateway}/ipfs/${cid}`;
+        }
+      } catch (e) {
+        // damn, upload failed!
+      }
+      return false;
+    },
+    async deleteProfile() {
+      const msgDeleteProfile: MsgDeleteProfileEncodeObject = {
+        typeUrl: "/desmos.profiles.v3.MsgDeleteProfile",
+        value: {
+          creator: this.authStore.account!.address,
+        },
+      };
+      this.transactionStore.start({
+        messages: [msgDeleteProfile],
+        mode: BroadcastMode.Async,
+        memo: "Profile delete | Go-find",
+      });
+      this.messageSent = msgDeleteProfile;
+      this.toggleProfileOptionDropdown();
+    },
+    toggleProfileOptionDropdown() {
+      this.isProfileOptionDropdownVisible =
+        !this.isProfileOptionDropdownVisible;
+    },
+  },
+});
+</script>

@@ -21,7 +21,7 @@
 
       <div class="col-span-12 md:col-span-4 text-center my-auto hidden md:inline">
         <img
-          src="@/assets/brands/go-find/logo.svg"
+          src="/public/assets/brands/go-find/logo.svg"
           class="mx-auto object-cover h-10 w-10 rounded-md"
         >
       </div>
@@ -49,7 +49,7 @@
         <h5 class="px-4  text-lg">
           <span class="flex justify-center font-semibold pb-1">
             <img
-              src="@/assets/brands/go-find/logo.svg"
+              src="/public/assets/brands/go-find/logo.svg"
               class="object-cover h-6 w-6 rounded-md"
             >o-find.me <span class="text-gray-500 font-extralight"> &nbsp; | &nbsp; © 2021 </span></span>
           <span class="px-4 py-0.5 text-white font-medium text-md rounded-xl bg-gradient-to-r from-indigo-900 via-indigo-800 to-indigo-700">
@@ -72,30 +72,30 @@
             <ToggleLanguage />
           </div>
           <div class="flex px-4 py-0.5 text-gray-500 my-auto font-light text-sm">
-            <span v-if="$store.state.StatusModule.status === 0">
+            <span v-if="statusStore.status === 0">
               Online
             </span>
-            <span v-if="$store.state.StatusModule.status === 1">
+            <span v-if="statusStore.status === 1">
               Connecting..
             </span>
-            <span v-if="$store.state.StatusModule.status === 2">
+            <span v-if="statusStore.status === 2">
               Not Synched
             </span>
             <span class="ml-2 h-3 w-3 ">
               <span
                 class="animate-ping absolute inline-flex h-3 w-3 rounded-full opacity-75 mt-0.5"
                 :class="{
-                  'bg-green-500':$store.state.StatusModule.status === 0,
-                  'bg-yellow-500':$store.state.StatusModule.status === 1,
-                  'bg-red-500':$store.state.StatusModule.status === 2
+                  'bg-green-500':statusStore.status === 0,
+                  'bg-yellow-500':statusStore.status === 1,
+                  'bg-red-500':statusStore.status === 2
                 }"
               />
               <span
                 class="relative inline-flex rounded-full h-3 w-3"
                 :class="{
-                  'bg-green-500':$store.state.StatusModule.status === 0,
-                  'bg-yellow-500':$store.state.StatusModule.status === 1,
-                  'bg-red-500':$store.state.StatusModule.status === 2
+                  'bg-green-500':statusStore.status === 0,
+                  'bg-yellow-500':statusStore.status === 1,
+                  'bg-red-500':statusStore.status === 2
                 }"
               />
             </span>
@@ -109,13 +109,18 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import ToggleLanguage from "@/ui/components/ToggleLanguage/ToggleLanguage.vue";
-import { getModule } from "vuex-module-decorators";
-import StatusModule from "@/store/modules/StatusModule";
-const statusModule = getModule(StatusModule);
-statusModule.startStatusListening();
+import { useStatusStore } from "@/stores/StatusModule";
 
 export default defineComponent({
   components: { ToggleLanguage },
+  data() {
+    return {
+      statusStore: useStatusStore(),
+    };
+  },
+  mounted() {
+    this.statusStore.startStatusListening();
+  },
   props: {
     forceBlack: {
       type: Boolean,

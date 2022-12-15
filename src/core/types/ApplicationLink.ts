@@ -1,5 +1,4 @@
-import { DesmosApplicationLinkState } from "desmosjs";
-
+import { ApplicationLinkState } from "@desmoslabs/desmjs-types/desmos/profiles/v3/models_app_links";
 export default class ApplicationLink {
     readonly name: string = "";
     readonly displayName: string = "";
@@ -12,10 +11,10 @@ export default class ApplicationLink {
     readonly usernameRegExpError: string = "Invalid username.";
 
     username: string;
-    state: DesmosApplicationLinkState = DesmosApplicationLinkState.APPLICATION_LINK_STATE_INITIALIZED_UNSPECIFIED
+    state: ApplicationLinkState = ApplicationLinkState.APPLICATION_LINK_STATE_INITIALIZED_UNSPECIFIED
 
 
-    constructor(username: string, state: DesmosApplicationLinkState) {
+    constructor(username: string, state: ApplicationLinkState) {
         this.username = username;
         this.state = state;
     }

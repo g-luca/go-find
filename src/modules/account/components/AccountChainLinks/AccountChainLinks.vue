@@ -1,20 +1,20 @@
 <template>
   <div>
-    <section v-if="$store.state.AccountModule.profileLoadingStatus==0||$store.state.AccountModule.profileLoadingStatus">
-      <span v-if="$store.state.AccountModule.profileLoadingStatus">
+    <section v-if="accountStore.profileLoadingStatus==0||accountStore.profileLoadingStatus">
+      <span v-if="accountStore.profileLoadingStatus">
         <div class="pt-2 pb-3 md:pt-6 px-2 bg-white dark:bg-gray-900 rounded-3xl shadow-xl hover:shadow-2xl">
           <h1 class="pb-8 pl-4 text-5xl text-purple-600 dark:text-purple-700 font-extrabold">
             Blockchains
           </h1>
-          <span v-if="$store.state.AccountModule.profile.chainLinks&&$store.state.AccountModule.profile.chainLinks.length>0">
+          <span v-if="accountStore.profile.chainLinks&&accountStore.profile.chainLinks.length>0">
             <div
               class="grid grid-cols-2 gap-3 text-center"
               :class="{
-                'md:overflow-y-auto md:max-h-96':$store.state.AccountModule.profile.chainLinks.length>3
+                'md:overflow-y-auto md:max-h-96':accountStore.profile.chainLinks.length>3
               }"
             >
               <div
-                v-for="chainLink in $store.state.AccountModule.profile.chainLinks"
+                v-for="chainLink in accountStore.profile.chainLinks"
                 :key="chainLink"
                 class="m-auto col-span-2 w-full px-2"
               >
@@ -28,7 +28,7 @@
                   <div class="w-14 sm:w-16 md:w-20 m-auto col-span-2">
                     <img
                       class="p-4 pointer-events-none select-none text-left"
-                      :src="getChainLogo(chainLink.chain)"
+                      :src="'/public/assets/brands/' + chainLink.chain + '/logo.svg'"
                       alt=""
                     >
                   </div>
@@ -127,7 +127,7 @@
                         <div class="col-span-4">
                           <img
                             class="p-3 pointer-events-none select-none h-16 w-16"
-                            :src="getChainLogo(chain.id)"
+                            :src="'/public/assets/brands/' + chain.id + '/logo.svg'"
                             alt=""
                           >
                         </div>
@@ -151,34 +151,9 @@
                         </div>
                       </div>
                     </div>
-                    <!-- <div
-                      class="flex-initial m-1 rounded-3xl bg-gray-100 dark:bg-denim-900 dark:hover:bg-purple-800 hover:bg-purple-200 cursor-pointer"
-                      @click="selectChain(null)"
-                    >
-                      <div class="grid grid-cols-12 w-44 md:w-60 py-3">
-                        <div class="col-span-4">
-                          <i class="p-3 pointer-events-none select-none text-4xl w-auto my-auto bi bi-link text-seagreen-500" />
-                        </div>
-                        <div class="col-span-5 my-auto">
-                          <h5 class="dark:text-white text-2xl capitalize">
-                            Other
-                          </h5>
-                        </div>
-                        <div class="col-span-3 text-right my-auto pr-4">
-                          <i
-                            v-if="isCustomChain"
-                            class="bi bi-check-circle text-xl text-seagreen-500"
-                          />
-                          <i
-                            v-else
-                            class="bi bi-circle text-xl dark:text-white"
-                          />
-                        </div>
-                      </div>
-                    </div> -->
                   </div>
 
-                  <div v-if="isCustomChain">
+                  <!-- <div v-if="isCustomChain">
                     <label
                       for="chainName"
                       class="text-gray-700 text-sm"
@@ -193,7 +168,7 @@
                       name="chainName"
                       placeholder="Chain name"
                     >
-                  </div>
+                  </div> -->
                 </div>
               </div>
               <div class="text-center text-xs dark:text-gray-400 text-gray-600 mt-1">
@@ -202,7 +177,7 @@
 
               <!-- Method Select -->
               <div
-                v-if="isCustomChain||selectedChain"
+                v-if="selectedChain"
                 class="md:flex -mx-4 pt-4"
               >
                 <div class="px-4">
@@ -218,19 +193,16 @@
                   </div>
                   <div class="flex flex-nowrap min-w-full mt-4">
                     <div
-                      v-for="connectionMethod of supportedChainLinkConnectionMethods"
+                      v-for="connectionMethod of selectedChain.supportedConnectionMethods"
                       class="flex-initial m-1 rounded-3xl cursor-pointer select-none transition ease-in duration-150"
                       :class="connectionMethod?.id===selectedConnectionMethod?.id?'bg-purple-300 dark:bg-purple-800 dark:hover:bg-purple-700 hover:bg-purple-200':'bg-gray-100 dark:bg-denim-900 dark:hover:bg-purple-800 hover:bg-purple-200'"
                       @click="selectChainConnectionMethod(connectionMethod)"
                     >
-                      <div
-                        class="grid grid-cols-12 w-52 md:w-60"
-                        v-if="connectionMethod.chainRestrictions.length===0 || connectionMethod.chainRestrictions.indexOf(selectedChain?.id)!==-1"
-                      >
+                      <div class="grid grid-cols-12 w-52 md:w-60">
                         <div class="col-span-4">
                           <img
                             class="p-3 pointer-events-none select-none h-16 w-16"
-                            :src="getChainLogo(connectionMethod.logo)"
+                            :src="'/public/assets/brands/' + connectionMethod.logo + '/logo.svg'"
                             alt=""
                           >
                         </div>
@@ -251,23 +223,6 @@
                         </div>
                       </div>
                     </div>
-                  </div>
-
-                  <div v-if="isCustomChain">
-                    <label
-                      for="chainName"
-                      class="text-gray-700 text-sm"
-                    >
-                      Chain name
-                    </label>
-                    <input
-                      id="chainName"
-                      v-model="customChainName"
-                      type="text"
-                      class=" rounded-lg border w-full py-2 px-4 bg-white dark:bg-gray-800 dark:text-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base border focus:outline-none"
-                      name="chainName"
-                      placeholder="Chain name"
-                    >
                   </div>
                 </div>
               </div>
@@ -320,7 +275,7 @@
                         @click="connectWithLedger(ledgerAppName)"
                       >
                         <img
-                          :src="getChainLogo(ledgerAppName)"
+                          :src="'/public/assets/brands/' + ledgerAppName + '/logo.svg'"
                           class="w-8 h-8 inline-flex"
                           alt=""
                         >
@@ -329,6 +284,47 @@
                     </div>
 
                   </div>
+                </span>
+                <span v-if="selectedConnectionMethod.id==='metamask'">
+                  <button
+                    :disabled="isSigningProof"
+                    type="button"
+                    class="py-2 px-4 w-6/12  text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                    :class="isSigningProof?'bg-gray-500 cursor-pointer':'bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200'"
+                    @click="connectWithMetaMask"
+                  >
+                    <span v-if="!isSigningProof">
+                      Connect
+                    </span>
+                    <span v-else>
+                      Loading...
+                    </span>
+                  </button>
+                </span>
+                <span
+                  v-if="selectedConnectionMethod.id==='mnemonic'"
+                  :set="inputMnemonic = ''"
+                >
+                  <InputMnemonic
+                    @onMnemonic="inputMnemonic=$event"
+                    :customBech32Prefix="selectedChain?.bechPrefix"
+                    :customHdpath="selectedChain?.hdpath"
+                    :showAddress="false"
+                  />
+                  <button
+                    :disabled="isSigningProof"
+                    type="button"
+                    class="py-2 px-4 w-6/12  text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                    :class="isSigningProof?'bg-gray-500 cursor-pointer':'bg-purple-600 hover:bg-purple-700 focus:ring-indigo-500 focus:ring-offset-indigo-200'"
+                    @click="connectWithMnemonic(inputMnemonic)"
+                  >
+                    <span v-if="!isSigningProof">
+                      Connect
+                    </span>
+                    <span v-else>
+                      Loading...
+                    </span>
+                  </button>
                 </span>
               </div>
 
@@ -348,6 +344,8 @@
 </template>
 
 <script lang="ts" src="./AccountChainLinks.ts"/>
+
+
 <style scoped>
 * {
   scrollbar-width: thin;

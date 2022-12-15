@@ -63,7 +63,7 @@
                 @click="shareTweet()"
               >
                 <img
-                  src="@/assets/brands/twitter/logo.svg"
+                  src="/public/assets/brands/twitter/logo.svg"
                   class="w-10 h-10"
                   alt=""
                 />
@@ -173,11 +173,10 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { Field, Form } from "vee-validate";
-import ApplicationLinkModule from "@/store/modules/ApplicationLinkModule";
 import ApplicationLinkTwitter from "@/core/types/ApplicationLinks/ApplicationLinkTwitter";
-import ClipboardModule from "@/store/modules/ClipboardModule";
-import { getModule } from "vuex-module-decorators";
-const clipboardModule = getModule(ClipboardModule);
+import { useClipboardStore } from "@/stores/ClipboardModule";
+import { useApplicationLinkStore } from "@/stores/ApplicationLinkModule";
+import { Buffer } from "buffer";
 
 class TwitterVerificationMethod {
   public id: string;
@@ -238,7 +237,7 @@ export default defineComponent({
   },
   methods: {
     copy(value: string) {
-      clipboardModule.copy(value);
+      useClipboardStore().copy(value);
     },
     updateTweetUrl() {
       if (this.inputTweetUrl) {
@@ -288,14 +287,17 @@ export default defineComponent({
           value: this.username,
         };
         const callData = Buffer.from(JSON.stringify(data)).toString("hex");
-        const txBody = ApplicationLinkModule.generateApplicationLinkTxBody(
-          "twitter",
-          this.username,
-          callData
-        );
+        const obj =
+          useApplicationLinkStore().generateApplicationLinkWrapperObject(
+            "twitter",
+            this.username,
+            callData
+          );
+
         this.$emit("applicationLinkSent", {
-          txBody: txBody,
+          messages: [obj?.message],
           applicationLink: new ApplicationLinkTwitter(this.username),
+          memo: obj?.memo,
         });
       } else {
         this.checkError = "Twitter biography link not found";
@@ -307,14 +309,17 @@ export default defineComponent({
         value: this.tweetId,
       };
       const callData = Buffer.from(JSON.stringify(data)).toString("hex");
-      const txBody = ApplicationLinkModule.generateApplicationLinkTxBody(
-        "twitter",
-        this.username,
-        callData
-      );
+      const obj =
+        useApplicationLinkStore().generateApplicationLinkWrapperObject(
+          "twitter",
+          this.username,
+          callData
+        );
+
       this.$emit("applicationLinkSent", {
-        txBody: txBody,
+        messages: [obj?.message],
         applicationLink: new ApplicationLinkTwitter(this.username),
+        memo: obj?.memo,
       });
     },
   },

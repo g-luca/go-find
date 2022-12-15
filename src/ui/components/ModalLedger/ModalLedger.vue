@@ -2,7 +2,7 @@
   <span>
     <span>
       <Dialog
-        :open="$store.state.LedgerModule.isModalOpen"
+        :open="ledgerStore.isModalOpen"
         @close="toggleModal"
       >
         <div class="fixed inset-0 z-40 overflow-y-auto bg-opacity-50 bg-gray-500">
@@ -15,7 +15,7 @@
                   <div class="text-left my-auto flex">
                     <img
                       class="h-8 w-8 flex-1 pt-1"
-                      src="@/assets/brands/ledger/logo.svg"
+                      src="/public/assets/brands/ledger/logo.svg"
                       alt=""
                     >
                     <h1 class="dark:text-white text-4xl flex-grow pl-3">Ledger</h1>
@@ -34,14 +34,14 @@
 
               <ModalLedgerConnect />
               <div class="pt-4 text-center dark:text-white text-lg">
-                <span v-if="$store.state.LedgerModule.isExecutingActionMessage">
+                <span v-if="ledgerStore.isExecutingActionMessage">
                   Approve the Transaction on your Ledger device
                 </span>
-                <span v-if="$store.state.LedgerModule.actionSignature!==null">
+                <span v-if="ledgerStore.actionSignature!==null">
                   <p class="text-green-500">Success!</p>
                 </span>
-                <span v-if="$store.state.LedgerModule.actionError">
-                  <p class="text-red-500">{{$store.state.LedgerModule.actionError}}</p>
+                <span v-if="ledgerStore.actionError">
+                  <p class="text-red-500">{{ledgerStore.actionError}}</p>
                 </span>
               </div>
             </div>
@@ -58,21 +58,19 @@ import { defineComponent } from "vue";
 import { ref } from "vue";
 import { Dialog, DialogOverlay, DialogTitle } from "@headlessui/vue";
 import ModalLedgerConnect from "@/ui/components/ModalLedger/components/ModalLedgerConnect.vue";
-
-import { getModule } from "vuex-module-decorators";
-import LedgerModule from "@/store/modules/LedgerModule";
-const ledgerModule = getModule(LedgerModule);
+import { useLedgerStore } from "@/stores/LedgerModule";
 
 export default defineComponent({
   components: { Dialog, DialogOverlay, DialogTitle, ModalLedgerConnect },
   setup() {
     return {
-      isOpen: ref(ledgerModule.isModalOpen),
+      ledgerStore: useLedgerStore(),
+      isOpen: ref(useLedgerStore().isModalOpen),
     };
   },
   methods: {
     async toggleModal() {
-      await ledgerModule.toggleModal();
+      await this.ledgerStore.toggleModal();
     },
   },
 });

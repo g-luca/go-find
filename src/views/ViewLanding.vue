@@ -7,18 +7,17 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from "vue-class-component";
+import { defineComponent } from "vue";
 
 import AppFooter from "@/ui/components/AppFooter/AppFooter.vue";
 import AppHeader from "@/ui/components/AppHeader/AppHeader.vue";
 import LandingHero from "@/modules/landing/components/LandingHero/LandingHero.vue";
 
-@Options({
+export default defineComponent({
   components: {
-    AppHeader,
     AppFooter,
+    AppHeader,
     LandingHero,
   },
-})
-export default class ViewLanding extends Vue {}
+});
 </script>

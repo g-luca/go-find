@@ -7,7 +7,7 @@
           <div class="flex justify-center">
             <img
               class="max-h-28 w-auto"
-              src="@/assets/brands/walletconnect/logo.svg"
+              src="/public/assets/brands/walletconnect/logo.svg"
               alt="WalletConnect"
             >
           </div>
@@ -22,14 +22,14 @@
 
           <div class="pt-14">
             <!-- WalletConnect connected but no Desmos profile -->
-            <span v-if="!$store.state.WalletConnectModule.hasProfile&&$store.state.WalletConnectModule.connectedAddress">
+            <span v-if="!walletConnectStore.hasProfile&&walletConnectStore.connectedAddress">
               <div class="text-center">
                 <!-- Dtag -->
                 <div>
                   <label
                     class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
                     for="dtag"
-                  > <span v-if="!$store.state.RegisterModule.hasDesmosProfile">
+                  > <span v-if="!registerStore.hasDesmosProfile">
                       Choose your
                     </span>
                     <span v-else>
@@ -123,7 +123,7 @@
               </div>
             </span>
 
-            <span v-if="!$store.state.WalletConnectModule.connectedAddress">
+            <span v-if="!walletConnectStore.connectedAddress">
               <div class="text-center">
                 <button
                   type="button"
@@ -133,7 +133,7 @@
                   <div class="flex py-2 justify-center">
                     <img
                       class="h-8"
-                      :src="require('@/assets/brands/walletconnect/logo.svg')"
+                      src="/public/assets/brands/walletconnect/logo.svg"
                       alt=""
                     >
                     <span class="text-white pl-3 text-lg my-auto">
@@ -155,16 +155,12 @@
 <script lang="ts">
 import AppFooter from "@/ui/components/AppFooter/AppFooter.vue";
 import AppHeader from "@/ui/components/AppHeader/AppHeader.vue";
-import { getModule } from "vuex-module-decorators";
 import { defineComponent } from "vue";
 import { Profile } from "@/core/types/Profile";
 import Api from "@/core/api/Api";
 import { Field, Form } from "vee-validate";
-import WalletConnectModule from "@/store/modules/WalletConnectModule";
-import AuthModule from "@/store/modules/AuthModule";
-const walletConnectModule = getModule(WalletConnectModule);
-const authModule = getModule(AuthModule);
-import QRCodeModal from "@walletconnect/qrcode-modal";
+import { useWalletConnectStore } from "@/stores/WalletConnectModule";
+import { useRegisterStore } from "@/stores/RegisterModule";
 
 export default defineComponent({
   components: {
@@ -178,6 +174,8 @@ export default defineComponent({
       dtag: { required: true, regex: Profile.DTAG_REGEX },
     };
     return {
+      registerStore: useRegisterStore(),
+      walletConnectStore: useWalletConnectStore(),
       formSchema,
       isValidDtag: false,
       isDtagAvailable: false,
@@ -186,12 +184,11 @@ export default defineComponent({
     };
   },
   mounted() {
-    walletConnectModule.connect();
+    this.walletConnectStore.connect();
   },
   methods: {
     openWalletConnect(): void {
-      QRCodeModal.open(AuthModule.walletConnectClient.uri, QRCodeModal.close);
-      walletConnectModule.connect();
+      this.walletConnectStore.connect();
     },
     validateDtag() {
       this.isDtagAvailable = false;
@@ -203,8 +200,9 @@ export default defineComponent({
           if (this.inputDtag === dtag) {
             // verify if the dtag is not changed while waiting the timeout
             Api.get(
-              `${process.env.VUE_APP_LCD_ENDPOINT}/desmos/profiles/v1beta1/profiles/` +
-                this.inputDtag
+              `${
+                import.meta.env.VITE_APP_LCD_ENDPOINT
+              }/desmos/profiles/v2/profiles/` + this.inputDtag
             ).then((response) => {
               if (this.inputDtag === dtag && response["profile"]) {
                 // dtag already taken
@@ -222,7 +220,9 @@ export default defineComponent({
       return this.isValidDtag;
     },
     setDtag() {
-      walletConnectModule.setupProfileWalletConnect({ dtag: this.inputDtag });
+      this.walletConnectStore.setupProfileWalletConnect({
+        dtag: this.inputDtag,
+      });
     },
   },
 });

@@ -6,9 +6,9 @@
       <div class="pb-1 w-full text-center text-lg font-semibold">
         <h6
           class="dark:text-white cursor-pointer select-none"
-          @click="setSignupWithDesmosProfile(!$store.state.RegisterModule.hasDesmosProfile)"
+          @click="setSignupWithDesmosProfile(!registerStore.hasDesmosProfile)"
         >
-          <span v-if="!$store.state.RegisterModule.hasDesmosProfile">
+          <span v-if="!registerStore.hasDesmosProfile">
             Already have a <span class="text-brand">Desmos Profile</span>?
           </span>
           <span v-else>
@@ -26,7 +26,7 @@
           <label
             class="dark:text-gray-50 text-gray-800 pb-2 font-medium text-xl"
             for="dtag"
-          > <span v-if="!$store.state.RegisterModule.hasDesmosProfile">
+          > <span v-if="!registerStore.hasDesmosProfile">
               Choose your
             </span>
             <span v-else>
@@ -176,7 +176,7 @@
       >
         <img
           class="h-8"
-          :src="require('@/assets/brands/keplr/logo.svg')"
+          src="/public/assets/brands/keplr/logo.svg"
           alt=""
         >
         <span class="text-white pl-3 text-lg">
@@ -187,4 +187,82 @@
   </div>
 </template>
         
-<script lang="tsx" src="./RegisterFormUser.ts"/>
+<script lang="ts">
+import { Profile } from "@/core/types/Profile";
+import LinkBlockSample from "@/modules/landing/components/LinkBlockSample/LinkBlockSample.vue";
+import { defineComponent } from "vue";
+import { Form, Field } from "vee-validate";
+import Api from "@/core/api/Api";
+import { RegisterState, useRegisterStore } from "@/stores/RegisterModule";
+
+export default defineComponent({
+  components: {
+    LinkBlockSample,
+    Form,
+    Field,
+  },
+  data() {
+    const formSchema = {
+      dtag: { required: true, regex: Profile.DTAG_REGEX },
+      ePassword: { required: true, regex: Profile.PASSWORD_REGEX },
+      ePasswordConfirm: {
+        required: true,
+        regex: Profile.PASSWORD_REGEX,
+        confirmed: "@ePassword",
+      },
+    };
+    return {
+      registerStore: useRegisterStore(),
+      formSchema,
+      isValidDtag: false,
+      isDtagAvailable: false,
+      isVerifyingDtagAvailability: false,
+      isEPasswordEqual: false,
+      inputDtag: "",
+      inputEPassword: "",
+      inputEPasswordConfirm: "",
+    };
+  },
+  methods: {
+    validateDtag() {
+      this.isDtagAvailable = false;
+      this.isValidDtag = Profile.DTAG_REGEX.test(this.inputDtag);
+      if (this.isValidDtag) {
+        this.isVerifyingDtagAvailability = true;
+        const dtag = this.inputDtag.toString(); // deep copy
+        setTimeout(() => {
+          if (this.inputDtag === dtag) {
+            // verify if the dtag is not changed while waiting the timeout
+            const response = Api.get(
+              `${
+                import.meta.env.VITE_APP_LCD_ENDPOINT
+              }/desmos/profiles/v2/profiles/` + this.inputDtag
+            );
+            console.log(response);
+            if (this.inputDtag === dtag && response["profile"]) {
+              // dtag already taken
+              // the availability value depends if is recovering the account
+              this.isDtagAvailable = this.registerStore.hasDesmosProfile;
+            } else {
+              this.isDtagAvailable = !this.registerStore.hasDesmosProfile;
+            }
+            this.isVerifyingDtagAvailability = false;
+          } else {
+            this.isVerifyingDtagAvailability = false;
+          }
+        }, 200);
+      }
+      return this.isValidDtag;
+    },
+    setUserInfo() {
+      this.registerStore.setDtag(this.inputDtag);
+      this.registerStore.setEPassword(this.inputEPassword);
+      this.registerStore.nextState(RegisterState.StateMPasswordInput);
+    },
+    setSignupWithDesmosProfile(has: boolean) {
+      this.registerStore.setHasDesmosProfile(has);
+      this.validateDtag();
+    },
+  },
+});
+</script>

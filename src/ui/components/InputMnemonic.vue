@@ -49,7 +49,7 @@
         />
       </span>
 
-      <div v-if="generatedAddress">
+      <div v-if="generatedAddress&&this.showAddress">
         <div class="py-2">
           <span class="text-xl break-all pl-1">
             <span class="text-gray-500"> Address: </span>
@@ -87,7 +87,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { validateMnemonic } from "bip39";
+import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing/build/directsecp256k1hdwallet";
+import { stringToPath } from "@cosmjs/crypto";
 import { Wallet } from "desmosjs";
 
 export default defineComponent({
@@ -107,6 +108,10 @@ export default defineComponent({
     isNew: {
       type: Boolean,
       default: false,
+    },
+    showAddress: {
+      type: Boolean,
+      default: true,
     },
   },
   emits: ["onMnemonic"],
@@ -149,7 +154,7 @@ export default defineComponent({
     /**
      * Parse & Validate mnemonic input
      */
-    validateInputMnemonic(): void {
+    async validateInputMnemonic(): Promise<void> {
       let mnemonic = "";
       if (!this.isInputMnemonicString) {
         this.inputMnemonic.forEach((word, i) => {
@@ -161,11 +166,11 @@ export default defineComponent({
         mnemonic = this.inputMnemonicString;
         this.inputMnemonic = this.inputMnemonicString.split(" ");
       }
-      this.isValidMnemonic = validateMnemonic(mnemonic);
-      if (this.isValidMnemonic) {
-        this.generateWallet();
+      try {
+        await this.generateWallet();
         this.$emit("onMnemonic", mnemonic);
-      } else {
+        this.isValidMnemonic = true;
+      } catch (e) {
         this.isValidMnemonic = false;
         this.$emit("onMnemonic", "");
       }
@@ -173,20 +178,22 @@ export default defineComponent({
     /**
      * Generate Wallet
      */
-    generateWallet(): void {
-      if (validateMnemonic(this.inputMnemonicString)) {
-        this.$emit("onMnemonic", this.inputMnemonicString);
-        this.inputMnemonic = this.inputMnemonicString.split(" ");
-        try {
-          const wallet = new Wallet(
-            this.inputMnemonicString,
-            this.customHdPath,
-            this.customBech32Prefix
-          );
-          this.generatedAddress = wallet.address;
-        } catch (e) {
-          this.$emit("onMnemonic", "");
-        }
+    async generateWallet(): Promise<void> {
+      this.$emit("onMnemonic", this.inputMnemonicString);
+      const hdpath = stringToPath(this.customHdPath);
+      console.log(hdpath);
+      try {
+        const wallet = await DirectSecp256k1HdWallet.fromMnemonic(
+          this.inputMnemonicString,
+          {
+            hdPaths: [hdpath],
+            prefix: this.customBech32Prefix,
+          }
+        );
+        const [firstAccount] = await wallet.getAccounts();
+        this.generatedAddress = firstAccount.address;
+      } catch (e) {
+        this.$emit("onMnemonic", "");
       }
     },
     downloadMnemonic(): void {

@@ -11,7 +11,7 @@
     >
       <span class="h-auto align-middle justify-items-center font-medium">
         <span
-          v-if="$store.state.ThemeModule.activeTheme === 'light'"
+          v-if="themeStore.activeTheme==='light'"
           :class="[active ? 'text-denim-700':'']"
         >
           <i class="bi bi-moon-fill mr-2" />
@@ -29,6 +29,28 @@
   </div>
 </template>
 
-<script lang="ts" src="./ToggleTheme.ts"/>
+<script lang="ts">
+import { useThemeStore } from "@/stores/ThemeModule";
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  props: {
+    active: Boolean,
+  },
+  data() {
+    return {
+      themeStore: useThemeStore(),
+    };
+  },
+  mounted(): void {
+    this.themeStore.loadThemeConfiguration();
+  },
+  methods: {
+    toggleTheme(): void {
+      this.themeStore.toggleTheme();
+    },
+  },
+});
+</script>
 
 <style></style>

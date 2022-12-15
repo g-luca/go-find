@@ -1,15 +1,15 @@
 <template>
   <section>
     <div class="px-2 md:px-16 lg:mx-40 pt-8 md:py-12">
-      <span v-if="$store.state.ProfileModule.profileLoadingStatus">
+      <span v-if="profileStore.profileLoadingStatus">
         <h1 class="pb-4 pl-4 text-4xl md:text-6xl text-brand font-extrabold">
           Social Networks
         </h1>
         <div class="py-2 md:py-z px-2 bg-gray-100 dark:bg-gray-700 rounded-3xl shadow-xl">
-          <span v-if="$store.state.ProfileModule.profile.applicationLinks.length>0&&validApplicationLinks.length>0">
+          <span v-if="profileStore.profile.applicationLinks.length>0&&getValidApplicationLinks().length>0">
             <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 text-center">
               <div
-                v-for="applicationLink in validApplicationLinks"
+                v-for="applicationLink in getValidApplicationLinks()"
                 :key="applicationLink"
                 class="m-auto cursor-pointer"
                 @click="openApplicationLink(applicationLink)"
@@ -40,7 +40,7 @@
               </h4>
               <h5 class="text-lg text-gray-700 dark:text-gray-300 text-center">
                 <span class="font-bold">
-                  {{ $store.state.ProfileModule.profile.dtag }}
+                  {{ profileStore.profile.dtag }}
                 </span> has not connected any Social Network
               </h5>
             </div>
@@ -61,4 +61,41 @@
 </template>
 
 
-<script lang="ts" src="./ProfileAppLinks.ts"/>
+<script lang="ts">
+import { defineComponent } from "vue";
+
+import SkeletonLoader from "@/ui/components/SkeletonLoader/SkeletonLoader.vue";
+import ApplicationLink from "@/core/types/ApplicationLink";
+import { useProfileStore } from "@/stores/ProfilleModule";
+
+export default defineComponent({
+  components: {
+    SkeletonLoader,
+  },
+  data() {
+    return {
+      profileStore: useProfileStore(),
+    };
+  },
+  computed: {},
+  methods: {
+    openApplicationLink(applicationLink: ApplicationLink): void {
+      window.open(applicationLink.redirectUrl, "_blank");
+    },
+    getValidApplicationLinks() {
+      if (this.profileStore.profile) {
+        return this.profileStore.profile.applicationLinks.filter(
+          (applicationLink: ApplicationLink) => {
+            return (
+              applicationLink.state.toLocaleString() ===
+              "APPLICATION_LINK_STATE_VERIFICATION_SUCCESS"
+            );
+          }
+        );
+      } else {
+        return [];
+      }
+    },
+  },
+});
+</script>

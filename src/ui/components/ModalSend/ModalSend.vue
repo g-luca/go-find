@@ -65,9 +65,9 @@
                       </div>
                       <div
                         class="text-sm text-gray-500 text-center pt-1"
-                        :class="{'text-red-500':amount>$store.state.AccountModule.account._balance}"
+                        :class="{'text-red-500':amount>accountStore.account.balance}"
                       >
-                        Available: {{$store.state.AccountModule.account._balance - feeAmount}} {{coinDenom}}
+                        Available: {{accountStore.account.balance - feeAmount}} {{coinDenom}}
                       </div>
                     </div>
 
@@ -117,32 +117,27 @@
 import { defineComponent } from "vue";
 import { ref } from "vue";
 import { Dialog, DialogOverlay, DialogTitle } from "@headlessui/vue";
-import { getModule } from "vuex-module-decorators";
-import AccountModule from "@/store/modules/AccountModule";
-import {
-  CosmosBroadcastMode,
-  CosmosMsgSend,
-  CosmosTxBody,
-  DesmosJS,
-} from "desmosjs";
-import TransactionModule from "@/store/modules/TransactionModule";
-import AuthModule from "@/store/modules/AuthModule";
-const accountModule = getModule(AccountModule);
-const transactionModule = getModule(TransactionModule);
+import { DesmosJS } from "desmosjs";
+import { BroadcastMode } from "@cosmjs/launchpad";
+import { useTransactionStore } from "@/stores/TransactionModule";
+import { useAccountStore } from "@/stores/AccountModule";
+import { useAuthStore } from "@/stores/AuthModule";
+import { MsgSendEncodeObject } from "@cosmjs/stargate";
 
 export default defineComponent({
   components: { Dialog, DialogOverlay, DialogTitle },
   setup() {
     return {
+      accountStore: useAccountStore(),
       isOpen: ref(false),
-      coinDenom: process.env.VUE_APP_COIN_DENOM,
-      ucoinDenom: process.env.VUE_APP_COIN_FEE_DENOM,
+      coinDenom: import.meta.env.VITE_APP_COIN_DENOM,
+      ucoinDenom: import.meta.env.VITE_APP_COIN_FEE_DENOM,
       amountRaw: ref("1"),
       addressTo: ref(""),
       amount: ref(1),
       isValidAddress: ref(false),
       isValidAmount: ref(true),
-      feeAmount: ref(Number(AuthModule.DEFAULT_FEE_AMOUNT) / 1000000),
+      feeAmount: ref(Number(useAuthStore().DEFAULT_FEE_AMOUNT) / 1000000),
     };
   },
   methods: {
@@ -156,8 +151,8 @@ export default defineComponent({
       this.validateAmount();
     },
     setMaxAmount() {
-      if (accountModule.account) {
-        const max = accountModule.account.balance - this.feeAmount;
+      if (this.accountStore.account) {
+        const max = this.accountStore.account.balance - this.feeAmount;
         this.amount = max;
         this.amountRaw = String(max);
         this.isValidAmount = true;
@@ -168,7 +163,7 @@ export default defineComponent({
     },
     validateAmount() {
       let isValidNumber = false;
-      if (accountModule.account) {
+      if (this.accountStore.account) {
         // check regex
         const amountRegex = /^[0-9.,]{1,}$/;
         const validAmountRaw = amountRegex.exec(this.amountRaw);
@@ -180,7 +175,7 @@ export default defineComponent({
           }
           this.isValidAmount =
             this.amount >= 0.000001 &&
-            this.amount <= accountModule.account.balance - this.feeAmount;
+            this.amount <= this.accountStore.account.balance - this.feeAmount;
         }
       }
 
@@ -194,33 +189,25 @@ export default defineComponent({
     },
     async send() {
       const sendAmount = this.amount * 1000000;
-      if (accountModule.profile) {
-        const msgSend: CosmosMsgSend = {
-          fromAddress: accountModule.profile.address,
-          toAddress: this.addressTo,
-          amount: [
-            {
-              denom: this.ucoinDenom!,
-              amount: sendAmount.toString(),
-            },
-          ],
-        };
-        const txBody: CosmosTxBody = {
-          memo: "Send | Go-find",
-          messages: [
-            {
-              typeUrl: "/cosmos.bank.v1beta1.MsgSend",
-              value: CosmosMsgSend.encode(msgSend).finish(),
-            },
-          ],
-          extensionOptions: [],
-          nonCriticalExtensionOptions: [],
-          timeoutHeight: 0,
+      if (this.accountStore.profile) {
+        const msgSend: MsgSendEncodeObject = {
+          typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+          value: {
+            fromAddress: this.accountStore.profile.address,
+            toAddress: this.addressTo,
+            amount: [
+              {
+                denom: this.ucoinDenom!,
+                amount: sendAmount.toString(),
+              },
+            ],
+          },
         };
         await this.toggleModal();
-        transactionModule.start({
-          tx: txBody,
-          mode: CosmosBroadcastMode.BROADCAST_MODE_BLOCK,
+        useTransactionStore().start({
+          messages: [msgSend],
+          mode: BroadcastMode.Sync,
+          memo: "Send | Go-find",
         });
       }
     },

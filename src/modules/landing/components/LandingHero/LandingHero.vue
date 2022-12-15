@@ -28,7 +28,7 @@
 
               <div class="grid grid-cols-8 pt-3">
                 <div
-                  v-if="$store.state.DesmosNetworkModule.isTestnet"
+                  v-if="desmosNetworkStore.isTestnet"
                   class="col-span-8 sm:col-span-3 sm:col-start-2 text-right px-2 pt-3"
                 >
                   <button
@@ -39,7 +39,7 @@
                     <div class="flex py-2 justify-center">
                       <img
                         class="h-8"
-                        :src="require('@/assets/brands/walletconnect/logo.svg')"
+                        src="/public/assets/brands/walletconnect/logo.svg"
                         alt=""
                       >
                       <span class="text-white pl-3 text-lg my-auto">
@@ -51,7 +51,7 @@
 
                 <div
                   class="px-2 pt-3"
-                  :class="[!$store.state.DesmosNetworkModule.isTestnet?'col-span-8 sm:col-span-8 text-center w-1/2 mx-auto':'col-span-8 sm:col-span-3 text-left']"
+                  :class="[!desmosNetworkStore.isTestnet?'col-span-8 sm:col-span-8 text-center w-1/2 mx-auto':'col-span-8 sm:col-span-3 text-left']"
                 >
                   <button
                     type="button"
@@ -61,7 +61,7 @@
                     <div class="flex py-2 justify-center">
                       <img
                         class="h-8"
-                        :src="require('@/assets/brands/keplr/logo.svg')"
+                        src="/public/assets/brands/keplr/logo.svg"
                         alt=""
                       >
                       <span class="text-white pl-3  text-xl font-bold uppercase my-auto">
@@ -82,7 +82,7 @@
               >
                 <img
                   class="mx-auto w-32 h-32 p-4  select-none pointer-events-none"
-                  :src="require('@/assets/brands/'+name+'/logo.svg')"
+                  :src="'/public/assets/brands/'+name+'/logo.svg'"
                   alt=""
                 >
               </div>
@@ -109,7 +109,7 @@
           </div>
           <div class="pt-20 col-span-12 grid grid-cols-12">
             <div class="col-span-12 md:col-span-4 pt-10 my-auto pointer-events-none">
-              <img src="@/assets/illustrations/landing/landing-social-box.svg">
+              <img src="/public/assets/illustrations/landing/landing-social-box.svg">
             </div>
             <div class="col-span-12 md:col-span-7 md:col-start-6">
               <div class="">
@@ -153,7 +153,7 @@
             </p>
           </div>
           <div class="col-span-12 md:col-span-4 xl:col-span-5 my-auto">
-            <img src="@/assets/illustrations/landing/landing-universe.svg">
+            <img src="/public/assets/illustrations/landing/landing-universe.svg">
           </div>
         </div>
       </div>
@@ -164,7 +164,7 @@
       <div class="bg-white dark:bg-black text-royalblue-900 dark:text-white flex relative z-20 items-center overflow-hidden py-10">
         <div class="container mx-auto px-6 flex relative py-16 grid grid-cols-12">
           <div class="col-span-12 md:col-span-4 xl:col-span-5 my-auto">
-            <img src="@/assets/illustrations/landing/landing-link.svg">
+            <img src="/public/assets/illustrations/landing/landing-link.svg">
           </div>
           <div class="col-span-12 md:col-span-8 xl:col-span-7 text-right">
             <div class="w-20 h-2 bg-brand mb-12 ml-auto mr-0" />
@@ -264,7 +264,7 @@
           </h2>
           <div class="pt-10">
             <img
-              src="@/assets/illustrations/landing/landing-connected-world.svg"
+              src="/public/assets/illustrations/landing/landing-connected-world.svg"
               class="mx-auto max-h-72"
             >
           </div>
@@ -276,7 +276,7 @@
       <div class="container mx-auto sm:flex-row flex-col flex text-center">
         <div class="sm:w-1/2 w-full py-4">
           <img
-            src="@/assets/brands/github/logo.svg"
+            src="/public/assets/brands/github/logo.svg"
             fillColor="yellow"
             class="w-24 h-24 mx-auto mb-2"
           >
@@ -292,7 +292,7 @@
 
         <div class="sm:w-1/2 w-full py-4">
           <img
-            src="@/assets/brands/desmos/logo.svg"
+            src="/public/assets/brands/desmos/logo.svg"
             class="w-24 h-24 mx-auto mb-2"
           >
           <a
@@ -310,4 +310,39 @@
   </div>
 </template>
 
-<script lang="ts" src="./LandingHero.ts" />
+<script lang="ts">
+import LinkBlockSample from "../LinkBlockSample/LinkBlockSample.vue";
+import { useDesmosNetworkStore } from "@/stores/DesmosNetworkModule";
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  components: { LinkBlockSample },
+  data() {
+    const squares: string[] = [
+      "github",
+      "facebook",
+      "band",
+      "discord",
+      "bitcoin",
+      "go-find",
+      "desmos",
+      "dogecoin",
+      "cosmos",
+      "twitter",
+      "instagram",
+      "ethereum",
+      "twitch",
+      "tiktok",
+      "youtube",
+      "osmosis",
+      "crypto.org",
+      "linkedin",
+      "akash",
+    ];
+    return {
+      desmosNetworkStore: useDesmosNetworkStore(),
+      squares,
+    };
+  },
+});
+</script>

@@ -49,11 +49,10 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import ApplicationLinkModule from "@/store/modules/ApplicationLinkModule";
 import ApplicationLinkTwitch from "@/core/types/ApplicationLinks/ApplicationLinkTwitch";
-import ClipboardModule from "@/store/modules/ClipboardModule";
-import { getModule } from "vuex-module-decorators";
-const clipboardModule = getModule(ClipboardModule);
+import { useClipboardStore } from "@/stores/ClipboardModule";
+import { useApplicationLinkStore } from "@/stores/ApplicationLinkModule";
+import { Buffer } from "buffer";
 
 export default defineComponent({
   components: {},
@@ -81,7 +80,7 @@ export default defineComponent({
   },
   methods: {
     copy(value: string) {
-      clipboardModule.copy(value);
+      useClipboardStore().copy(value);
     },
     async submitApplicationLink() {
       this.checkError = "";
@@ -102,14 +101,17 @@ export default defineComponent({
             username: this.username,
           })
         ).toString("hex");
-        const txBody = ApplicationLinkModule.generateApplicationLinkTxBody(
-          "twitch",
-          this.username,
-          callData
-        );
+        const obj =
+          useApplicationLinkStore().generateApplicationLinkWrapperObject(
+            "twitch",
+            this.username,
+            callData
+          );
+
         this.$emit("applicationLinkSent", {
-          txBody: txBody,
+          messages: [obj?.message],
           applicationLink: new ApplicationLinkTwitch(this.username),
+          memo: obj?.memo,
         });
       } else {
         this.checkError = "Twitch biography link not found";
