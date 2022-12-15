@@ -5,11 +5,11 @@ import { gql } from "@apollo/client/core";
  */
 export const ProfileSearchQuery = gql`
     query ProfileSearch($query: String!) {
-        profile(where: {_or: [{dtag: {_ilike: $query}}, {nickname: {_ilike: $query}}, {application_links: {username: {_ilike: $query}}}]}, limit:20) {
+        profile(where: {_or: [{dtag: {_ilike: $query}}, {nickname: {_ilike: $query}}, {applications_links: {username: {_ilike: $query}}}]}, limit:20) {
             nickname
             dtag
             profile_pic
-            application_links {
+            applications_links {
             application
             username
             }

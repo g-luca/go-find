@@ -132,8 +132,8 @@ export default defineComponent({
             },
           });
           // check if the link has been created correctly
-          if (res.data.profile[0].application_links.length > 0) {
-            const appLink = res.data.profile[0].application_links[0];
+          if (res.data.profile[0].applications_links.length > 0) {
+            const appLink = res.data.profile[0].applications_links[0];
             switch (appLink.state) {
               // success
               case "APPLICATION_LINK_STATE_VERIFICATION_SUCCESS":
