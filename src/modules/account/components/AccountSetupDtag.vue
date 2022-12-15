@@ -6,7 +6,7 @@
           <div class="flex justify-center">
             <img
               class="max-h-28 w-auto"
-              src="/public/assets/brands/go-find/logo.svg"
+              src="/assets/brands/go-find/logo.svg"
               alt="Workflow"
             >
           </div>

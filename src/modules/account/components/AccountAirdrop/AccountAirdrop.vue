@@ -53,7 +53,7 @@
                   <div class="col-span-12 md:col-span-5 mx-auto md:mx-0 md:pt-0 pt-4">
                     <img
                       class="h-60 "
-                      src="/public/assets/illustrations/airdrop/balloons.svg"
+                      src="/assets/illustrations/airdrop/balloons.svg"
                       alt=""
                     >
                   </div>
@@ -87,7 +87,7 @@
                               <div class="col-span-2 mx-auto">
                                 <img
                                   class="pointer-events-none select-none h-8"
-                                  :src="'/public/assets/brands/' + stakingAllocation.chain_name.toLowerCase() + '/logo.svg'"
+                                  :src="'/assets/brands/' + stakingAllocation.chain_name.toLowerCase() + '/logo.svg'"
                                   alt=""
                                 >
                               </div>
@@ -114,7 +114,7 @@
                               <div class="col-span-2 mx-auto">
                                 <img
                                   class="pointer-events-none select-none h-8"
-                                  :src="'/public/assets/brands/' + lpAllocation.chain_name.toLowerCase() + '/logo.svg'"
+                                  :src="'/assets/brands/' + lpAllocation.chain_name.toLowerCase() + '/logo.svg'"
                                   alt=""
                                 >
                               </div>

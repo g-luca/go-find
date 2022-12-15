@@ -7,7 +7,7 @@
       <div class="text-center col-span-12">
         <img
           class="w-1/3 mx-auto py-4"
-          src="/public/assets/illustrations/register/loading_blockchain.svg"
+          src="/assets/illustrations/register/loading_blockchain.svg"
           alt=""
         >
         <div class="text-2xl">
@@ -68,7 +68,7 @@
         <div class="text-center">
           <img
             class="w-1/3 mx-auto py-4"
-            src="/public/assets/illustrations/airdrop/claim_error.svg"
+            src="/assets/illustrations/airdrop/claim_error.svg"
             alt=""
           >
           <span class="text-red-500 text-2xl">

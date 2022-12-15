@@ -7,7 +7,7 @@
           <div class="flex justify-center">
             <img
               class="max-h-28 w-auto"
-              src="/public/assets/brands/walletconnect/logo.svg"
+              src="/assets/brands/walletconnect/logo.svg"
               alt="WalletConnect"
             >
           </div>
@@ -133,7 +133,7 @@
                   <div class="flex py-2 justify-center">
                     <img
                       class="h-8"
-                      src="/public/assets/brands/walletconnect/logo.svg"
+                      src="/assets/brands/walletconnect/logo.svg"
                       alt=""
                     >
                     <span class="text-white pl-3 text-lg my-auto">

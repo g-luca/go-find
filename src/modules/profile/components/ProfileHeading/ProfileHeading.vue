@@ -58,7 +58,7 @@
                 <div class="flex justify-center md:justify-start px-4 md:pl-0 pb-2 pt-1">
                   <div class="flex-none w-5">
                     <img
-                      src="/public/assets/brands/desmos/logo.svg"
+                      src="/assets/brands/desmos/logo.svg"
                       class="object-cover w-5 inline-block"
                     >
                   </div>
@@ -102,7 +102,7 @@
                         <div class="rounded-full w-10 h-10 md:w-10 md:h-10 m-auto">
                           <img
                             class="p-2 pointer-events-none select-none"
-                            :src="'/public/assets/brands/' + chainLink.chain + '/logo.svg'"
+                            :src="'/assets/brands/' + chainLink.chain + '/logo.svg'"
                             alt=""
                           >
                         </div>

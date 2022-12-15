@@ -23,7 +23,7 @@
         <div class="w-full text-center">
           <img
             class="text-center mx-auto my-auto align-middle rounded-r-3xl"
-            src="/public/assets/illustrations/user/user-not-found.svg"
+            src="/assets/illustrations/user/user-not-found.svg"
             alt=""
           >
         </div>

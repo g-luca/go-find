@@ -3,7 +3,7 @@
     <div class="flex justify-center">
       <img
         class="max-h-44 xl:max-h-64"
-        src="/public/assets/illustrations/register/loading_blockchain.svg"
+        src="/assets/illustrations/register/loading_blockchain.svg"
         alt="Success"
       >
     </div>
