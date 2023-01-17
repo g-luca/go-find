@@ -230,10 +230,10 @@ export default defineComponent({
       if (this.isValidDtag) {
         this.isVerifyingDtagAvailability = true;
         const dtag = this.inputDtag.toString(); // deep copy
-        setTimeout(() => {
+        setTimeout(async () => {
           if (this.inputDtag === dtag) {
             // verify if the dtag is not changed while waiting the timeout
-            const response = Api.get(
+            const response = await Api.get(
               `${
                 import.meta.env.VITE_APP_LCD_ENDPOINT
               }/desmos/profiles/v3/profiles/` + this.inputDtag
