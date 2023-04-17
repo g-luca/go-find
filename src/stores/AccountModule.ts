@@ -254,7 +254,10 @@ function parseGqlAccountResult(accountRaw: any): Account {
  * @returns parsed profile
  */
 function parseGqlProfileResult(profileRaw: any): Profile {
-    // calculate the total of the delegations (if they exists)
+    if (!profileRaw) {
+        return new Profile("", "");
+    }
+    
     const applicationLinks = useApplicationLinkStore().parseApplicationLinks(profileRaw);
     const chainLinks: ChainLink[] = [];
     if (profileRaw.chain_links && profileRaw.chain_links.length > 0) {
