@@ -54,10 +54,11 @@ export const useAccountStore = defineStore({
                         this.account = false;
                         this.profileLoadingStatus = LoadingStatus.Error;
                     }
-                    if (accountRaw.data) {
+                    // Ensure that the GraphQL returned a valid Account response, and parse it
+                    if (accountRaw.data && accountRaw.data["account"].length > 0) {
                         this.account = parseGqlAccountResult(accountRaw.data);
                     } else {
-                        // The user hasn't done any transaction on chain, completelly new account
+                        // The user hasn't done any transaction on chain, completely new account
                         this.account = new Account(authStore.account.address, 0, { delegations: [], totalAmount: 0, totalRewards: 0, totalUnbonding: 0 });
                     }
 
