@@ -76,10 +76,18 @@ export const useAccountStore = defineStore({
                         this.profileLoadingStatus = LoadingStatus.Error;
                     }
 
-                    if (accountRaw.data) {
-                        // The profile exists
-                        this.profile = parseGqlProfileResult(profileRaw.data.profile[0]);
-                    } else {
+                    // Check if does have at least an account record, and the graphQL query doesn't have errors
+                    if (accountRaw.data && accountRaw.data["account"].length > 0 && this.profile != false) {
+                        // The profile should exists, parse the result
+                        try {
+                            this.profile = parseGqlProfileResult(profileRaw.data.profile[0]);
+                        } catch (e) { 
+                            // invalid profile result
+                        }
+                    }
+
+                    // if the profile doesn't exists, set as new
+                    if (!this.profile || this.profile.address === "" || this.profile.dtag === "" && !profileRaw.error) {
                         // The profile doesn't exists
                         this.isNewProfile = true;
                         this.profile = new Profile(authStore.account?.dtag, authStore.account?.address, "", "", "", "", [], []);
