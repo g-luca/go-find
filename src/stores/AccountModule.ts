@@ -77,17 +77,17 @@ export const useAccountStore = defineStore({
                     }
 
                     // Check if does have at least an account record, and the graphQL query doesn't have errors
-                    if (accountRaw.data && accountRaw.data["account"].length > 0 && this.profile != false) {
+                    if (accountRaw.data && accountRaw.data["account"].length > 0 && profileRaw.error === undefined) {
                         // The profile should exists, parse the result
                         try {
                             this.profile = parseGqlProfileResult(profileRaw.data.profile[0]);
-                        } catch (e) { 
+                        } catch (e) {
                             // invalid profile result
                         }
                     }
 
                     // if the profile doesn't exists, set as new
-                    if (!this.profile || this.profile.address === "" || this.profile.dtag === "" && !profileRaw.error) {
+                    if (!this.profile || this.profile.address === "" || this.profile.dtag === "" || profileRaw.error !== undefined) {
                         // The profile doesn't exists
                         this.isNewProfile = true;
                         this.profile = new Profile(authStore.account?.dtag, authStore.account?.address, "", "", "", "", [], []);
@@ -266,7 +266,7 @@ function parseGqlProfileResult(profileRaw: any): Profile {
     if (!profileRaw) {
         return new Profile("", "");
     }
-    
+
     const applicationLinks = useApplicationLinkStore().parseApplicationLinks(profileRaw);
     const chainLinks: ChainLink[] = [];
     if (profileRaw.chain_links && profileRaw.chain_links.length > 0) {
