@@ -54,10 +54,11 @@ export const useAccountStore = defineStore({
                         this.account = false;
                         this.profileLoadingStatus = LoadingStatus.Error;
                     }
-                    if (accountRaw.data) {
+                    // Ensure that the GraphQL returned a valid Account response, and parse it
+                    if (accountRaw.data && accountRaw.data["account"].length > 0) {
                         this.account = parseGqlAccountResult(accountRaw.data);
                     } else {
-                        // The user hasn't done any transaction on chain, completelly new account
+                        // The user hasn't done any transaction on chain, completely new account
                         this.account = new Account(authStore.account.address, 0, { delegations: [], totalAmount: 0, totalRewards: 0, totalUnbonding: 0 });
                     }
 
@@ -75,10 +76,18 @@ export const useAccountStore = defineStore({
                         this.profileLoadingStatus = LoadingStatus.Error;
                     }
 
-                    if (accountRaw.data) {
-                        // The profile exists
-                        this.profile = parseGqlProfileResult(profileRaw.data.profile[0]);
-                    } else {
+                    // Check if does have at least an account record, and the graphQL query doesn't have errors
+                    if (accountRaw.data && accountRaw.data["account"].length > 0 && this.profile != false) {
+                        // The profile should exists, parse the result
+                        try {
+                            this.profile = parseGqlProfileResult(profileRaw.data.profile[0]);
+                        } catch (e) { 
+                            // invalid profile result
+                        }
+                    }
+
+                    // if the profile doesn't exists, set as new
+                    if (!this.profile || this.profile.address === "" || this.profile.dtag === "" && !profileRaw.error) {
                         // The profile doesn't exists
                         this.isNewProfile = true;
                         this.profile = new Profile(authStore.account?.dtag, authStore.account?.address, "", "", "", "", [], []);
@@ -254,7 +263,10 @@ function parseGqlAccountResult(accountRaw: any): Account {
  * @returns parsed profile
  */
 function parseGqlProfileResult(profileRaw: any): Profile {
-    // calculate the total of the delegations (if they exists)
+    if (!profileRaw) {
+        return new Profile("", "");
+    }
+    
     const applicationLinks = useApplicationLinkStore().parseApplicationLinks(profileRaw);
     const chainLinks: ChainLink[] = [];
     if (profileRaw.chain_links && profileRaw.chain_links.length > 0) {
