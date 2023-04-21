@@ -579,7 +579,7 @@ export default defineComponent({
      */
     async uploadFileIpfs(file: any): Promise<string | false> {
       // define the IPFS gateway
-      const ipfsGateway = "https://ipfs.infura.io";
+      const ipfsGateway = "https://cloudflare-ipfs.com/";
 
       // prepare the file to be uploaded
       const formData = new FormData();
@@ -588,7 +588,7 @@ export default defineComponent({
       // try to upload the file
       try {
         const res = await (
-          await fetch(`${ipfsGateway}:5001/api/v0/add`, {
+          await fetch(`https://rest.scripta.network/v1/ipfs/add`, {
             method: "POST",
             body: formData as any,
           })
